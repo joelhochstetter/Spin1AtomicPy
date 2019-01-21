@@ -1,0 +1,7 @@
+Compiling quantumc.pyx because it changed.
+[1/1] Cythonizing quantumc.pyx
+running build_ext
+building 'quantumc' extension
+C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gcc.exe -mdll -O -Wall -DMS_WIN64 -IC:\Users\Joel\Anaconda3\lib\site-packages\numpy\core\include -IC:\Users\Joel\Anaconda3\include -IC:\Users\Joel\Anaconda3\include -c quantumc.c -o build\temp.win-amd64-3.6\Release\quantumc.o -O2 -ffast-math -funsafe-math-optimizations
+writing build\temp.win-amd64-3.6\Release\quantumc.cp36-win_amd64.def
+C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gcc.exe -shared -s build\temp.win-amd64-3.6\Release\quantumc.o build\temp.win-amd64-3.6\Release\quantumc.cp36-win_amd64.def -LC:\Users\Joel\Anaconda3\libs -LC:\Users\Joel\Anaconda3\PCbuild\amd64 -lpython36 -lvcruntime140 -o "C:\Users\Joel\Documents\!Monash Summer\Atomicpy-master-spin 1\quantumc.cp36-win_amd64.pyd"
