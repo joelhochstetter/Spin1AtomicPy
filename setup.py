@@ -23,7 +23,7 @@ ext_modules = [
         "quantumc",
         ["quantumc.pyx"],
         include_dirs=[np.get_include()]
-        ,extra_compile_args=["-O3","-ffast-math", "-funsafe-math-optimizations"]
+        ,extra_compile_args=["-O3"]
     )
 ]
 

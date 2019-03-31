@@ -5,9 +5,7 @@
     "distutils": {
         "depends": [],
         "extra_compile_args": [
-            "-O3",
-            "-ffast-math",
-            "-funsafe-math-optimizations"
+            "-O3"
         ],
         "include_dirs": [
             "C:\\Users\\Joel\\Anaconda3\\lib\\site-packages\\numpy\\core\\include"
@@ -1023,6 +1021,7 @@ struct __pyx_t_8quantumc_Params {
   double xlamp;
   double xlfreq;
   double xlphase;
+  double tr2;
   double zlamp;
   double zlfreq;
   double zlphase;
@@ -1031,6 +1030,10 @@ struct __pyx_t_8quantumc_Params {
   double sdtrabi;
   double ctcrabi;
   double stcrabi;
+  double cdtxl;
+  double sdtxl;
+  double ctcxl;
+  double stcxl;
 };
 
 /* "View.MemoryView":104
@@ -1299,6 +1302,47 @@ static CYTHON_INLINE int __Pyx_div_int(int, int);
 #define UNARY_NEG_WOULD_OVERFLOW(x)\
         (((x) < 0) & ((unsigned long)(x) == 0-(unsigned long)(x)))
 
+/* PyThreadStateGet.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
+#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
+#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
+#else
+#define __Pyx_PyThreadState_declare
+#define __Pyx_PyThreadState_assign
+#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
+#endif
+
+/* PyErrFetchRestore.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#if CYTHON_COMPILING_IN_CPYTHON
+#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
+#else
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#endif
+#else
+#define __Pyx_PyErr_Clear() PyErr_Clear()
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
+#endif
+
+/* WriteUnraisableException.proto */
+static void __Pyx_WriteUnraisable(const char *name, int clineno,
+                                  int lineno, const char *filename,
+                                  int full_traceback, int nogil);
+
 /* PyFunctionFastCall.proto */
 #if CYTHON_FAST_PYCALL
 #define __Pyx_PyFunction_FastCall(func, args, nargs)\
@@ -1340,47 +1384,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 #else
 #define __Pyx_PyObject_CallNoArg(func) __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL)
 #endif
-
-/* PyThreadStateGet.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
-#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
-#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
-#else
-#define __Pyx_PyThreadState_declare
-#define __Pyx_PyThreadState_assign
-#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
-#endif
-
-/* PyErrFetchRestore.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#if CYTHON_COMPILING_IN_CPYTHON
-#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
-#else
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#endif
-#else
-#define __Pyx_PyErr_Clear() PyErr_Clear()
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
-#endif
-
-/* WriteUnraisableException.proto */
-static void __Pyx_WriteUnraisable(const char *name, int clineno,
-                                  int lineno, const char *filename,
-                                  int full_traceback, int nogil);
 
 /* GetTopmostException.proto */
 #if CYTHON_USE_EXC_INFO_STACK
@@ -1813,9 +1816,12 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long value);
 
-/* MemviewDtypeToObject.proto */
-static CYTHON_INLINE PyObject *__pyx_memview_get_double(const char *itemp);
-static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *obj);
+/* Print.proto */
+static int __Pyx_Print(PyObject*, PyObject *, int);
+#if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
+static PyObject* __pyx_print = 0;
+static PyObject* __pyx_print_kwargs = 0;
+#endif
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
@@ -1831,7 +1837,13 @@ __pyx_memoryview_copy_new_contig(const __Pyx_memviewslice *from_mvs,
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntFromPy.proto */
+static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *);
+
+/* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
+
+/* PrintOne.proto */
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *);
@@ -1881,12 +1893,10 @@ static CYTHON_INLINE double __pyx_f_8quantumc_square(double); /*proto*/
 static CYTHON_INLINE double __pyx_f_8quantumc_tanh(double); /*proto*/
 static CYTHON_INLINE double __pyx_f_8quantumc_sech(double); /*proto*/
 static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double, __pyx_t_double_complex *, double *); /*proto*/
-static void __pyx_f_8quantumc_unitary33(double, __pyx_t_double_complex *, double *); /*proto*/
+static void __pyx_f_8quantumc_unitary33(double, double *, __pyx_t_double_complex (*)[3]); /*proto*/
 static CYTHON_INLINE void __pyx_f_8quantumc_fastB(double, __pyx_t_8quantumc_Params *, double *); /*proto*/
-static CYTHON_INLINE void __pyx_f_8quantumc_getField(double, __pyx_t_8quantumc_Params *, double *); /*proto*/
-static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double, __pyx_t_double_complex *, double *, __pyx_t_double_complex (*)[3]); /*proto*/
+static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(__pyx_t_double_complex *, __pyx_t_double_complex (*)[3]); /*proto*/
 static CYTHON_INLINE void __pyx_f_8quantumc_eval33(double *, double *); /*proto*/
-static void __pyx_f_8quantumc_esys33(double *, double *, __pyx_t_double_complex (*)[3]); /*proto*/
 static void __pyx_f_8quantumc_QL33(double *, __pyx_t_double_complex (*)[3], double *); /*proto*/
 static int __Pyx_carray_from_py___pyx_t_double_complex(PyObject *, __pyx_t_double_complex *, Py_ssize_t); /*proto*/
 static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(PyObject *); /*proto*/
@@ -1944,9 +1954,11 @@ static PyObject *__pyx_builtin_id;
 static const char __pyx_k_B[] = "B";
 static const char __pyx_k_F[] = "F";
 static const char __pyx_k_O[] = "O";
+static const char __pyx_k_U[] = "U";
 static const char __pyx_k_c[] = "c";
 static const char __pyx_k_i[] = "i";
 static const char __pyx_k_j[] = "j";
+static const char __pyx_k_k[] = "k";
 static const char __pyx_k_t[] = "t";
 static const char __pyx_k_dt[] = "dt";
 static const char __pyx_k_id[] = "id";
@@ -1955,6 +1967,7 @@ static const char __pyx_k_np[] = "np";
 static const char __pyx_k_nt[] = "nt";
 static const char __pyx_k_sA[] = "sA";
 static const char __pyx_k_dim[] = "dim";
+static const char __pyx_k_end[] = "end";
 static const char __pyx_k_eps[] = "eps";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_nte[] = "nte";
@@ -1963,6 +1976,9 @@ static const char __pyx_k_one[] = "one";
 static const char __pyx_k_phi[] = "phi";
 static const char __pyx_k_rff[] = "rff";
 static const char __pyx_k_rph[] = "rph";
+static const char __pyx_k_tr2[] = "tr2";
+static const char __pyx_k_yay[] = "yay";
+static const char __pyx_k_you[] = "you";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_beta[] = "beta";
 static const char __pyx_k_detA[] = "detA";
@@ -1971,6 +1987,8 @@ static const char __pyx_k_dett[] = "dett";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_exit[] = "exit";
 static const char __pyx_k_expm[] = "expm";
+static const char __pyx_k_file[] = "file";
+static const char __pyx_k_fuck[] = "fuck";
 static const char __pyx_k_half[] = "half";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_mode[] = "mode";
@@ -1989,17 +2007,22 @@ static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_time[] = "time";
 static const char __pyx_k_ASCII[] = "ASCII";
 static const char __pyx_k_F_arr[] = "F_arr";
+static const char __pyx_k_cdtxl[] = "cdtxl";
 static const char __pyx_k_class[] = "__class__";
+static const char __pyx_k_ctcxl[] = "ctcxl";
 static const char __pyx_k_error[] = "error";
 static const char __pyx_k_finfo[] = "finfo";
 static const char __pyx_k_flags[] = "flags";
 static const char __pyx_k_numpy[] = "numpy";
+static const char __pyx_k_print[] = "print";
 static const char __pyx_k_probs[] = "probs";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_savef[] = "savef";
+static const char __pyx_k_sdtxl[] = "sdtxl";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
 static const char __pyx_k_state[] = "state";
+static const char __pyx_k_stcxl[] = "stcxl";
 static const char __pyx_k_steps[] = "steps";
 static const char __pyx_k_xlamp[] = "xlamp";
 static const char __pyx_k_zlamp[] = "zlamp";
@@ -2048,13 +2071,13 @@ static const char __pyx_k_pyx_result[] = "__pyx_result";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_MemoryError[] = "MemoryError";
 static const char __pyx_k_PickleError[] = "PickleError";
+static const char __pyx_k_n_propagateF[] = "n_propagateF";
 static const char __pyx_k_n_propagateN[] = "n_propagateN";
 static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_quantumc_pyx[] = "quantumc.pyx";
 static const char __pyx_k_scipy_linalg[] = "scipy.linalg";
 static const char __pyx_k_stringsource[] = "stringsource";
 static const char __pyx_k_OverflowError[] = "OverflowError";
-static const char __pyx_k_n_propagate_F[] = "n_propagate_F";
 static const char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_View_MemoryView[] = "View.MemoryView";
@@ -2073,6 +2096,7 @@ static const char __pyx_k_MemoryView_of_r_at_0x_x[] = "<MemoryView of %r at 0x%x
 static const char __pyx_k_contiguous_and_indirect[] = "<contiguous and indirect>";
 static const char __pyx_k_Cannot_index_with_type_s[] = "Cannot index with type '%s'";
 static const char __pyx_k_Invalid_shape_in_axis_d_d[] = "Invalid shape in axis %d: %d.";
+static const char __pyx_k_Error_QL33_doesn_t_converge[] = "Error. QL33 doesn't converge";
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
 static const char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate array data.";
 static const char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direct or indirect>";
@@ -2110,14 +2134,19 @@ static const char __pyx_k_No_value_specified_for_struct_at_18[] = "No value spec
 static const char __pyx_k_No_value_specified_for_struct_at_19[] = "No value specified for struct attribute 'xlamp'";
 static const char __pyx_k_No_value_specified_for_struct_at_20[] = "No value specified for struct attribute 'xlfreq'";
 static const char __pyx_k_No_value_specified_for_struct_at_21[] = "No value specified for struct attribute 'xlphase'";
-static const char __pyx_k_No_value_specified_for_struct_at_22[] = "No value specified for struct attribute 'zlamp'";
-static const char __pyx_k_No_value_specified_for_struct_at_23[] = "No value specified for struct attribute 'zlfreq'";
-static const char __pyx_k_No_value_specified_for_struct_at_24[] = "No value specified for struct attribute 'zlphase'";
-static const char __pyx_k_No_value_specified_for_struct_at_25[] = "No value specified for struct attribute 'proj'";
-static const char __pyx_k_No_value_specified_for_struct_at_26[] = "No value specified for struct attribute 'cdtrabi'";
-static const char __pyx_k_No_value_specified_for_struct_at_27[] = "No value specified for struct attribute 'sdtrabi'";
-static const char __pyx_k_No_value_specified_for_struct_at_28[] = "No value specified for struct attribute 'ctcrabi'";
-static const char __pyx_k_No_value_specified_for_struct_at_29[] = "No value specified for struct attribute 'stcrabi'";
+static const char __pyx_k_No_value_specified_for_struct_at_22[] = "No value specified for struct attribute 'tr2'";
+static const char __pyx_k_No_value_specified_for_struct_at_23[] = "No value specified for struct attribute 'zlamp'";
+static const char __pyx_k_No_value_specified_for_struct_at_24[] = "No value specified for struct attribute 'zlfreq'";
+static const char __pyx_k_No_value_specified_for_struct_at_25[] = "No value specified for struct attribute 'zlphase'";
+static const char __pyx_k_No_value_specified_for_struct_at_26[] = "No value specified for struct attribute 'proj'";
+static const char __pyx_k_No_value_specified_for_struct_at_27[] = "No value specified for struct attribute 'cdtrabi'";
+static const char __pyx_k_No_value_specified_for_struct_at_28[] = "No value specified for struct attribute 'sdtrabi'";
+static const char __pyx_k_No_value_specified_for_struct_at_29[] = "No value specified for struct attribute 'ctcrabi'";
+static const char __pyx_k_No_value_specified_for_struct_at_30[] = "No value specified for struct attribute 'stcrabi'";
+static const char __pyx_k_No_value_specified_for_struct_at_31[] = "No value specified for struct attribute 'cdtxl'";
+static const char __pyx_k_No_value_specified_for_struct_at_32[] = "No value specified for struct attribute 'sdtxl'";
+static const char __pyx_k_No_value_specified_for_struct_at_33[] = "No value specified for struct attribute 'ctcxl'";
+static const char __pyx_k_No_value_specified_for_struct_at_34[] = "No value specified for struct attribute 'stcxl'";
 static PyObject *__pyx_n_s_ASCII;
 static PyObject *__pyx_n_s_B;
 static PyObject *__pyx_n_s_Bfield;
@@ -2128,6 +2157,7 @@ static PyObject *__pyx_kp_s_Cannot_create_writable_memory_vi;
 static PyObject *__pyx_kp_s_Cannot_index_with_type_s;
 static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
+static PyObject *__pyx_kp_s_Error_QL33_doesn_t_converge;
 static PyObject *__pyx_n_s_F;
 static PyObject *__pyx_n_s_F_arr;
 static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xb0;
@@ -2162,6 +2192,11 @@ static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_27;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_28;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_29;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_3;
+static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_30;
+static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_31;
+static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_32;
+static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_33;
+static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_34;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_4;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_5;
 static PyObject *__pyx_kp_s_No_value_specified_for_struct_at_6;
@@ -2173,6 +2208,7 @@ static PyObject *__pyx_kp_s_Out_of_bounds_on_buffer_access_a;
 static PyObject *__pyx_n_s_OverflowError;
 static PyObject *__pyx_n_s_PickleError;
 static PyObject *__pyx_n_s_TypeError;
+static PyObject *__pyx_n_s_U;
 static PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_View_MemoryView;
@@ -2182,11 +2218,13 @@ static PyObject *__pyx_n_s_beta;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
 static PyObject *__pyx_n_s_cdtrabi;
+static PyObject *__pyx_n_s_cdtxl;
 static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
 static PyObject *__pyx_n_s_ctcrabi;
+static PyObject *__pyx_n_s_ctcxl;
 static PyObject *__pyx_n_s_detA;
 static PyObject *__pyx_n_s_dete;
 static PyObject *__pyx_n_s_dett;
@@ -2195,17 +2233,20 @@ static PyObject *__pyx_n_s_dim;
 static PyObject *__pyx_n_s_dt;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_encode;
+static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_eps;
 static PyObject *__pyx_n_s_error;
 static PyObject *__pyx_n_s_exit;
 static PyObject *__pyx_n_s_expm;
+static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_finfo;
 static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
+static PyObject *__pyx_n_s_fuck;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
 static PyObject *__pyx_n_s_half;
@@ -2215,13 +2256,14 @@ static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_j;
+static PyObject *__pyx_n_s_k;
 static PyObject *__pyx_n_s_larmor;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_memview;
 static PyObject *__pyx_n_s_mode;
 static PyObject *__pyx_n_s_mytime;
+static PyObject *__pyx_n_s_n_propagateF;
 static PyObject *__pyx_n_s_n_propagateN;
-static PyObject *__pyx_n_s_n_propagate_F;
 static PyObject *__pyx_n_s_n_propagate_lite;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_name_2;
@@ -2240,6 +2282,7 @@ static PyObject *__pyx_n_s_paramdict;
 static PyObject *__pyx_n_s_params;
 static PyObject *__pyx_n_s_phi;
 static PyObject *__pyx_n_s_pickle;
+static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_probs;
 static PyObject *__pyx_n_s_proj;
 static PyObject *__pyx_n_s_pyx_PickleError;
@@ -2264,6 +2307,7 @@ static PyObject *__pyx_n_s_sA;
 static PyObject *__pyx_n_s_savef;
 static PyObject *__pyx_n_s_scipy_linalg;
 static PyObject *__pyx_n_s_sdtrabi;
+static PyObject *__pyx_n_s_sdtxl;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
@@ -2274,6 +2318,7 @@ static PyObject *__pyx_n_s_state;
 static PyObject *__pyx_n_s_state_in;
 static PyObject *__pyx_n_s_states;
 static PyObject *__pyx_n_s_stcrabi;
+static PyObject *__pyx_n_s_stcxl;
 static PyObject *__pyx_n_s_step;
 static PyObject *__pyx_n_s_steps;
 static PyObject *__pyx_n_s_stop;
@@ -2286,6 +2331,7 @@ static PyObject *__pyx_n_s_t;
 static PyObject *__pyx_n_s_tend;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_time;
+static PyObject *__pyx_n_s_tr2;
 static PyObject *__pyx_n_s_tstart;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
@@ -2294,12 +2340,14 @@ static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_xlamp;
 static PyObject *__pyx_n_s_xlfreq;
 static PyObject *__pyx_n_s_xlphase;
+static PyObject *__pyx_n_s_yay;
+static PyObject *__pyx_n_s_you;
 static PyObject *__pyx_n_s_zlamp;
 static PyObject *__pyx_n_s_zlfreq;
 static PyObject *__pyx_n_s_zlphase;
 static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_state_in, PyObject *__pyx_v_spin); /* proto */
 static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_states, __Pyx_memviewslice __pyx_v_probs, PyObject *__pyx_v_spin); /* proto */
-static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_states, __Pyx_memviewslice __pyx_v_F_arr, PyObject *__pyx_v_spin); /* proto */
+static PyObject *__pyx_pf_8quantumc_4n_propagateF(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_states, __Pyx_memviewslice __pyx_v_F_arr, PyObject *__pyx_v_spin); /* proto */
 static PyObject *__pyx_pf_8quantumc_6Bfield(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_time, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_Bfield); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -2349,6 +2397,7 @@ static PyObject *__pyx_tp_new_memoryview(PyTypeObject *t, PyObject *a, PyObject 
 static PyObject *__pyx_tp_new__memoryviewslice(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
+static PyObject *__pyx_int_100;
 static PyObject *__pyx_int_184977713;
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_tuple_;
@@ -2360,7 +2409,7 @@ static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
-static PyObject *__pyx_slice__44;
+static PyObject *__pyx_slice__49;
 static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
@@ -2395,24 +2444,29 @@ static PyObject *__pyx_tuple__40;
 static PyObject *__pyx_tuple__41;
 static PyObject *__pyx_tuple__42;
 static PyObject *__pyx_tuple__43;
+static PyObject *__pyx_tuple__44;
 static PyObject *__pyx_tuple__45;
 static PyObject *__pyx_tuple__46;
 static PyObject *__pyx_tuple__47;
 static PyObject *__pyx_tuple__48;
 static PyObject *__pyx_tuple__50;
+static PyObject *__pyx_tuple__51;
 static PyObject *__pyx_tuple__52;
-static PyObject *__pyx_tuple__54;
-static PyObject *__pyx_tuple__56;
+static PyObject *__pyx_tuple__53;
+static PyObject *__pyx_tuple__55;
 static PyObject *__pyx_tuple__57;
-static PyObject *__pyx_tuple__58;
 static PyObject *__pyx_tuple__59;
-static PyObject *__pyx_tuple__60;
 static PyObject *__pyx_tuple__61;
-static PyObject *__pyx_codeobj__49;
-static PyObject *__pyx_codeobj__51;
-static PyObject *__pyx_codeobj__53;
-static PyObject *__pyx_codeobj__55;
-static PyObject *__pyx_codeobj__62;
+static PyObject *__pyx_tuple__62;
+static PyObject *__pyx_tuple__63;
+static PyObject *__pyx_tuple__64;
+static PyObject *__pyx_tuple__65;
+static PyObject *__pyx_tuple__66;
+static PyObject *__pyx_codeobj__54;
+static PyObject *__pyx_codeobj__56;
+static PyObject *__pyx_codeobj__58;
+static PyObject *__pyx_codeobj__60;
+static PyObject *__pyx_codeobj__67;
 /* Late includes */
 
 /* "quantumc.pyx":17
@@ -2489,7 +2543,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_square(double __pyx_v_z) {
   return __pyx_r;
 }
 
-/* "quantumc.pyx":82
+/* "quantumc.pyx":88
  * # define hyperbolic functions
  * @cython.cdivision(True)
  * cdef inline double tanh(double x):             # <<<<<<<<<<<<<<
@@ -2503,7 +2557,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_tanh(double __pyx_v_x) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("tanh", 0);
 
-  /* "quantumc.pyx":83
+  /* "quantumc.pyx":89
  * @cython.cdivision(True)
  * cdef inline double tanh(double x):
  *     cdef double tx = 2*x             # <<<<<<<<<<<<<<
@@ -2512,7 +2566,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_tanh(double __pyx_v_x) {
  */
   __pyx_v_tx = (2.0 * __pyx_v_x);
 
-  /* "quantumc.pyx":84
+  /* "quantumc.pyx":90
  * cdef inline double tanh(double x):
  *     cdef double tx = 2*x
  *     return (exp(tx)-1)/(exp(tx)+1)             # <<<<<<<<<<<<<<
@@ -2522,7 +2576,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_tanh(double __pyx_v_x) {
   __pyx_r = ((exp(__pyx_v_tx) - 1.0) / (exp(__pyx_v_tx) + 1.0));
   goto __pyx_L0;
 
-  /* "quantumc.pyx":82
+  /* "quantumc.pyx":88
  * # define hyperbolic functions
  * @cython.cdivision(True)
  * cdef inline double tanh(double x):             # <<<<<<<<<<<<<<
@@ -2536,7 +2590,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_tanh(double __pyx_v_x) {
   return __pyx_r;
 }
 
-/* "quantumc.pyx":87
+/* "quantumc.pyx":93
  * 
  * @cython.cdivision(True)
  * cdef inline double sech(double x):             # <<<<<<<<<<<<<<
@@ -2549,7 +2603,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_sech(double __pyx_v_x) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("sech", 0);
 
-  /* "quantumc.pyx":88
+  /* "quantumc.pyx":94
  * @cython.cdivision(True)
  * cdef inline double sech(double x):
  *     return 2/(exp(x)+exp(-x))             # <<<<<<<<<<<<<<
@@ -2559,7 +2613,7 @@ static CYTHON_INLINE double __pyx_f_8quantumc_sech(double __pyx_v_x) {
   __pyx_r = (2.0 / (exp(__pyx_v_x) + exp((-__pyx_v_x))));
   goto __pyx_L0;
 
-  /* "quantumc.pyx":87
+  /* "quantumc.pyx":93
  * 
  * @cython.cdivision(True)
  * cdef inline double sech(double x):             # <<<<<<<<<<<<<<
@@ -2573,9 +2627,9 @@ static CYTHON_INLINE double __pyx_f_8quantumc_sech(double __pyx_v_x) {
   return __pyx_r;
 }
 
-/* "quantumc.pyx":94
- * @cython.wraparound(False)
+/* "quantumc.pyx":101
  * @cython.nonecheck(False)
+ * @cython.cdivision(True)
  * def n_propagate_lite(paramdict, double complex [:] state_in, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
@@ -2617,17 +2671,17 @@ static PyObject *__pyx_pw_8quantumc_1n_propagate_lite(PyObject *__pyx_self, PyOb
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_state_in)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, 1); __PYX_ERR(0, 94, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, 1); __PYX_ERR(0, 101, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_spin)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, 2); __PYX_ERR(0, 94, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, 2); __PYX_ERR(0, 101, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagate_lite") < 0)) __PYX_ERR(0, 94, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagate_lite") < 0)) __PYX_ERR(0, 101, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -2637,12 +2691,12 @@ static PyObject *__pyx_pw_8quantumc_1n_propagate_lite(PyObject *__pyx_self, PyOb
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
     __pyx_v_paramdict = values[0];
-    __pyx_v_state_in = __Pyx_PyObject_to_MemoryviewSlice_ds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_state_in.memview)) __PYX_ERR(0, 94, __pyx_L3_error)
+    __pyx_v_state_in = __Pyx_PyObject_to_MemoryviewSlice_ds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_state_in.memview)) __PYX_ERR(0, 101, __pyx_L3_error)
     __pyx_v_spin = values[2];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 94, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("n_propagate_lite", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 101, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("quantumc.n_propagate_lite", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2664,42 +2718,46 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
   __pyx_t_double_complex __pyx_v_state[3];
   double __pyx_v_t;
   double __pyx_v_B[4];
+  __pyx_t_double_complex __pyx_v_U[3][3];
   CYTHON_UNUSED PyObject *__pyx_v_mytime = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __pyx_t_8quantumc_Params __pyx_t_1;
   int __pyx_t_2;
-  double __pyx_t_3;
+  int __pyx_t_3;
   int __pyx_t_4;
   int __pyx_t_5;
-  int __pyx_t_6;
-  Py_ssize_t __pyx_t_7;
+  Py_ssize_t __pyx_t_6;
+  double __pyx_t_7;
   PyObject *__pyx_t_8 = NULL;
   unsigned long __pyx_t_9;
   unsigned long __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  Py_ssize_t __pyx_t_13;
   __Pyx_RefNannySetupContext("n_propagate_lite", 0);
 
-  /* "quantumc.pyx":100
+  /* "quantumc.pyx":107
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  *     params = paramdict             # <<<<<<<<<<<<<<
  *     cdef int dim
  *     if spin == 'half':
  */
-  __pyx_t_1 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
   __pyx_v_params = __pyx_t_1;
 
-  /* "quantumc.pyx":102
+  /* "quantumc.pyx":109
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         dim = 2
  *     else: #spin == 1
  */
-  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 109, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "quantumc.pyx":103
+    /* "quantumc.pyx":110
  *     cdef int dim
  *     if spin == 'half':
  *         dim = 2             # <<<<<<<<<<<<<<
@@ -2708,7 +2766,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
     __pyx_v_dim = 2;
 
-    /* "quantumc.pyx":102
+    /* "quantumc.pyx":109
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
@@ -2718,7 +2776,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
     goto __pyx_L3;
   }
 
-  /* "quantumc.pyx":105
+  /* "quantumc.pyx":112
  *         dim = 2
  *     else: #spin == 1
  *         dim = 3             # <<<<<<<<<<<<<<
@@ -2730,90 +2788,85 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
   }
   __pyx_L3:;
 
-  /* "quantumc.pyx":109
+  /* "quantumc.pyx":116
  *     # define loop constants
  *     cdef int i, j
  *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt)             # <<<<<<<<<<<<<<
  * 
  *     #Initialise state array
  */
-  __pyx_t_3 = (__pyx_v_params.tend - __pyx_v_params.tstart);
-  if (unlikely(__pyx_v_params.dt == 0)) {
-    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 109, __pyx_L1_error)
-  }
-  __pyx_v_steps = ((int)ceil((__pyx_t_3 / __pyx_v_params.dt)));
+  __pyx_v_steps = ((int)ceil(((__pyx_v_params.tend - __pyx_v_params.tstart) / __pyx_v_params.dt)));
 
-  /* "quantumc.pyx":114
+  /* "quantumc.pyx":121
  *     cdef double complex state[3]
  * 
  *     for j in range(0,dim):             # <<<<<<<<<<<<<<
  *         state[j] = state_in[j]
  * 
  */
-  __pyx_t_4 = __pyx_v_dim;
-  __pyx_t_5 = __pyx_t_4;
-  for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-    __pyx_v_j = __pyx_t_6;
+  __pyx_t_3 = __pyx_v_dim;
+  __pyx_t_4 = __pyx_t_3;
+  for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
+    __pyx_v_j = __pyx_t_5;
 
-    /* "quantumc.pyx":115
+    /* "quantumc.pyx":122
  * 
  *     for j in range(0,dim):
  *         state[j] = state_in[j]             # <<<<<<<<<<<<<<
  * 
  *     #Intialise cos and sin values for fast field calculations
  */
-    __pyx_t_7 = __pyx_v_j;
-    (__pyx_v_state[__pyx_v_j]) = (*((__pyx_t_double_complex *) ( /* dim=0 */ (__pyx_v_state_in.data + __pyx_t_7 * __pyx_v_state_in.strides[0]) )));
+    __pyx_t_6 = __pyx_v_j;
+    (__pyx_v_state[__pyx_v_j]) = (*((__pyx_t_double_complex *) ( /* dim=0 */ (__pyx_v_state_in.data + __pyx_t_6 * __pyx_v_state_in.strides[0]) )));
   }
 
-  /* "quantumc.pyx":118
+  /* "quantumc.pyx":125
  * 
  *     #Intialise cos and sin values for fast field calculations
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.cdtrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":119
+  /* "quantumc.pyx":126
  *     #Intialise cos and sin values for fast field calculations
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.sdtrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":120
+  /* "quantumc.pyx":127
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  * 
  */
-  __pyx_v_params.ctcrabi = 1.0;
+  __pyx_v_params.ctcrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart));
 
-  /* "quantumc.pyx":121
+  /* "quantumc.pyx":128
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
  * 
  *     # set time step to half
  */
-  __pyx_v_params.stcrabi = 0.0;
+  __pyx_v_params.stcrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart));
 
-  /* "quantumc.pyx":124
+  /* "quantumc.pyx":131
  * 
  *     # set time step to half
  *     cdef double t = params.tstart             # <<<<<<<<<<<<<<
  *     params.dt *= 0.5
  * 
  */
-  __pyx_t_3 = __pyx_v_params.tstart;
-  __pyx_v_t = __pyx_t_3;
+  __pyx_t_7 = __pyx_v_params.tstart;
+  __pyx_v_t = __pyx_t_7;
 
-  /* "quantumc.pyx":125
+  /* "quantumc.pyx":132
  *     # set time step to half
  *     cdef double t = params.tstart
  *     params.dt *= 0.5             # <<<<<<<<<<<<<<
@@ -2822,7 +2875,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_params.dt = (__pyx_v_params.dt * 0.5);
 
-  /* "quantumc.pyx":128
+  /* "quantumc.pyx":135
  * 
  *     cdef double B[4]
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)             # <<<<<<<<<<<<<<
@@ -2831,57 +2884,56 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
   (__pyx_v_B[0]) = ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * __pyx_v_params.tstart)));
 
-  /* "quantumc.pyx":129
+  /* "quantumc.pyx":136
  *     cdef double B[4]
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)
  *     B[1] = 0.0             # <<<<<<<<<<<<<<
  *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad
+ *     B[3] = M_TAU*params.quad
  */
   (__pyx_v_B[1]) = 0.0;
 
-  /* "quantumc.pyx":130
+  /* "quantumc.pyx":137
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
- *     B[3] = params.quad
+ *     B[3] = M_TAU*params.quad
  * 
  */
   (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.larmor);
 
-  /* "quantumc.pyx":131
+  /* "quantumc.pyx":138
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad             # <<<<<<<<<<<<<<
+ *     B[3] = M_TAU*params.quad             # <<<<<<<<<<<<<<
  * 
- *     import mytime
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  */
-  __pyx_t_3 = __pyx_v_params.quad;
-  (__pyx_v_B[3]) = __pyx_t_3;
+  (__pyx_v_B[3]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.quad);
 
-  /* "quantumc.pyx":133
- *     B[3] = params.quad
+  /* "quantumc.pyx":142
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  * 
  *     import mytime             # <<<<<<<<<<<<<<
  * 
  *     if spin == 'half':
  */
-  __pyx_t_8 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 133, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_v_mytime = __pyx_t_8;
   __pyx_t_8 = 0;
 
-  /* "quantumc.pyx":135
+  /* "quantumc.pyx":144
  *     import mytime
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         # iterate through time using second order expansion
  *         for i in range(1,steps):
  */
-  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 144, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "quantumc.pyx":137
+    /* "quantumc.pyx":146
  *     if spin == 'half':
  *         # iterate through time using second order expansion
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
@@ -2890,10 +2942,10 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
     __pyx_t_9 = __pyx_v_steps;
     __pyx_t_10 = __pyx_t_9;
-    for (__pyx_t_4 = 1; __pyx_t_4 < __pyx_t_10; __pyx_t_4+=1) {
-      __pyx_v_i = __pyx_t_4;
+    for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_10; __pyx_t_3+=1) {
+      __pyx_v_i = __pyx_t_3;
 
-      /* "quantumc.pyx":139
+      /* "quantumc.pyx":148
  *         for i in range(1,steps):
  *             # apply half step unitary at current position
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
@@ -2902,7 +2954,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
 
-      /* "quantumc.pyx":141
+      /* "quantumc.pyx":150
  *             unitary22(params.dt, state, B)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
@@ -2911,7 +2963,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":142
+      /* "quantumc.pyx":151
  * 
  *             t += 2*params.dt
  *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
@@ -2920,7 +2972,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
  */
       __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":145
+      /* "quantumc.pyx":154
  * 
  *             # apply half step at destination time
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
@@ -2930,7 +2982,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
     }
 
-    /* "quantumc.pyx":135
+    /* "quantumc.pyx":144
  *     import mytime
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
@@ -2940,78 +2992,145 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
     goto __pyx_L6;
   }
 
-  /* "quantumc.pyx":147
+  /* "quantumc.pyx":156
  *             unitary22(params.dt, state, B)
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
  *         # iterate through time using second order expansion
- *         for i in range(1,steps):
+ *         unitary33(params.dt, B, U)
  */
-  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 156, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "quantumc.pyx":149
+    /* "quantumc.pyx":158
  *     elif spin == 'one':
  *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *         for i in range(1,steps):
+ *             # apply half step unitary at current position
+ */
+    __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
+
+    /* "quantumc.pyx":159
+ *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
  *             # apply half step unitary at current position
- *             unitary33(params.dt, state, B)
+ *             updateState33(state, U)
  */
     __pyx_t_9 = __pyx_v_steps;
     __pyx_t_10 = __pyx_t_9;
-    for (__pyx_t_4 = 1; __pyx_t_4 < __pyx_t_10; __pyx_t_4+=1) {
-      __pyx_v_i = __pyx_t_4;
+    for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_10; __pyx_t_3+=1) {
+      __pyx_v_i = __pyx_t_3;
 
-      /* "quantumc.pyx":151
+      /* "quantumc.pyx":161
  *         for i in range(1,steps):
  *             # apply half step unitary at current position
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
  *             #unitary33(time[i], &params, state, state)
  * 
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
 
-      /* "quantumc.pyx":154
+      /* "quantumc.pyx":164
  *             #unitary33(time[i], &params, state, state)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
  *             fastB(t, &params, B)
- *             #print(B[0], B[1], B[2], B[3])
+ *             unitary33(params.dt, B, U)
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":155
+      /* "quantumc.pyx":165
  * 
  *             t += 2*params.dt
  *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
- *             #print(B[0], B[1], B[2], B[3])
- *             # apply half step at destination time
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)
  */
       __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":159
- *             # apply half step at destination time
- *             #unitary33(time[i] + 2*params.dt, &params, state, state)
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
- *     '''
+      /* "quantumc.pyx":166
+ *             t += 2*params.dt
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)
+ * 
+ */
+      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
+
+      /* "quantumc.pyx":167
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
+ * 
  *     state_in[0] = state[0]
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
     }
 
-    /* "quantumc.pyx":147
+    /* "quantumc.pyx":156
  *             unitary22(params.dt, state, B)
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
  *         # iterate through time using second order expansion
- *         for i in range(1,steps):
+ *         unitary33(params.dt, B, U)
  */
   }
   __pyx_L6:;
 
-  /* "quantumc.pyx":94
- * @cython.wraparound(False)
+  /* "quantumc.pyx":169
+ *             updateState33(state, U)
+ * 
+ *     state_in[0] = state[0]             # <<<<<<<<<<<<<<
+ *     state_in[1] = state[1]
+ *     if dim == 3:
+ */
+  __pyx_t_11 = 0;
+  *((__pyx_t_double_complex *) ( /* dim=0 */ (__pyx_v_state_in.data + __pyx_t_11 * __pyx_v_state_in.strides[0]) )) = (__pyx_v_state[0]);
+
+  /* "quantumc.pyx":170
+ * 
+ *     state_in[0] = state[0]
+ *     state_in[1] = state[1]             # <<<<<<<<<<<<<<
+ *     if dim == 3:
+ *         state_in[2] = state[2]
+ */
+  __pyx_t_12 = 1;
+  *((__pyx_t_double_complex *) ( /* dim=0 */ (__pyx_v_state_in.data + __pyx_t_12 * __pyx_v_state_in.strides[0]) )) = (__pyx_v_state[1]);
+
+  /* "quantumc.pyx":171
+ *     state_in[0] = state[0]
+ *     state_in[1] = state[1]
+ *     if dim == 3:             # <<<<<<<<<<<<<<
+ *         state_in[2] = state[2]
+ * 
+ */
+  __pyx_t_2 = ((__pyx_v_dim == 3) != 0);
+  if (__pyx_t_2) {
+
+    /* "quantumc.pyx":172
+ *     state_in[1] = state[1]
+ *     if dim == 3:
+ *         state_in[2] = state[2]             # <<<<<<<<<<<<<<
+ * 
+ * @cython.boundscheck(False) # deactivate index bound checks locally
+ */
+    __pyx_t_13 = 2;
+    *((__pyx_t_double_complex *) ( /* dim=0 */ (__pyx_v_state_in.data + __pyx_t_13 * __pyx_v_state_in.strides[0]) )) = (__pyx_v_state[2]);
+
+    /* "quantumc.pyx":171
+ *     state_in[0] = state[0]
+ *     state_in[1] = state[1]
+ *     if dim == 3:             # <<<<<<<<<<<<<<
+ *         state_in[2] = state[2]
+ * 
+ */
+  }
+
+  /* "quantumc.pyx":101
  * @cython.nonecheck(False)
+ * @cython.cdivision(True)
  * def n_propagate_lite(paramdict, double complex [:] state_in, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
@@ -3032,7 +3151,7 @@ static PyObject *__pyx_pf_8quantumc_n_propagate_lite(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-/* "quantumc.pyx":170
+/* "quantumc.pyx":177
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def n_propagateN(paramdict, double complex [:,:] states, double [:] probs, spin):             # <<<<<<<<<<<<<<
@@ -3079,23 +3198,23 @@ static PyObject *__pyx_pw_8quantumc_3n_propagateN(PyObject *__pyx_self, PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_states)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 1); __PYX_ERR(0, 170, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 1); __PYX_ERR(0, 177, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_probs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 2); __PYX_ERR(0, 170, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 2); __PYX_ERR(0, 177, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_spin)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 3); __PYX_ERR(0, 170, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, 3); __PYX_ERR(0, 177, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagateN") < 0)) __PYX_ERR(0, 170, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagateN") < 0)) __PYX_ERR(0, 177, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -3106,13 +3225,13 @@ static PyObject *__pyx_pw_8quantumc_3n_propagateN(PyObject *__pyx_self, PyObject
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
     __pyx_v_paramdict = values[0];
-    __pyx_v_states = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_states.memview)) __PYX_ERR(0, 170, __pyx_L3_error)
-    __pyx_v_probs = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_probs.memview)) __PYX_ERR(0, 170, __pyx_L3_error)
+    __pyx_v_states = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_states.memview)) __PYX_ERR(0, 177, __pyx_L3_error)
+    __pyx_v_probs = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_probs.memview)) __PYX_ERR(0, 177, __pyx_L3_error)
     __pyx_v_spin = values[3];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 170, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("n_propagateN", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 177, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("quantumc.n_propagateN", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3135,6 +3254,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_double_complex __pyx_v_state[3];
   double __pyx_v_t;
   double __pyx_v_B[4];
+  __pyx_t_double_complex __pyx_v_U[3][3];
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3164,39 +3284,39 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   Py_ssize_t __pyx_t_25;
   __Pyx_RefNannySetupContext("n_propagateN", 0);
 
-  /* "quantumc.pyx":174
+  /* "quantumc.pyx":181
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  *     """
  *     import mytime             # <<<<<<<<<<<<<<
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_mytime = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "quantumc.pyx":177
+  /* "quantumc.pyx":184
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  *     params = paramdict             # <<<<<<<<<<<<<<
  *     cdef int dim
  *     if spin == 'half':
  */
-  __pyx_t_2 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 184, __pyx_L1_error)
   __pyx_v_params = __pyx_t_2;
 
-  /* "quantumc.pyx":179
+  /* "quantumc.pyx":186
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         dim = 2
  *     else: #spin == 1
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 186, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":180
+    /* "quantumc.pyx":187
  *     cdef int dim
  *     if spin == 'half':
  *         dim = 2             # <<<<<<<<<<<<<<
@@ -3205,7 +3325,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
     __pyx_v_dim = 2;
 
-    /* "quantumc.pyx":179
+    /* "quantumc.pyx":186
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
@@ -3215,7 +3335,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     goto __pyx_L3;
   }
 
-  /* "quantumc.pyx":182
+  /* "quantumc.pyx":189
  *         dim = 2
  *     else: #spin == 1
  *         dim = 3             # <<<<<<<<<<<<<<
@@ -3227,7 +3347,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   }
   __pyx_L3:;
 
-  /* "quantumc.pyx":186
+  /* "quantumc.pyx":193
  *     # define loop constants
  *     cdef int i, j
  *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt)             # <<<<<<<<<<<<<<
@@ -3237,11 +3357,11 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_4 = (__pyx_v_params.tend - __pyx_v_params.tstart);
   if (unlikely(__pyx_v_params.dt == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 186, __pyx_L1_error)
+    __PYX_ERR(0, 193, __pyx_L1_error)
   }
   __pyx_v_steps = ((int)ceil((__pyx_t_4 / __pyx_v_params.dt)));
 
-  /* "quantumc.pyx":191
+  /* "quantumc.pyx":198
  *     cdef double complex state[3] #= <double complex *>malloc(dim * sizeof(double complex))
  * 
  *     for j in range(0,dim):             # <<<<<<<<<<<<<<
@@ -3253,7 +3373,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
     __pyx_v_j = __pyx_t_7;
 
-    /* "quantumc.pyx":192
+    /* "quantumc.pyx":199
  * 
  *     for j in range(0,dim):
  *         state[j] = states[0][j]             # <<<<<<<<<<<<<<
@@ -3265,43 +3385,43 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     (__pyx_v_state[__pyx_v_j]) = (*((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_8 * __pyx_v_states.strides[0]) ) + __pyx_t_9 * __pyx_v_states.strides[1]) )));
   }
 
-  /* "quantumc.pyx":197
+  /* "quantumc.pyx":204
  * 
  *     #Intialise cos and sin values for fast field calculations
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.cdtrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":198
+  /* "quantumc.pyx":205
  *     #Intialise cos and sin values for fast field calculations
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.sdtrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":199
+  /* "quantumc.pyx":206
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  * 
  */
-  __pyx_v_params.ctcrabi = 1.0;
+  __pyx_v_params.ctcrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart));
 
-  /* "quantumc.pyx":200
+  /* "quantumc.pyx":207
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
  * 
  *     # set time step to half
  */
-  __pyx_v_params.stcrabi = 0.0;
+  __pyx_v_params.stcrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart));
 
-  /* "quantumc.pyx":203
+  /* "quantumc.pyx":210
  * 
  *     # set time step to half
  *     cdef double t = params.tstart             # <<<<<<<<<<<<<<
@@ -3311,7 +3431,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_4 = __pyx_v_params.tstart;
   __pyx_v_t = __pyx_t_4;
 
-  /* "quantumc.pyx":204
+  /* "quantumc.pyx":211
  *     # set time step to half
  *     cdef double t = params.tstart
  *     params.dt = params.dt*0.5             # <<<<<<<<<<<<<<
@@ -3320,7 +3440,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
   __pyx_v_params.dt = (__pyx_v_params.dt * 0.5);
 
-  /* "quantumc.pyx":207
+  /* "quantumc.pyx":214
  * 
  *     cdef double B[4]
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)             # <<<<<<<<<<<<<<
@@ -3329,45 +3449,44 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
   (__pyx_v_B[0]) = ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * __pyx_v_params.tstart)));
 
-  /* "quantumc.pyx":208
+  /* "quantumc.pyx":215
  *     cdef double B[4]
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)
  *     B[1] = 0.0             # <<<<<<<<<<<<<<
  *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad
+ *     B[3] = M_TAU*params.quad
  */
   (__pyx_v_B[1]) = 0.0;
 
-  /* "quantumc.pyx":209
+  /* "quantumc.pyx":216
  *     B[0] = M_TAU*params.rabi*cos(M_TAU*params.rabi*params.tstart)
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
- *     B[3] = params.quad
+ *     B[3] = M_TAU*params.quad
  * 
  */
   (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.larmor);
 
-  /* "quantumc.pyx":210
+  /* "quantumc.pyx":217
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad             # <<<<<<<<<<<<<<
+ *     B[3] = M_TAU*params.quad             # <<<<<<<<<<<<<<
  * 
- * 
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  */
-  __pyx_t_4 = __pyx_v_params.quad;
-  (__pyx_v_B[3]) = __pyx_t_4;
+  (__pyx_v_B[3]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.quad);
 
-  /* "quantumc.pyx":214
- * 
+  /* "quantumc.pyx":221
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  *         probs[0] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1])
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 221, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":216
+    /* "quantumc.pyx":223
  *     if spin == 'half':
  *         # compute initial probability
  *         probs[0] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1])             # <<<<<<<<<<<<<<
@@ -3377,7 +3496,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     __pyx_t_10 = 0;
     *((double *) ( /* dim=0 */ (__pyx_v_probs.data + __pyx_t_10 * __pyx_v_probs.strides[0]) )) = __pyx_f_8quantumc_absquare(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[0])), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[1])), (__pyx_v_state[1]))));
 
-    /* "quantumc.pyx":219
+    /* "quantumc.pyx":226
  * 
  *         # iterate through time using second order expansion
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
@@ -3389,7 +3508,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     for (__pyx_t_5 = 1; __pyx_t_5 < __pyx_t_12; __pyx_t_5+=1) {
       __pyx_v_i = __pyx_t_5;
 
-      /* "quantumc.pyx":221
+      /* "quantumc.pyx":228
  *         for i in range(1,steps):
  *             # apply half step unitary at current position
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
@@ -3398,7 +3517,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
 
-      /* "quantumc.pyx":223
+      /* "quantumc.pyx":230
  *             unitary22(params.dt, state, B)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
@@ -3407,7 +3526,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":224
+      /* "quantumc.pyx":231
  * 
  *             t += 2*params.dt
  *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
@@ -3416,7 +3535,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
       __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":227
+      /* "quantumc.pyx":234
  * 
  *             # apply half step at destination time
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
@@ -3425,7 +3544,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
 
-      /* "quantumc.pyx":230
+      /* "quantumc.pyx":237
  * 
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
@@ -3434,12 +3553,12 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
       if (unlikely(__pyx_v_params.savef == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 230, __pyx_L1_error)
+        __PYX_ERR(0, 237, __pyx_L1_error)
       }
       __pyx_t_3 = ((__Pyx_mod_int(__pyx_v_i, __pyx_v_params.savef) == 0) != 0);
       if (__pyx_t_3) {
 
-        /* "quantumc.pyx":231
+        /* "quantumc.pyx":238
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]             # <<<<<<<<<<<<<<
@@ -3448,17 +3567,17 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 231, __pyx_L1_error)
+          __PYX_ERR(0, 238, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 231, __pyx_L1_error)
+          __PYX_ERR(0, 238, __pyx_L1_error)
         }
         __pyx_t_13 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         __pyx_t_14 = 0;
         *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_13 * __pyx_v_states.strides[0]) ) + __pyx_t_14 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
 
-        /* "quantumc.pyx":232
+        /* "quantumc.pyx":239
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]             # <<<<<<<<<<<<<<
@@ -3467,17 +3586,17 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 232, __pyx_L1_error)
+          __PYX_ERR(0, 239, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 232, __pyx_L1_error)
+          __PYX_ERR(0, 239, __pyx_L1_error)
         }
         __pyx_t_15 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         __pyx_t_16 = 1;
         *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_15 * __pyx_v_states.strides[0]) ) + __pyx_t_16 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
 
-        /* "quantumc.pyx":234
+        /* "quantumc.pyx":241
  *                 states[i/params.savef][1] = state[1]
  * 
  *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1])             # <<<<<<<<<<<<<<
@@ -3486,16 +3605,16 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 234, __pyx_L1_error)
+          __PYX_ERR(0, 241, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 234, __pyx_L1_error)
+          __PYX_ERR(0, 241, __pyx_L1_error)
         }
         __pyx_t_17 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         *((double *) ( /* dim=0 */ (__pyx_v_probs.data + __pyx_t_17 * __pyx_v_probs.strides[0]) )) = __pyx_f_8quantumc_absquare(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[0])), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[1])), (__pyx_v_state[1]))));
 
-        /* "quantumc.pyx":230
+        /* "quantumc.pyx":237
  * 
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
@@ -3505,8 +3624,8 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
       }
     }
 
-    /* "quantumc.pyx":214
- * 
+    /* "quantumc.pyx":221
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         # compute initial probability
@@ -3515,17 +3634,17 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     goto __pyx_L6;
   }
 
-  /* "quantumc.pyx":236
+  /* "quantumc.pyx":243
  *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1])
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  *         probs[0] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1] + params.proj[2].conjugate()*state[2])
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 243, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":238
+    /* "quantumc.pyx":245
  *     elif spin == 'one':
  *         # compute initial probability
  *         probs[0] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1] + params.proj[2].conjugate()*state[2])             # <<<<<<<<<<<<<<
@@ -3535,69 +3654,87 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
     __pyx_t_18 = 0;
     *((double *) ( /* dim=0 */ (__pyx_v_probs.data + __pyx_t_18 * __pyx_v_probs.strides[0]) )) = __pyx_f_8quantumc_absquare(__Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[0])), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[1])), (__pyx_v_state[1]))), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[2])), (__pyx_v_state[2]))));
 
-    /* "quantumc.pyx":241
+    /* "quantumc.pyx":248
  * 
  *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *         for i in range(1,steps):
+ *             # apply half step unitary at current position
+ */
+    __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
+
+    /* "quantumc.pyx":249
+ *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
  *             # apply half step unitary at current position
- *             unitary33(params.dt, state, B)
+ *             updateState33(state, U)
  */
     __pyx_t_11 = __pyx_v_steps;
     __pyx_t_12 = __pyx_t_11;
     for (__pyx_t_5 = 1; __pyx_t_5 < __pyx_t_12; __pyx_t_5+=1) {
       __pyx_v_i = __pyx_t_5;
 
-      /* "quantumc.pyx":243
+      /* "quantumc.pyx":251
  *         for i in range(1,steps):
  *             # apply half step unitary at current position
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
  *             #unitary33(time[i], &params, state, state)
  * 
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
 
-      /* "quantumc.pyx":246
+      /* "quantumc.pyx":254
  *             #unitary33(time[i], &params, state, state)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
  *             fastB(t, &params, B)
- *             #print(B[0], B[1], B[2], B[3])
+ *             unitary33(params.dt, B, U)
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":247
+      /* "quantumc.pyx":255
  * 
  *             t += 2*params.dt
  *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
- *             #print(B[0], B[1], B[2], B[3])
- *             # apply half step at destination time
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)
  */
       __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":251
- *             # apply half step at destination time
- *             #unitary33(time[i] + 2*params.dt, &params, state, state)
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
- * 
+      /* "quantumc.pyx":256
+ *             t += 2*params.dt
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)
  *             if i % params.savef == 0:
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
 
-      /* "quantumc.pyx":253
- *             unitary33(params.dt, state, B)
- * 
+      /* "quantumc.pyx":257
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
+ *             if i % params.savef == 0:
+ *                 #store state and store probability along specified projection
+ */
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
+
+      /* "quantumc.pyx":258
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 #store state and store probability along specified projection
  *                 states[i/params.savef][0] = state[0]
  */
       if (unlikely(__pyx_v_params.savef == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 253, __pyx_L1_error)
+        __PYX_ERR(0, 258, __pyx_L1_error)
       }
       __pyx_t_3 = ((__Pyx_mod_int(__pyx_v_i, __pyx_v_params.savef) == 0) != 0);
       if (__pyx_t_3) {
 
-        /* "quantumc.pyx":255
+        /* "quantumc.pyx":260
  *             if i % params.savef == 0:
  *                 #store state and store probability along specified projection
  *                 states[i/params.savef][0] = state[0]             # <<<<<<<<<<<<<<
@@ -3606,75 +3743,75 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 255, __pyx_L1_error)
+          __PYX_ERR(0, 260, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 255, __pyx_L1_error)
+          __PYX_ERR(0, 260, __pyx_L1_error)
         }
         __pyx_t_19 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         __pyx_t_20 = 0;
         *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_19 * __pyx_v_states.strides[0]) ) + __pyx_t_20 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
 
-        /* "quantumc.pyx":256
+        /* "quantumc.pyx":261
  *                 #store state and store probability along specified projection
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][2] = state[2]
- * 
+ *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1] + params.proj[2].conjugate()*state[2])
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 256, __pyx_L1_error)
+          __PYX_ERR(0, 261, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 256, __pyx_L1_error)
+          __PYX_ERR(0, 261, __pyx_L1_error)
         }
         __pyx_t_21 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         __pyx_t_22 = 1;
         *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_21 * __pyx_v_states.strides[0]) ) + __pyx_t_22 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
 
-        /* "quantumc.pyx":257
+        /* "quantumc.pyx":262
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]
  *                 states[i/params.savef][2] = state[2]             # <<<<<<<<<<<<<<
- * 
  *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1] + params.proj[2].conjugate()*state[2])
+ * 
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 257, __pyx_L1_error)
+          __PYX_ERR(0, 262, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 257, __pyx_L1_error)
+          __PYX_ERR(0, 262, __pyx_L1_error)
         }
         __pyx_t_23 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         __pyx_t_24 = 2;
         *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_23 * __pyx_v_states.strides[0]) ) + __pyx_t_24 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[2]);
 
-        /* "quantumc.pyx":259
+        /* "quantumc.pyx":263
+ *                 states[i/params.savef][1] = state[1]
  *                 states[i/params.savef][2] = state[2]
- * 
  *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1] + params.proj[2].conjugate()*state[2])             # <<<<<<<<<<<<<<
  * 
  * 
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 259, __pyx_L1_error)
+          __PYX_ERR(0, 263, __pyx_L1_error)
         }
         else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
           PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 259, __pyx_L1_error)
+          __PYX_ERR(0, 263, __pyx_L1_error)
         }
         __pyx_t_25 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
         *((double *) ( /* dim=0 */ (__pyx_v_probs.data + __pyx_t_25 * __pyx_v_probs.strides[0]) )) = __pyx_f_8quantumc_absquare(__Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[0])), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[1])), (__pyx_v_state[1]))), __Pyx_c_prod_double(__Pyx_c_conj_double((__pyx_v_params.proj[2])), (__pyx_v_state[2]))));
 
-        /* "quantumc.pyx":253
- *             unitary33(params.dt, state, B)
- * 
+        /* "quantumc.pyx":258
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 #store state and store probability along specified projection
  *                 states[i/params.savef][0] = state[0]
@@ -3682,7 +3819,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
       }
     }
 
-    /* "quantumc.pyx":236
+    /* "quantumc.pyx":243
  *                 probs[i/params.savef] = absquare(params.proj[0].conjugate()*state[0] + params.proj[1].conjugate()*state[1])
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
@@ -3692,7 +3829,7 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   }
   __pyx_L6:;
 
-  /* "quantumc.pyx":170
+  /* "quantumc.pyx":177
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def n_propagateN(paramdict, double complex [:,:] states, double [:] probs, spin):             # <<<<<<<<<<<<<<
@@ -3716,26 +3853,26 @@ static PyObject *__pyx_pf_8quantumc_2n_propagateN(CYTHON_UNUSED PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "quantumc.pyx":265
+/* "quantumc.pyx":269
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
- * def n_propagate_F(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
+ * def n_propagateF(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8quantumc_5n_propagate_F(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8quantumc_4n_propagate_F[] = "\n    Fast unitary evolution over <time> given simulation parameters <paramdict>.\n    ";
-static PyMethodDef __pyx_mdef_8quantumc_5n_propagate_F = {"n_propagate_F", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8quantumc_5n_propagate_F, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8quantumc_4n_propagate_F};
-static PyObject *__pyx_pw_8quantumc_5n_propagate_F(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8quantumc_5n_propagateF(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8quantumc_4n_propagateF[] = "\n    Fast unitary evolution over <time> given simulation parameters <paramdict>.\n    ";
+static PyMethodDef __pyx_mdef_8quantumc_5n_propagateF = {"n_propagateF", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8quantumc_5n_propagateF, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8quantumc_4n_propagateF};
+static PyObject *__pyx_pw_8quantumc_5n_propagateF(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_paramdict = 0;
   __Pyx_memviewslice __pyx_v_states = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_F_arr = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_v_spin = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("n_propagate_F (wrapper)", 0);
+  __Pyx_RefNannySetupContext("n_propagateF (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_paramdict,&__pyx_n_s_states,&__pyx_n_s_F_arr,&__pyx_n_s_spin,0};
     PyObject* values[4] = {0,0,0,0};
@@ -3763,23 +3900,23 @@ static PyObject *__pyx_pw_8quantumc_5n_propagate_F(PyObject *__pyx_self, PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_states)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagate_F", 1, 4, 4, 1); __PYX_ERR(0, 265, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateF", 1, 4, 4, 1); __PYX_ERR(0, 269, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_F_arr)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagate_F", 1, 4, 4, 2); __PYX_ERR(0, 265, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateF", 1, 4, 4, 2); __PYX_ERR(0, 269, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_spin)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("n_propagate_F", 1, 4, 4, 3); __PYX_ERR(0, 265, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("n_propagateF", 1, 4, 4, 3); __PYX_ERR(0, 269, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagate_F") < 0)) __PYX_ERR(0, 265, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "n_propagateF") < 0)) __PYX_ERR(0, 269, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -3790,36 +3927,37 @@ static PyObject *__pyx_pw_8quantumc_5n_propagate_F(PyObject *__pyx_self, PyObjec
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
     __pyx_v_paramdict = values[0];
-    __pyx_v_states = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_states.memview)) __PYX_ERR(0, 265, __pyx_L3_error)
-    __pyx_v_F_arr = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_F_arr.memview)) __PYX_ERR(0, 265, __pyx_L3_error)
+    __pyx_v_states = __Pyx_PyObject_to_MemoryviewSlice_dsds___pyx_t_double_complex(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_states.memview)) __PYX_ERR(0, 269, __pyx_L3_error)
+    __pyx_v_F_arr = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_F_arr.memview)) __PYX_ERR(0, 269, __pyx_L3_error)
     __pyx_v_spin = values[3];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("n_propagate_F", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 265, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("n_propagateF", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 269, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("quantumc.n_propagate_F", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("quantumc.n_propagateF", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8quantumc_4n_propagate_F(__pyx_self, __pyx_v_paramdict, __pyx_v_states, __pyx_v_F_arr, __pyx_v_spin);
+  __pyx_r = __pyx_pf_8quantumc_4n_propagateF(__pyx_self, __pyx_v_paramdict, __pyx_v_states, __pyx_v_F_arr, __pyx_v_spin);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_states, __Pyx_memviewslice __pyx_v_F_arr, PyObject *__pyx_v_spin) {
+static PyObject *__pyx_pf_8quantumc_4n_propagateF(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_states, __Pyx_memviewslice __pyx_v_F_arr, PyObject *__pyx_v_spin) {
   CYTHON_UNUSED PyObject *__pyx_v_mytime = NULL;
   __pyx_t_8quantumc_Params __pyx_v_params;
   int __pyx_v_dim;
-  int __pyx_v_i;
   int __pyx_v_j;
+  unsigned long __pyx_v_i;
   unsigned long __pyx_v_steps;
   __pyx_t_double_complex __pyx_v_state[3];
-  __pyx_t_double_complex __pyx_v_F[3];
-  double __pyx_v_B[4];
   double __pyx_v_t;
+  double __pyx_v_B[4];
+  __pyx_t_double_complex __pyx_v_F[3];
+  __pyx_t_double_complex __pyx_v_U[3][3];
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3836,20 +3974,20 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   Py_ssize_t __pyx_t_12;
   Py_ssize_t __pyx_t_13;
   Py_ssize_t __pyx_t_14;
-  unsigned long __pyx_t_15;
-  unsigned long __pyx_t_16;
-  Py_ssize_t __pyx_t_17;
-  Py_ssize_t __pyx_t_18;
-  Py_ssize_t __pyx_t_19;
-  Py_ssize_t __pyx_t_20;
+  Py_ssize_t __pyx_t_15;
+  Py_ssize_t __pyx_t_16;
+  unsigned long __pyx_t_17;
+  unsigned long __pyx_t_18;
+  unsigned long __pyx_t_19;
+  size_t __pyx_t_20;
   Py_ssize_t __pyx_t_21;
-  Py_ssize_t __pyx_t_22;
+  size_t __pyx_t_22;
   Py_ssize_t __pyx_t_23;
-  Py_ssize_t __pyx_t_24;
+  size_t __pyx_t_24;
   Py_ssize_t __pyx_t_25;
-  Py_ssize_t __pyx_t_26;
+  size_t __pyx_t_26;
   Py_ssize_t __pyx_t_27;
-  Py_ssize_t __pyx_t_28;
+  size_t __pyx_t_28;
   Py_ssize_t __pyx_t_29;
   Py_ssize_t __pyx_t_30;
   Py_ssize_t __pyx_t_31;
@@ -3857,48 +3995,53 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   Py_ssize_t __pyx_t_33;
   Py_ssize_t __pyx_t_34;
   Py_ssize_t __pyx_t_35;
-  Py_ssize_t __pyx_t_36;
+  size_t __pyx_t_36;
   Py_ssize_t __pyx_t_37;
-  Py_ssize_t __pyx_t_38;
+  size_t __pyx_t_38;
   Py_ssize_t __pyx_t_39;
-  Py_ssize_t __pyx_t_40;
+  size_t __pyx_t_40;
   Py_ssize_t __pyx_t_41;
-  Py_ssize_t __pyx_t_42;
-  __Pyx_RefNannySetupContext("n_propagate_F", 0);
+  size_t __pyx_t_42;
+  Py_ssize_t __pyx_t_43;
+  size_t __pyx_t_44;
+  Py_ssize_t __pyx_t_45;
+  size_t __pyx_t_46;
+  Py_ssize_t __pyx_t_47;
+  __Pyx_RefNannySetupContext("n_propagateF", 0);
 
-  /* "quantumc.pyx":269
+  /* "quantumc.pyx":273
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  *     """
  *     import mytime             # <<<<<<<<<<<<<<
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 269, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_mytime, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_mytime = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "quantumc.pyx":272
+  /* "quantumc.pyx":276
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  *     params = paramdict             # <<<<<<<<<<<<<<
  *     cdef int dim
  *     if spin == 'half':
  */
-  __pyx_t_2 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 272, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 276, __pyx_L1_error)
   __pyx_v_params = __pyx_t_2;
 
-  /* "quantumc.pyx":274
+  /* "quantumc.pyx":278
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         dim = 2
  *     else: #spin == 1
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 274, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 278, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":275
+    /* "quantumc.pyx":279
  *     cdef int dim
  *     if spin == 'half':
  *         dim = 2             # <<<<<<<<<<<<<<
@@ -3907,7 +4050,7 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
     __pyx_v_dim = 2;
 
-    /* "quantumc.pyx":274
+    /* "quantumc.pyx":278
  *     params = paramdict
  *     cdef int dim
  *     if spin == 'half':             # <<<<<<<<<<<<<<
@@ -3917,7 +4060,7 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
     goto __pyx_L3;
   }
 
-  /* "quantumc.pyx":277
+  /* "quantumc.pyx":281
  *         dim = 2
  *     else: #spin == 1
  *         dim = 3             # <<<<<<<<<<<<<<
@@ -3929,21 +4072,21 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   }
   __pyx_L3:;
 
-  /* "quantumc.pyx":281
- *     # define loop constants
- *     cdef int i, j
- *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt)             # <<<<<<<<<<<<<<
+  /* "quantumc.pyx":286
+ *     cdef int j
+ *     cdef unsigned long int i
+ *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt) + 1             # <<<<<<<<<<<<<<
  * 
  *     #Initialise state array
  */
   __pyx_t_4 = (__pyx_v_params.tend - __pyx_v_params.tstart);
   if (unlikely(__pyx_v_params.dt == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 281, __pyx_L1_error)
+    __PYX_ERR(0, 286, __pyx_L1_error)
   }
-  __pyx_v_steps = ((int)ceil((__pyx_t_4 / __pyx_v_params.dt)));
+  __pyx_v_steps = (((int)ceil((__pyx_t_4 / __pyx_v_params.dt))) + 1);
 
-  /* "quantumc.pyx":286
+  /* "quantumc.pyx":291
  *     cdef double complex state[3]
  * 
  *     for j in range(0,dim):             # <<<<<<<<<<<<<<
@@ -3955,121 +4098,185 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
     __pyx_v_j = __pyx_t_7;
 
-    /* "quantumc.pyx":287
+    /* "quantumc.pyx":292
  * 
  *     for j in range(0,dim):
  *         state[j] = states[0][j]             # <<<<<<<<<<<<<<
  * 
- *     # set time step to half
+ *     #Intialise cos and sin values for fast field calculations
  */
     __pyx_t_8 = 0;
     __pyx_t_9 = __pyx_v_j;
     (__pyx_v_state[__pyx_v_j]) = (*((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_8 * __pyx_v_states.strides[0]) ) + __pyx_t_9 * __pyx_v_states.strides[1]) )));
   }
 
-  /* "quantumc.pyx":290
- * 
- *     # set time step to half
- *     params.dt = params.dt*0.5             # <<<<<<<<<<<<<<
+  /* "quantumc.pyx":295
  * 
  *     #Intialise cos and sin values for fast field calculations
- */
-  __pyx_v_params.dt = (__pyx_v_params.dt * 0.5);
-
-  /* "quantumc.pyx":293
- * 
- *     #Intialise cos and sin values for fast field calculations
- *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
- *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.cdtrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":294
+  /* "quantumc.pyx":296
  *     #Intialise cos and sin values for fast field calculations
- *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
- *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
   __pyx_v_params.sdtrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
 
-  /* "quantumc.pyx":295
- *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
- *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+  /* "quantumc.pyx":297
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  * 
  */
-  __pyx_v_params.ctcrabi = 1.0;
+  __pyx_v_params.ctcrabi = cos((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart) + __pyx_v_params.rph));
 
-  /* "quantumc.pyx":296
- *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
- *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
- *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+  /* "quantumc.pyx":298
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
  * 
- *     cdef double complex F[3] #(<Fx>,<Fy>,<Fz>) - complex to speed up calculations
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  */
-  __pyx_v_params.stcrabi = 0.0;
+  __pyx_v_params.stcrabi = sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart) + __pyx_v_params.rph));
+
+  /* "quantumc.pyx":300
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ * 
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ */
+  __pyx_v_params.cdtxl = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.dt));
 
   /* "quantumc.pyx":301
- *     cdef double B[4]
  * 
- *     B[0] = M_TAU*params.rabi             # <<<<<<<<<<<<<<
- *     B[1] = 0.0
- *     B[2] = M_TAU*params.larmor
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  */
-  (__pyx_v_B[0]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi);
+  __pyx_v_params.sdtxl = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.dt));
 
   /* "quantumc.pyx":302
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  * 
- *     B[0] = M_TAU*params.rabi
- *     B[1] = 0.0             # <<<<<<<<<<<<<<
- *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad
  */
-  (__pyx_v_B[1]) = 0.0;
+  __pyx_v_params.ctcxl = cos((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.tr2) + __pyx_v_params.xlphase));
 
   /* "quantumc.pyx":303
- *     B[0] = M_TAU*params.rabi
- *     B[1] = 0.0
- *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
- *     B[3] = params.quad
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
  * 
+ *     #print(params.xlamp,params.cdtxl,params.sdtxl,params.stcxl)
  */
-  (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.larmor);
+  __pyx_v_params.stcxl = sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.tr2) + __pyx_v_params.xlphase));
 
-  /* "quantumc.pyx":304
- *     B[1] = 0.0
- *     B[2] = M_TAU*params.larmor
- *     B[3] = params.quad             # <<<<<<<<<<<<<<
- * 
- *     cdef double t = params.tstart
- */
-  __pyx_t_4 = __pyx_v_params.quad;
-  (__pyx_v_B[3]) = __pyx_t_4;
-
-  /* "quantumc.pyx":306
- *     B[3] = params.quad
- * 
+  /* "quantumc.pyx":307
+ *     #print(params.xlamp,params.cdtxl,params.sdtxl,params.stcxl)
+ *     # set time step to half
  *     cdef double t = params.tstart             # <<<<<<<<<<<<<<
+ *     params.dt = params.dt*0.5
  * 
- *     if spin == 'half':
  */
   __pyx_t_4 = __pyx_v_params.tstart;
   __pyx_v_t = __pyx_t_4;
 
   /* "quantumc.pyx":308
+ *     # set time step to half
  *     cdef double t = params.tstart
+ *     params.dt = params.dt*0.5             # <<<<<<<<<<<<<<
+ * 
+ *     cdef double B[4]
+ */
+  __pyx_v_params.dt = (__pyx_v_params.dt * 0.5);
+
+  /* "quantumc.pyx":312
+ *     cdef double B[4]
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi             # <<<<<<<<<<<<<<
+ *     if params.tr2 == params.tstart:
+ *         #print('yay')
+ */
+  (__pyx_v_B[0]) = ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * __pyx_v_params.ctcrabi);
+
+  /* "quantumc.pyx":313
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi
+ *     if params.tr2 == params.tstart:             # <<<<<<<<<<<<<<
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ */
+  __pyx_t_3 = ((__pyx_v_params.tr2 == __pyx_v_params.tstart) != 0);
+  if (__pyx_t_3) {
+
+    /* "quantumc.pyx":315
+ *     if params.tr2 == params.tstart:
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl             # <<<<<<<<<<<<<<
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor
+ */
+    __pyx_t_10 = 0;
+    (__pyx_v_B[__pyx_t_10]) = ((__pyx_v_B[__pyx_t_10]) + ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlamp) * __pyx_v_params.ctcxl));
+
+    /* "quantumc.pyx":313
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi
+ *     if params.tr2 == params.tstart:             # <<<<<<<<<<<<<<
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ */
+  }
+
+  /* "quantumc.pyx":316
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ *     B[1] = 0.0             # <<<<<<<<<<<<<<
+ *     B[2] = M_TAU*params.larmor
+ *     B[3] = M_TAU*params.quad
+ */
+  (__pyx_v_B[1]) = 0.0;
+
+  /* "quantumc.pyx":317
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
+ *     B[3] = M_TAU*params.quad
+ * 
+ */
+  (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.larmor);
+
+  /* "quantumc.pyx":318
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor
+ *     B[3] = M_TAU*params.quad             # <<<<<<<<<<<<<<
+ * 
+ *     cdef double complex F[3]
+ */
+  (__pyx_v_B[3]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.quad);
+
+  /* "quantumc.pyx":323
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  *         F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 308, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_half, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 323, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":310
+    /* "quantumc.pyx":325
  *     if spin == 'half':
  *         # compute initial probability
  *         F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
@@ -4078,81 +4285,93 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
     (__pyx_v_F[0]) = __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0.5, 0), __Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[1]))));
 
-    /* "quantumc.pyx":311
+    /* "quantumc.pyx":326
  *         # compute initial probability
  *         F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  *         F[0] += F[0].conjugate()             # <<<<<<<<<<<<<<
  *         F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()
+ *         F[1] += F[1].conjugate()
  */
     __pyx_t_10 = 0;
     (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
 
-    /* "quantumc.pyx":312
+    /* "quantumc.pyx":327
  *         F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  *         F[0] += F[0].conjugate()
  *         F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
- *         F[1] += F[0].conjugate()
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
+ *         F[1] += F[1].conjugate()
+ *         F[2] = 0.5*(state[0]*state[0].conjugate()-state[1]*state[1].conjugate())
  */
     (__pyx_v_F[1]) = __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 0.5), __Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[1]))));
 
-    /* "quantumc.pyx":313
+    /* "quantumc.pyx":328
  *         F[0] += F[0].conjugate()
  *         F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()             # <<<<<<<<<<<<<<
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
+ *         F[1] += F[1].conjugate()             # <<<<<<<<<<<<<<
+ *         F[2] = 0.5*(state[0]*state[0].conjugate()-state[1]*state[1].conjugate())
  *         F_arr[0][0] = F[0].real
  */
     __pyx_t_10 = 1;
-    (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
+    (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[1])));
 
-    /* "quantumc.pyx":314
+    /* "quantumc.pyx":329
  *         F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[1]))             # <<<<<<<<<<<<<<
+ *         F[1] += F[1].conjugate()
+ *         F[2] = 0.5*(state[0]*state[0].conjugate()-state[1]*state[1].conjugate())             # <<<<<<<<<<<<<<
  *         F_arr[0][0] = F[0].real
  *         F_arr[0][1] = F[1].real
  */
-    (__pyx_v_F[2]) = __pyx_t_double_complex_from_parts((0.5 * (__pyx_f_8quantumc_absquare((__pyx_v_state[0])) - __pyx_f_8quantumc_absquare((__pyx_v_state[1])))), 0);
+    (__pyx_v_F[2]) = __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0.5, 0), __Pyx_c_diff_double(__Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[0]))), __Pyx_c_prod_double((__pyx_v_state[1]), __Pyx_c_conj_double((__pyx_v_state[1])))));
 
-    /* "quantumc.pyx":315
- *         F[1] += F[0].conjugate()
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
+    /* "quantumc.pyx":330
+ *         F[1] += F[1].conjugate()
+ *         F[2] = 0.5*(state[0]*state[0].conjugate()-state[1]*state[1].conjugate())
  *         F_arr[0][0] = F[0].real             # <<<<<<<<<<<<<<
  *         F_arr[0][1] = F[1].real
- * 
+ *         F_arr[0][2] = F[1].real
  */
     __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[0]));
     __pyx_t_11 = 0;
     __pyx_t_12 = 0;
     *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_11 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_12 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-    /* "quantumc.pyx":316
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
+    /* "quantumc.pyx":331
+ *         F[2] = 0.5*(state[0]*state[0].conjugate()-state[1]*state[1].conjugate())
  *         F_arr[0][0] = F[0].real
  *         F_arr[0][1] = F[1].real             # <<<<<<<<<<<<<<
+ *         F_arr[0][2] = F[1].real
  * 
- *         # iterate through time using second order expansion
  */
     __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[1]));
     __pyx_t_13 = 0;
     __pyx_t_14 = 1;
     *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_13 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_14 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-    /* "quantumc.pyx":319
+    /* "quantumc.pyx":332
+ *         F_arr[0][0] = F[0].real
+ *         F_arr[0][1] = F[1].real
+ *         F_arr[0][2] = F[1].real             # <<<<<<<<<<<<<<
+ * 
+ *         # iterate through time using second order expansion
+ */
+    __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[1]));
+    __pyx_t_15 = 0;
+    __pyx_t_16 = 2;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_15 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_16 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+
+    /* "quantumc.pyx":335
  * 
  *         # iterate through time using second order expansion
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
  *             # apply half step unitary at current position
  *             unitary22(params.dt, state, B)
  */
-    __pyx_t_15 = __pyx_v_steps;
-    __pyx_t_16 = __pyx_t_15;
-    for (__pyx_t_5 = 1; __pyx_t_5 < __pyx_t_16; __pyx_t_5+=1) {
-      __pyx_v_i = __pyx_t_5;
+    __pyx_t_17 = __pyx_v_steps;
+    __pyx_t_18 = __pyx_t_17;
+    for (__pyx_t_19 = 1; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
+      __pyx_v_i = __pyx_t_19;
 
-      /* "quantumc.pyx":321
+      /* "quantumc.pyx":337
  *         for i in range(1,steps):
  *             # apply half step unitary at current position
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
@@ -4161,35 +4380,35 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
 
-      /* "quantumc.pyx":323
+      /* "quantumc.pyx":339
  *             unitary22(params.dt, state, B)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
- *             getField(t, &params, B)
+ *             fastB(t, &params, B)
  *             # apply half step at destination time
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":324
+      /* "quantumc.pyx":340
  * 
  *             t += 2*params.dt
- *             getField(t, &params, B)             # <<<<<<<<<<<<<<
+ *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
  *             # apply half step at destination time
  *             unitary22(params.dt, state, B)
  */
-      __pyx_f_8quantumc_getField(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
+      __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":326
- *             getField(t, &params, B)
+      /* "quantumc.pyx":342
+ *             fastB(t, &params, B)
  *             # apply half step at destination time
  *             unitary22(params.dt, state, B)             # <<<<<<<<<<<<<<
- * 
  *             #store state and store probability along specified projection
+ *             if i % params.savef == 0:
  */
       __pyx_f_8quantumc_unitary22(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
 
-      /* "quantumc.pyx":329
- * 
+      /* "quantumc.pyx":344
+ *             unitary22(params.dt, state, B)
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][0] = state[0]
@@ -4197,12 +4416,12 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
       if (unlikely(__pyx_v_params.savef == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 329, __pyx_L1_error)
+        __PYX_ERR(0, 344, __pyx_L1_error)
       }
-      __pyx_t_3 = ((__Pyx_mod_int(__pyx_v_i, __pyx_v_params.savef) == 0) != 0);
+      __pyx_t_3 = (((__pyx_v_i % __pyx_v_params.savef) == 0) != 0);
       if (__pyx_t_3) {
 
-        /* "quantumc.pyx":330
+        /* "quantumc.pyx":345
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]             # <<<<<<<<<<<<<<
@@ -4211,17 +4430,13 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 330, __pyx_L1_error)
+          __PYX_ERR(0, 345, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 330, __pyx_L1_error)
-        }
-        __pyx_t_17 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_18 = 0;
-        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_17 * __pyx_v_states.strides[0]) ) + __pyx_t_18 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
+        __pyx_t_20 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_21 = 0;
+        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_20 * __pyx_v_states.strides[0]) ) + __pyx_t_21 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
 
-        /* "quantumc.pyx":331
+        /* "quantumc.pyx":346
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]             # <<<<<<<<<<<<<<
@@ -4230,17 +4445,13 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 331, __pyx_L1_error)
+          __PYX_ERR(0, 346, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 331, __pyx_L1_error)
-        }
-        __pyx_t_19 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_20 = 1;
-        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_19 * __pyx_v_states.strides[0]) ) + __pyx_t_20 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
+        __pyx_t_22 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_23 = 1;
+        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_22 * __pyx_v_states.strides[0]) ) + __pyx_t_23 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
 
-        /* "quantumc.pyx":333
+        /* "quantumc.pyx":348
  *                 states[i/params.savef][1] = state[1]
  * 
  *                 F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
@@ -4249,7 +4460,7 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         (__pyx_v_F[0]) = __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0.5, 0), __Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[1]))));
 
-        /* "quantumc.pyx":334
+        /* "quantumc.pyx":349
  * 
  *                 F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  *                 F[1] = F[0]*1j             # <<<<<<<<<<<<<<
@@ -4258,86 +4469,94 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         (__pyx_v_F[1]) = __Pyx_c_prod_double((__pyx_v_F[0]), __pyx_t_double_complex_from_parts(0, 1.0));
 
-        /* "quantumc.pyx":335
+        /* "quantumc.pyx":350
  *                 F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  *                 F[1] = F[0]*1j
  *                 F[0] += F[0].conjugate()             # <<<<<<<<<<<<<<
  *                 F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()
+ *                 F[1] += F[1].conjugate()
  */
         __pyx_t_10 = 0;
         (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
 
-        /* "quantumc.pyx":336
+        /* "quantumc.pyx":351
  *                 F[1] = F[0]*1j
  *                 F[0] += F[0].conjugate()
  *                 F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
- *                 F[1] += F[0].conjugate()
+ *                 F[1] += F[1].conjugate()
  *                 F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
  */
         (__pyx_v_F[1]) = __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 0.5), __Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[1]))));
 
-        /* "quantumc.pyx":337
+        /* "quantumc.pyx":352
  *                 F[0] += F[0].conjugate()
  *                 F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()             # <<<<<<<<<<<<<<
+ *                 F[1] += F[1].conjugate()             # <<<<<<<<<<<<<<
  *                 F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
  * 
  */
         __pyx_t_10 = 1;
-        (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
+        (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[1])));
 
-        /* "quantumc.pyx":338
+        /* "quantumc.pyx":353
  *                 F[1] = 0.5j*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()
+ *                 F[1] += F[1].conjugate()
  *                 F[2] = 0.5*(absquare(state[0])-absquare(state[1]))             # <<<<<<<<<<<<<<
  * 
  *                 F_arr[i/params.savef][0] = F[0].real
  */
         (__pyx_v_F[2]) = __pyx_t_double_complex_from_parts((0.5 * (__pyx_f_8quantumc_absquare((__pyx_v_state[0])) - __pyx_f_8quantumc_absquare((__pyx_v_state[1])))), 0);
 
-        /* "quantumc.pyx":340
+        /* "quantumc.pyx":355
  *                 F[2] = 0.5*(absquare(state[0])-absquare(state[1]))
  * 
  *                 F_arr[i/params.savef][0] = F[0].real             # <<<<<<<<<<<<<<
  *                 F_arr[i/params.savef][1] = F[1].real
- * 
+ *                 F_arr[i/params.savef][2] = F[2].real
  */
         __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[0]));
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 340, __pyx_L1_error)
+          __PYX_ERR(0, 355, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 340, __pyx_L1_error)
-        }
-        __pyx_t_21 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_22 = 0;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_21 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_22 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+        __pyx_t_24 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_25 = 0;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_24 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_25 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-        /* "quantumc.pyx":341
+        /* "quantumc.pyx":356
  * 
  *                 F_arr[i/params.savef][0] = F[0].real
  *                 F_arr[i/params.savef][1] = F[1].real             # <<<<<<<<<<<<<<
+ *                 F_arr[i/params.savef][2] = F[2].real
  * 
- *     elif spin == 'one':
  */
         __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[1]));
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 341, __pyx_L1_error)
+          __PYX_ERR(0, 356, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 341, __pyx_L1_error)
-        }
-        __pyx_t_23 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_24 = 1;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_23 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_24 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+        __pyx_t_26 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_27 = 1;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_26 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_27 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-        /* "quantumc.pyx":329
+        /* "quantumc.pyx":357
+ *                 F_arr[i/params.savef][0] = F[0].real
+ *                 F_arr[i/params.savef][1] = F[1].real
+ *                 F_arr[i/params.savef][2] = F[2].real             # <<<<<<<<<<<<<<
  * 
+ *     elif spin == 'one':
+ */
+        __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[2]));
+        if (unlikely(__pyx_v_params.savef == 0)) {
+          PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+          __PYX_ERR(0, 357, __pyx_L1_error)
+        }
+        __pyx_t_28 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_29 = 2;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_28 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_29 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+
+        /* "quantumc.pyx":344
+ *             unitary22(params.dt, state, B)
  *             #store state and store probability along specified projection
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][0] = state[0]
@@ -4346,86 +4565,86 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "quantumc.pyx":308
- *     cdef double t = params.tstart
+    /* "quantumc.pyx":323
+ *     cdef double complex U[3][3] #unitary operator for spin 1
  * 
  *     if spin == 'half':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  *         F[0] = 0.5*(state[0]*state[1].conjugate()) #0.5(a.b*+b.a*)
  */
-    goto __pyx_L6;
+    goto __pyx_L7;
   }
 
-  /* "quantumc.pyx":343
- *                 F_arr[i/params.savef][1] = F[1].real
+  /* "quantumc.pyx":359
+ *                 F_arr[i/params.savef][2] = F[2].real
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  * 
  */
-  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 343, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_spin, __pyx_n_s_one, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 359, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "quantumc.pyx":346
+    /* "quantumc.pyx":362
  *         # compute initial probability
  * 
- *         F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
+ *         F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
  *         F[0] += F[0].conjugate()
- *         F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *         F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
  */
-    (__pyx_v_F[0]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0.5, 0), __Pyx_c_conj_double((__pyx_v_state[1]))), __Pyx_c_sum_double((__pyx_v_state[0]), (__pyx_v_state[2])));
+    (__pyx_v_F[0]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0), __Pyx_c_conj_double((__pyx_v_state[1]))), __Pyx_c_sum_double((__pyx_v_state[0]), (__pyx_v_state[2])));
 
-    /* "quantumc.pyx":347
+    /* "quantumc.pyx":363
  * 
- *         F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
+ *         F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
  *         F[0] += F[0].conjugate()             # <<<<<<<<<<<<<<
- *         F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()
+ *         F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *         F[1] += F[1].conjugate()
  */
     __pyx_t_10 = 0;
     (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
 
-    /* "quantumc.pyx":348
- *         F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
+    /* "quantumc.pyx":364
+ *         F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
  *         F[0] += F[0].conjugate()
- *         F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
- *         F[1] += F[0].conjugate()
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+ *         F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
+ *         F[1] += F[1].conjugate()
+ *         F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  */
-    (__pyx_v_F[1]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 0.5), __Pyx_c_diff_double((__pyx_v_state[0]), (__pyx_v_state[2]))), __Pyx_c_conj_double((__pyx_v_state[1])));
+    (__pyx_v_F[1]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0), __pyx_t_double_complex_from_parts(0, 1.0)), __Pyx_c_diff_double((__pyx_v_state[0]), (__pyx_v_state[2]))), __Pyx_c_conj_double((__pyx_v_state[1])));
 
-    /* "quantumc.pyx":349
+    /* "quantumc.pyx":365
  *         F[0] += F[0].conjugate()
- *         F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()             # <<<<<<<<<<<<<<
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+ *         F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *         F[1] += F[1].conjugate()             # <<<<<<<<<<<<<<
+ *         F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  * 
  */
     __pyx_t_10 = 1;
-    (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
+    (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[1])));
 
-    /* "quantumc.pyx":350
- *         F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *         F[1] += F[0].conjugate()
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[2]))             # <<<<<<<<<<<<<<
+    /* "quantumc.pyx":366
+ *         F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *         F[1] += F[1].conjugate()
+ *         F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()             # <<<<<<<<<<<<<<
  * 
  *         F_arr[0][0] = F[0].real
  */
-    (__pyx_v_F[2]) = __pyx_t_double_complex_from_parts((0.5 * (__pyx_f_8quantumc_absquare((__pyx_v_state[0])) - __pyx_f_8quantumc_absquare((__pyx_v_state[2])))), 0);
+    (__pyx_v_F[2]) = __Pyx_c_diff_double(__Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[0]))), __Pyx_c_prod_double((__pyx_v_state[2]), __Pyx_c_conj_double((__pyx_v_state[2]))));
 
-    /* "quantumc.pyx":352
- *         F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+    /* "quantumc.pyx":368
+ *         F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  * 
  *         F_arr[0][0] = F[0].real             # <<<<<<<<<<<<<<
  *         F_arr[0][1] = F[1].real
  *         F_arr[0][2] = F[2].real
  */
     __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[0]));
-    __pyx_t_25 = 0;
-    __pyx_t_26 = 0;
-    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_25 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_26 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+    __pyx_t_30 = 0;
+    __pyx_t_31 = 0;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_30 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_31 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-    /* "quantumc.pyx":353
+    /* "quantumc.pyx":369
  * 
  *         F_arr[0][0] = F[0].real
  *         F_arr[0][1] = F[1].real             # <<<<<<<<<<<<<<
@@ -4433,11 +4652,11 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  * 
  */
     __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[1]));
-    __pyx_t_27 = 0;
-    __pyx_t_28 = 1;
-    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_27 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_28 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+    __pyx_t_32 = 0;
+    __pyx_t_33 = 1;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_32 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_33 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-    /* "quantumc.pyx":354
+    /* "quantumc.pyx":370
  *         F_arr[0][0] = F[0].real
  *         F_arr[0][1] = F[1].real
  *         F_arr[0][2] = F[2].real             # <<<<<<<<<<<<<<
@@ -4445,74 +4664,92 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  *         # iterate through time using second order expansion
  */
     __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[2]));
-    __pyx_t_29 = 0;
-    __pyx_t_30 = 2;
-    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_29 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_30 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+    __pyx_t_34 = 0;
+    __pyx_t_35 = 2;
+    *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_34 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_35 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-    /* "quantumc.pyx":357
+    /* "quantumc.pyx":373
  * 
  *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *         for i in range(1,steps):
+ *             # apply half step unitary at current position
+ */
+    __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
+
+    /* "quantumc.pyx":374
+ *         # iterate through time using second order expansion
+ *         unitary33(params.dt, B, U)
  *         for i in range(1,steps):             # <<<<<<<<<<<<<<
  *             # apply half step unitary at current position
- *             #unitary33(params.dt, state, B)
+ *             updateState33(state, U)
  */
-    __pyx_t_15 = __pyx_v_steps;
-    __pyx_t_16 = __pyx_t_15;
-    for (__pyx_t_5 = 1; __pyx_t_5 < __pyx_t_16; __pyx_t_5+=1) {
-      __pyx_v_i = __pyx_t_5;
+    __pyx_t_17 = __pyx_v_steps;
+    __pyx_t_18 = __pyx_t_17;
+    for (__pyx_t_19 = 1; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
+      __pyx_v_i = __pyx_t_19;
 
-      /* "quantumc.pyx":360
+      /* "quantumc.pyx":376
+ *         for i in range(1,steps):
  *             # apply half step unitary at current position
- *             #unitary33(params.dt, state, B)
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
+ *             #unitary33(time[i], &params, state, state)
  * 
- *             t += 2*params.dt
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
 
-      /* "quantumc.pyx":362
- *             unitary33(params.dt, state, B)
+      /* "quantumc.pyx":379
+ *             #unitary33(time[i], &params, state, state)
  * 
  *             t += 2*params.dt             # <<<<<<<<<<<<<<
- *             getField(t, &params, B)
- *             # apply half step at destination time
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)
  */
       __pyx_v_t = (__pyx_v_t + (2.0 * __pyx_v_params.dt));
 
-      /* "quantumc.pyx":363
+      /* "quantumc.pyx":380
  * 
  *             t += 2*params.dt
- *             getField(t, &params, B)             # <<<<<<<<<<<<<<
- *             # apply half step at destination time
- *             unitary33(params.dt, state, B)
+ *             fastB(t, &params, B)             # <<<<<<<<<<<<<<
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)
  */
-      __pyx_f_8quantumc_getField(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
+      __pyx_f_8quantumc_fastB(__pyx_v_t, (&__pyx_v_params), __pyx_v_B);
 
-      /* "quantumc.pyx":365
- *             getField(t, &params, B)
- *             # apply half step at destination time
- *             unitary33(params.dt, state, B)             # <<<<<<<<<<<<<<
- * 
- *             #store state and store probability along specified projection
+      /* "quantumc.pyx":381
+ *             t += 2*params.dt
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)             # <<<<<<<<<<<<<<
+ *             updateState33(state, U)
+ *             #print('state', state[0], state[1], state[2])
  */
-      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_state, __pyx_v_B);
+      __pyx_f_8quantumc_unitary33(__pyx_v_params.dt, __pyx_v_B, __pyx_v_U);
 
-      /* "quantumc.pyx":368
+      /* "quantumc.pyx":382
+ *             fastB(t, &params, B)
+ *             unitary33(params.dt, B, U)
+ *             updateState33(state, U)             # <<<<<<<<<<<<<<
+ *             #print('state', state[0], state[1], state[2])
  * 
- *             #store state and store probability along specified projection
+ */
+      __pyx_f_8quantumc_updateState33(__pyx_v_state, __pyx_v_U);
+
+      /* "quantumc.pyx":386
+ * 
+ * 
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]
  */
       if (unlikely(__pyx_v_params.savef == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 368, __pyx_L1_error)
+        __PYX_ERR(0, 386, __pyx_L1_error)
       }
-      __pyx_t_3 = ((__Pyx_mod_int(__pyx_v_i, __pyx_v_params.savef) == 0) != 0);
+      __pyx_t_3 = (((__pyx_v_i % __pyx_v_params.savef) == 0) != 0);
       if (__pyx_t_3) {
 
-        /* "quantumc.pyx":369
- *             #store state and store probability along specified projection
+        /* "quantumc.pyx":387
+ * 
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][1] = state[1]
@@ -4520,17 +4757,13 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 369, __pyx_L1_error)
+          __PYX_ERR(0, 387, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 369, __pyx_L1_error)
-        }
-        __pyx_t_31 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_32 = 0;
-        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_31 * __pyx_v_states.strides[0]) ) + __pyx_t_32 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
+        __pyx_t_36 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_37 = 0;
+        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_36 * __pyx_v_states.strides[0]) ) + __pyx_t_37 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[0]);
 
-        /* "quantumc.pyx":370
+        /* "quantumc.pyx":388
  *             if i % params.savef == 0:
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]             # <<<<<<<<<<<<<<
@@ -4539,84 +4772,76 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 370, __pyx_L1_error)
+          __PYX_ERR(0, 388, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 370, __pyx_L1_error)
-        }
-        __pyx_t_33 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_34 = 1;
-        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_33 * __pyx_v_states.strides[0]) ) + __pyx_t_34 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
+        __pyx_t_38 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_39 = 1;
+        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_38 * __pyx_v_states.strides[0]) ) + __pyx_t_39 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[1]);
 
-        /* "quantumc.pyx":371
+        /* "quantumc.pyx":389
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]
  *                 states[i/params.savef][2] = state[2]             # <<<<<<<<<<<<<<
  * 
- *                 F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
+ *                 F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
  */
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 371, __pyx_L1_error)
+          __PYX_ERR(0, 389, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 371, __pyx_L1_error)
-        }
-        __pyx_t_35 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_36 = 2;
-        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_35 * __pyx_v_states.strides[0]) ) + __pyx_t_36 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[2]);
+        __pyx_t_40 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_41 = 2;
+        *((__pyx_t_double_complex *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_states.data + __pyx_t_40 * __pyx_v_states.strides[0]) ) + __pyx_t_41 * __pyx_v_states.strides[1]) )) = (__pyx_v_state[2]);
 
-        /* "quantumc.pyx":373
+        /* "quantumc.pyx":391
  *                 states[i/params.savef][2] = state[2]
  * 
- *                 F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
+ *                 F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
  *                 F[0] += F[0].conjugate()
- *                 F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *                 F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
  */
-        (__pyx_v_F[0]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0.5, 0), __Pyx_c_conj_double((__pyx_v_state[1]))), __Pyx_c_sum_double((__pyx_v_state[0]), (__pyx_v_state[2])));
+        (__pyx_v_F[0]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0), __Pyx_c_conj_double((__pyx_v_state[1]))), __Pyx_c_sum_double((__pyx_v_state[0]), (__pyx_v_state[2])));
 
-        /* "quantumc.pyx":374
+        /* "quantumc.pyx":392
  * 
- *                 F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
+ *                 F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
  *                 F[0] += F[0].conjugate()             # <<<<<<<<<<<<<<
- *                 F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()
+ *                 F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *                 F[1] += F[1].conjugate()
  */
         __pyx_t_10 = 0;
         (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
 
-        /* "quantumc.pyx":375
- *                 F[0] = 0.5*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
+        /* "quantumc.pyx":393
+ *                 F[0] = invsqrt2*state[1].conjugate()*(state[0]+state[2]) #0.5(a.b*+b.a*)
  *                 F[0] += F[0].conjugate()
- *                 F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
- *                 F[1] += F[0].conjugate()
- *                 F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+ *                 F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)             # <<<<<<<<<<<<<<
+ *                 F[1] += F[1].conjugate()
+ *                 F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  */
-        (__pyx_v_F[1]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 0.5), __Pyx_c_diff_double((__pyx_v_state[0]), (__pyx_v_state[2]))), __Pyx_c_conj_double((__pyx_v_state[1])));
+        (__pyx_v_F[1]) = __Pyx_c_prod_double(__Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0), __pyx_t_double_complex_from_parts(0, 1.0)), __Pyx_c_diff_double((__pyx_v_state[0]), (__pyx_v_state[2]))), __Pyx_c_conj_double((__pyx_v_state[1])));
 
-        /* "quantumc.pyx":376
+        /* "quantumc.pyx":394
  *                 F[0] += F[0].conjugate()
- *                 F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()             # <<<<<<<<<<<<<<
- *                 F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+ *                 F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *                 F[1] += F[1].conjugate()             # <<<<<<<<<<<<<<
+ *                 F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  * 
  */
         __pyx_t_10 = 1;
-        (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[0])));
+        (__pyx_v_F[__pyx_t_10]) = __Pyx_c_sum_double((__pyx_v_F[__pyx_t_10]), __Pyx_c_conj_double((__pyx_v_F[1])));
 
-        /* "quantumc.pyx":377
- *                 F[1] = 0.5j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
- *                 F[1] += F[0].conjugate()
- *                 F[2] = 0.5*(absquare(state[0])-absquare(state[2]))             # <<<<<<<<<<<<<<
+        /* "quantumc.pyx":395
+ *                 F[1] = invsqrt2*1j*(state[0]-state[2])*state[1].conjugate() #0.5(a.b*+b.a*)
+ *                 F[1] += F[1].conjugate()
+ *                 F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()             # <<<<<<<<<<<<<<
  * 
  *                 F_arr[i/params.savef][0] = F[0].real
  */
-        (__pyx_v_F[2]) = __pyx_t_double_complex_from_parts((0.5 * (__pyx_f_8quantumc_absquare((__pyx_v_state[0])) - __pyx_f_8quantumc_absquare((__pyx_v_state[2])))), 0);
+        (__pyx_v_F[2]) = __Pyx_c_diff_double(__Pyx_c_prod_double((__pyx_v_state[0]), __Pyx_c_conj_double((__pyx_v_state[0]))), __Pyx_c_prod_double((__pyx_v_state[2]), __Pyx_c_conj_double((__pyx_v_state[2]))));
 
-        /* "quantumc.pyx":379
- *                 F[2] = 0.5*(absquare(state[0])-absquare(state[2]))
+        /* "quantumc.pyx":397
+ *                 F[2] = state[0]*state[0].conjugate()-state[2]*state[2].conjugate()
  * 
  *                 F_arr[i/params.savef][0] = F[0].real             # <<<<<<<<<<<<<<
  *                 F_arr[i/params.savef][1] = F[1].real
@@ -4625,17 +4850,13 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[0]));
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 379, __pyx_L1_error)
+          __PYX_ERR(0, 397, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 379, __pyx_L1_error)
-        }
-        __pyx_t_37 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_38 = 0;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_37 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_38 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+        __pyx_t_42 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_43 = 0;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_42 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_43 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-        /* "quantumc.pyx":380
+        /* "quantumc.pyx":398
  * 
  *                 F_arr[i/params.savef][0] = F[0].real
  *                 F_arr[i/params.savef][1] = F[1].real             # <<<<<<<<<<<<<<
@@ -4645,39 +4866,31 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
         __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[1]));
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 380, __pyx_L1_error)
+          __PYX_ERR(0, 398, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 380, __pyx_L1_error)
-        }
-        __pyx_t_39 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_40 = 1;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_39 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_40 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+        __pyx_t_44 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_45 = 1;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_44 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_45 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-        /* "quantumc.pyx":381
+        /* "quantumc.pyx":399
  *                 F_arr[i/params.savef][0] = F[0].real
  *                 F_arr[i/params.savef][1] = F[1].real
  *                 F_arr[i/params.savef][2] = F[2].real             # <<<<<<<<<<<<<<
  * 
- * 
+ *                 #print('F',F[0],F[1],F[2])
  */
         __pyx_t_4 = __Pyx_CREAL((__pyx_v_F[2]));
         if (unlikely(__pyx_v_params.savef == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 381, __pyx_L1_error)
+          __PYX_ERR(0, 399, __pyx_L1_error)
         }
-        else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_params.savef == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_i))) {
-          PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-          __PYX_ERR(0, 381, __pyx_L1_error)
-        }
-        __pyx_t_41 = __Pyx_div_int(__pyx_v_i, __pyx_v_params.savef);
-        __pyx_t_42 = 2;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_41 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_42 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
+        __pyx_t_46 = (__pyx_v_i / __pyx_v_params.savef);
+        __pyx_t_47 = 2;
+        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_F_arr.data + __pyx_t_46 * __pyx_v_F_arr.strides[0]) ) + __pyx_t_47 * __pyx_v_F_arr.strides[1]) )) = __pyx_t_4;
 
-        /* "quantumc.pyx":368
+        /* "quantumc.pyx":386
  * 
- *             #store state and store probability along specified projection
+ * 
  *             if i % params.savef == 0:             # <<<<<<<<<<<<<<
  *                 states[i/params.savef][0] = state[0]
  *                 states[i/params.savef][1] = state[1]
@@ -4685,20 +4898,20 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
       }
     }
 
-    /* "quantumc.pyx":343
- *                 F_arr[i/params.savef][1] = F[1].real
+    /* "quantumc.pyx":359
+ *                 F_arr[i/params.savef][2] = F[2].real
  * 
  *     elif spin == 'one':             # <<<<<<<<<<<<<<
  *         # compute initial probability
  * 
  */
   }
-  __pyx_L6:;
+  __pyx_L7:;
 
-  /* "quantumc.pyx":265
+  /* "quantumc.pyx":269
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
- * def n_propagate_F(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
+ * def n_propagateF(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
@@ -4708,7 +4921,7 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("quantumc.n_propagate_F", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("quantumc.n_propagateF", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_mytime);
@@ -4719,7 +4932,7 @@ static PyObject *__pyx_pf_8quantumc_4n_propagate_F(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "quantumc.pyx":391
+/* "quantumc.pyx":408
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * @cython.cdivision(True)
  * cdef inline void unitary22(double dt, double complex state[2], double B[3]):             # <<<<<<<<<<<<<<
@@ -4748,7 +4961,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
   int __pyx_t_2;
   __Pyx_RefNannySetupContext("unitary22", 0);
 
-  /* "quantumc.pyx":399
+  /* "quantumc.pyx":416
  * 
  *     #Multiply by time incremement to get unitary evolver
  *     x = B[0]*dt             # <<<<<<<<<<<<<<
@@ -4757,7 +4970,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_x = ((__pyx_v_B[0]) * __pyx_v_dt);
 
-  /* "quantumc.pyx":400
+  /* "quantumc.pyx":417
  *     #Multiply by time incremement to get unitary evolver
  *     x = B[0]*dt
  *     y = B[1]*dt             # <<<<<<<<<<<<<<
@@ -4766,16 +4979,16 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_y = ((__pyx_v_B[1]) * __pyx_v_dt);
 
-  /* "quantumc.pyx":401
+  /* "quantumc.pyx":418
  *     x = B[0]*dt
  *     y = B[1]*dt
  *     z = B[2]*dt*0.5             # <<<<<<<<<<<<<<
  * 
- *     ###print(np.asarray(B))
+ *     ####print(np.asarray(B))
  */
   __pyx_v_z = (((__pyx_v_B[2]) * __pyx_v_dt) * 0.5);
 
-  /* "quantumc.pyx":406
+  /* "quantumc.pyx":423
  * 
  *     # can't handle a==b==0 with cdivision activated
  *     if abs(x) < 1e-100 and abs(y) < 1e-100:             # <<<<<<<<<<<<<<
@@ -4793,7 +5006,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "quantumc.pyx":407
+    /* "quantumc.pyx":424
  *     # can't handle a==b==0 with cdivision activated
  *     if abs(x) < 1e-100 and abs(y) < 1e-100:
  *         x = 1e-100             # <<<<<<<<<<<<<<
@@ -4802,7 +5015,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
     __pyx_v_x = 1e-100;
 
-    /* "quantumc.pyx":406
+    /* "quantumc.pyx":423
  * 
  *     # can't handle a==b==0 with cdivision activated
  *     if abs(x) < 1e-100 and abs(y) < 1e-100:             # <<<<<<<<<<<<<<
@@ -4811,7 +5024,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   }
 
-  /* "quantumc.pyx":410
+  /* "quantumc.pyx":427
  * 
  *     # compute energy
  *     E = sqrt(x*x+y*y+z*z)             # <<<<<<<<<<<<<<
@@ -4820,7 +5033,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_E = sqrt((((__pyx_v_x * __pyx_v_x) + (__pyx_v_y * __pyx_v_y)) + (__pyx_v_z * __pyx_v_z)));
 
-  /* "quantumc.pyx":413
+  /* "quantumc.pyx":430
  * 
  *     # compute eigenvalue while still local (definitely don't want trig functions to wait on L3)
  *     c = cos(E)             # <<<<<<<<<<<<<<
@@ -4829,7 +5042,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_c = cos(__pyx_v_E);
 
-  /* "quantumc.pyx":414
+  /* "quantumc.pyx":431
  *     # compute eigenvalue while still local (definitely don't want trig functions to wait on L3)
  *     c = cos(E)
  *     s = sin(E)             # <<<<<<<<<<<<<<
@@ -4838,7 +5051,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_s = sin(__pyx_v_E);
 
-  /* "quantumc.pyx":415
+  /* "quantumc.pyx":432
  *     c = cos(E)
  *     s = sin(E)
  *     phase = c + 1j*s             # <<<<<<<<<<<<<<
@@ -4847,7 +5060,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_phase = __Pyx_c_sum_double(__pyx_t_double_complex_from_parts(__pyx_v_c, 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(__pyx_v_s, 0)));
 
-  /* "quantumc.pyx":419
+  /* "quantumc.pyx":436
  * 
  *     # compute unnormalised eigenvectors (force casting after some strange assignment glitch)
  *     U11 = <complex>(z - E)             # <<<<<<<<<<<<<<
@@ -4856,7 +5069,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_U11 = __pyx_t_double_complex_from_parts(((double)(__pyx_v_z - __pyx_v_E)), 0);
 
-  /* "quantumc.pyx":420
+  /* "quantumc.pyx":437
  *     # compute unnormalised eigenvectors (force casting after some strange assignment glitch)
  *     U11 = <complex>(z - E)
  *     U12 = <complex>(z + E)             # <<<<<<<<<<<<<<
@@ -4865,7 +5078,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_U12 = __pyx_t_double_complex_from_parts(((double)(__pyx_v_z + __pyx_v_E)), 0);
 
-  /* "quantumc.pyx":421
+  /* "quantumc.pyx":438
  *     U11 = <complex>(z - E)
  *     U12 = <complex>(z + E)
  *     U21 = (x + 1j * y)             # <<<<<<<<<<<<<<
@@ -4874,7 +5087,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_U21 = __Pyx_c_sum_double(__pyx_t_double_complex_from_parts(__pyx_v_x, 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(__pyx_v_y, 0)));
 
-  /* "quantumc.pyx":422
+  /* "quantumc.pyx":439
  *     U12 = <complex>(z + E)
  *     U21 = (x + 1j * y)
  *     U22 = U21             # <<<<<<<<<<<<<<
@@ -4883,7 +5096,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_U22 = __pyx_v_U21;
 
-  /* "quantumc.pyx":425
+  /* "quantumc.pyx":442
  * 
  *     # compute unitary by applying decomposition to state piecewise
  *     psi_down = U11.conjugate()*state[0] + U21.conjugate()*state[1]             # <<<<<<<<<<<<<<
@@ -4892,7 +5105,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_psi_down = __Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double(__pyx_v_U11), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double(__pyx_v_U21), (__pyx_v_state[1])));
 
-  /* "quantumc.pyx":426
+  /* "quantumc.pyx":443
  *     # compute unitary by applying decomposition to state piecewise
  *     psi_down = U11.conjugate()*state[0] + U21.conjugate()*state[1]
  *     psi_up = U12.conjugate()*state[0] + U22.conjugate()*state[1]             # <<<<<<<<<<<<<<
@@ -4901,7 +5114,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_psi_up = __Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double(__pyx_v_U12), (__pyx_v_state[0])), __Pyx_c_prod_double(__Pyx_c_conj_double(__pyx_v_U22), (__pyx_v_state[1])));
 
-  /* "quantumc.pyx":429
+  /* "quantumc.pyx":446
  * 
  *     # apply phase factor
  *     psi_down *= phase             # <<<<<<<<<<<<<<
@@ -4910,7 +5123,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_psi_down = __Pyx_c_prod_double(__pyx_v_psi_down, __pyx_v_phase);
 
-  /* "quantumc.pyx":430
+  /* "quantumc.pyx":447
  *     # apply phase factor
  *     psi_down *= phase
  *     psi_up *= phase.conjugate()             # <<<<<<<<<<<<<<
@@ -4919,7 +5132,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_psi_up = __Pyx_c_prod_double(__pyx_v_psi_up, __Pyx_c_conj_double(__pyx_v_phase));
 
-  /* "quantumc.pyx":433
+  /* "quantumc.pyx":450
  * 
  *     # compute squared normalisation
  *     norma = absquare(U11) + absquare(U21)             # <<<<<<<<<<<<<<
@@ -4928,7 +5141,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_norma = (__pyx_f_8quantumc_absquare(__pyx_v_U11) + __pyx_f_8quantumc_absquare(__pyx_v_U21));
 
-  /* "quantumc.pyx":434
+  /* "quantumc.pyx":451
  *     # compute squared normalisation
  *     norma = absquare(U11) + absquare(U21)
  *     normb = absquare(U12) + absquare(U22)             # <<<<<<<<<<<<<<
@@ -4937,7 +5150,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   __pyx_v_normb = (__pyx_f_8quantumc_absquare(__pyx_v_U12) + __pyx_f_8quantumc_absquare(__pyx_v_U22));
 
-  /* "quantumc.pyx":437
+  /* "quantumc.pyx":454
  * 
  *     # apply final eigenvector and save to output state memory location
  *     state[0] = U11*psi_down/norma + U12*psi_up/normb             # <<<<<<<<<<<<<<
@@ -4946,7 +5159,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   (__pyx_v_state[0]) = __Pyx_c_sum_double(__Pyx_c_quot_double(__Pyx_c_prod_double(__pyx_v_U11, __pyx_v_psi_down), __pyx_t_double_complex_from_parts(__pyx_v_norma, 0)), __Pyx_c_quot_double(__Pyx_c_prod_double(__pyx_v_U12, __pyx_v_psi_up), __pyx_t_double_complex_from_parts(__pyx_v_normb, 0)));
 
-  /* "quantumc.pyx":438
+  /* "quantumc.pyx":455
  *     # apply final eigenvector and save to output state memory location
  *     state[0] = U11*psi_down/norma + U12*psi_up/normb
  *     state[1] = U21*psi_down/norma + U22*psi_up/normb             # <<<<<<<<<<<<<<
@@ -4955,7 +5168,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
  */
   (__pyx_v_state[1]) = __Pyx_c_sum_double(__Pyx_c_quot_double(__Pyx_c_prod_double(__pyx_v_U21, __pyx_v_psi_down), __pyx_t_double_complex_from_parts(__pyx_v_norma, 0)), __Pyx_c_quot_double(__Pyx_c_prod_double(__pyx_v_U22, __pyx_v_psi_up), __pyx_t_double_complex_from_parts(__pyx_v_normb, 0)));
 
-  /* "quantumc.pyx":391
+  /* "quantumc.pyx":408
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * @cython.cdivision(True)
  * cdef inline void unitary22(double dt, double complex state[2], double B[3]):             # <<<<<<<<<<<<<<
@@ -4967,51 +5180,638 @@ static CYTHON_INLINE void __pyx_f_8quantumc_unitary22(double __pyx_v_dt, __pyx_t
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":444
- * @cython.wraparound(False)  # deactivate index wraparound check
+/* "quantumc.pyx":462
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * cdef void unitary33(double dt, double complex state[3], double B[4]):             # <<<<<<<<<<<<<<
- *     #3x3 hermitian matrix is stored as 6 entries
- *     #H[i] -> H[i][i] for i =0,1,2, H[3]->H[0][1], H[4]->H[0][2], H[5]->H[1][2]
+ * @cython.cdivision(True)
+ * cdef void unitary33(double dt, double B[4], double complex U[3][3]):             # <<<<<<<<<<<<<<
+ *  #based on the algorithm dsyevh3
+ * # ----------------------------------------------------------------------------
  */
 
-static void __pyx_f_8quantumc_unitary33(double __pyx_v_dt, __pyx_t_double_complex *__pyx_v_state, double *__pyx_v_B) {
-  double __pyx_v_Eval[3];
-  __pyx_t_double_complex __pyx_v_Evec[3][3];
+static void __pyx_f_8quantumc_unitary33(double __pyx_v_dt, double *__pyx_v_B, __pyx_t_double_complex (*__pyx_v_U)[3]) {
+  double __pyx_v_w[3];
+  __pyx_t_double_complex __pyx_v_Q[3][3];
+  double __pyx_v_norm;
+  double __pyx_v_error;
+  double __pyx_v_t;
+  double __pyx_v_u;
+  int __pyx_v_j;
+  __pyx_t_double_complex __pyx_v_H0;
+  __pyx_t_double_complex __pyx_v_H1;
+  double __pyx_v_B2x;
+  double __pyx_v_B2y;
+  __pyx_t_double_complex __pyx_v_e[3];
   __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  int __pyx_t_2;
+  long __pyx_t_3;
   __Pyx_RefNannySetupContext("unitary33", 0);
 
-  /* "quantumc.pyx":461
- *     ####print(str(Bx) + ' ' + str(By) + ' ' + str(Bz))
- * 
- *     esys33(B, Eval, Evec)             # <<<<<<<<<<<<<<
- *     #print('ES')
- *     #print(np.asarray(Eval))
+  /* "quantumc.pyx":495
+ *   # Calculate eigenvalues
+ *     ####print(B[0],B[1],B[2])
+ *     eval33(B, w)             # <<<<<<<<<<<<<<
+ *     ####print(w[0],w[1],w[2])
+ *     #Calculates maximum eigenvalue and sets error bound
  */
-  __pyx_f_8quantumc_esys33(__pyx_v_B, __pyx_v_Eval, __pyx_v_Evec);
+  __pyx_f_8quantumc_eval33(__pyx_v_B, __pyx_v_w);
 
-  /* "quantumc.pyx":474
+  /* "quantumc.pyx":499
+ *     #Calculates maximum eigenvalue and sets error bound
  * 
- *     #calculate unitary matrix
- *     updateState33(dt, state, Eval, Evec)             # <<<<<<<<<<<<<<
- *     '''cdef double nm = sqrt(absquare(state[0]) + absquare(state[1]) + absquare(state[2]))
- *     state[0] /= nm
+ *     t = abs(w[0])             # <<<<<<<<<<<<<<
+ *     u = abs(w[1])
+ *     if (u > t):
  */
-  __pyx_f_8quantumc_updateState33(__pyx_v_dt, __pyx_v_state, __pyx_v_Eval, __pyx_v_Evec);
+  __pyx_v_t = fabs((__pyx_v_w[0]));
 
-  /* "quantumc.pyx":444
- * @cython.wraparound(False)  # deactivate index wraparound check
+  /* "quantumc.pyx":500
+ * 
+ *     t = abs(w[0])
+ *     u = abs(w[1])             # <<<<<<<<<<<<<<
+ *     if (u > t):
+ *         t = u
+ */
+  __pyx_v_u = fabs((__pyx_v_w[1]));
+
+  /* "quantumc.pyx":501
+ *     t = abs(w[0])
+ *     u = abs(w[1])
+ *     if (u > t):             # <<<<<<<<<<<<<<
+ *         t = u
+ *     u = abs(w[2])
+ */
+  __pyx_t_1 = ((__pyx_v_u > __pyx_v_t) != 0);
+  if (__pyx_t_1) {
+
+    /* "quantumc.pyx":502
+ *     u = abs(w[1])
+ *     if (u > t):
+ *         t = u             # <<<<<<<<<<<<<<
+ *     u = abs(w[2])
+ *     if (u > t):
+ */
+    __pyx_v_t = __pyx_v_u;
+
+    /* "quantumc.pyx":501
+ *     t = abs(w[0])
+ *     u = abs(w[1])
+ *     if (u > t):             # <<<<<<<<<<<<<<
+ *         t = u
+ *     u = abs(w[2])
+ */
+  }
+
+  /* "quantumc.pyx":503
+ *     if (u > t):
+ *         t = u
+ *     u = abs(w[2])             # <<<<<<<<<<<<<<
+ *     if (u > t):
+ *         t = u
+ */
+  __pyx_v_u = fabs((__pyx_v_w[2]));
+
+  /* "quantumc.pyx":504
+ *         t = u
+ *     u = abs(w[2])
+ *     if (u > t):             # <<<<<<<<<<<<<<
+ *         t = u
+ *     if (t < 1.0):
+ */
+  __pyx_t_1 = ((__pyx_v_u > __pyx_v_t) != 0);
+  if (__pyx_t_1) {
+
+    /* "quantumc.pyx":505
+ *     u = abs(w[2])
+ *     if (u > t):
+ *         t = u             # <<<<<<<<<<<<<<
+ *     if (t < 1.0):
+ *         u = t
+ */
+    __pyx_v_t = __pyx_v_u;
+
+    /* "quantumc.pyx":504
+ *         t = u
+ *     u = abs(w[2])
+ *     if (u > t):             # <<<<<<<<<<<<<<
+ *         t = u
+ *     if (t < 1.0):
+ */
+  }
+
+  /* "quantumc.pyx":506
+ *     if (u > t):
+ *         t = u
+ *     if (t < 1.0):             # <<<<<<<<<<<<<<
+ *         u = t
+ *     else:
+ */
+  __pyx_t_1 = ((__pyx_v_t < 1.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "quantumc.pyx":507
+ *         t = u
+ *     if (t < 1.0):
+ *         u = t             # <<<<<<<<<<<<<<
+ *     else:
+ *         u = t*t
+ */
+    __pyx_v_u = __pyx_v_t;
+
+    /* "quantumc.pyx":506
+ *     if (u > t):
+ *         t = u
+ *     if (t < 1.0):             # <<<<<<<<<<<<<<
+ *         u = t
+ *     else:
+ */
+    goto __pyx_L5;
+  }
+
+  /* "quantumc.pyx":509
+ *         u = t
+ *     else:
+ *         u = t*t             # <<<<<<<<<<<<<<
+ *     error = 256.0 * eps * u*u
+ * 
+ */
+  /*else*/ {
+    __pyx_v_u = (__pyx_v_t * __pyx_v_t);
+  }
+  __pyx_L5:;
+
+  /* "quantumc.pyx":510
+ *     else:
+ *         u = t*t
+ *     error = 256.0 * eps * u*u             # <<<<<<<<<<<<<<
+ * 
+ *     cdef double complex H0, H1
+ */
+  __pyx_v_error = (((256.0 * __pyx_v_8quantumc_eps) * __pyx_v_u) * __pyx_v_u);
+
+  /* "quantumc.pyx":515
+ *     cdef double B2x, B2y
+ * 
+ *     B2x = 0.5*B[0]*B[0]             # <<<<<<<<<<<<<<
+ *     B2y = 0.5*B[1]*B[1]
+ * 
+ */
+  __pyx_v_B2x = ((0.5 * (__pyx_v_B[0])) * (__pyx_v_B[0]));
+
+  /* "quantumc.pyx":516
+ * 
+ *     B2x = 0.5*B[0]*B[0]
+ *     B2y = 0.5*B[1]*B[1]             # <<<<<<<<<<<<<<
+ * 
+ *     H0 = B[2] + B[3] #try treating as a double or complex double
+ */
+  __pyx_v_B2y = ((0.5 * (__pyx_v_B[1])) * (__pyx_v_B[1]));
+
+  /* "quantumc.pyx":518
+ *     B2y = 0.5*B[1]*B[1]
+ * 
+ *     H0 = B[2] + B[3] #try treating as a double or complex double             # <<<<<<<<<<<<<<
+ *     H1 = (B[0]-1j*B[1])*invsqrt2
+ * 
+ */
+  __pyx_v_H0 = __pyx_t_double_complex_from_parts(((__pyx_v_B[2]) + (__pyx_v_B[3])), 0);
+
+  /* "quantumc.pyx":519
+ * 
+ *     H0 = B[2] + B[3] #try treating as a double or complex double
+ *     H1 = (B[0]-1j*B[1])*invsqrt2             # <<<<<<<<<<<<<<
+ * 
+ *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
+ */
+  __pyx_v_H1 = __Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_t_double_complex_from_parts((__pyx_v_B[0]), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts((__pyx_v_B[1]), 0))), __pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0));
+
+  /* "quantumc.pyx":521
+ *     H1 = (B[0]-1j*B[1])*invsqrt2
+ * 
+ *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]             # <<<<<<<<<<<<<<
+ *     Q[1][1] = -H0*H1
+ *     Q[2][1] = B2x+B2y
+ */
+  ((__pyx_v_Q[0])[1]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts((__pyx_v_B2x - __pyx_v_B2y), 0), __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts((__pyx_v_B[0]), 0)), __pyx_t_double_complex_from_parts((__pyx_v_B[1]), 0)));
+
+  /* "quantumc.pyx":522
+ * 
+ *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
+ *     Q[1][1] = -H0*H1             # <<<<<<<<<<<<<<
+ *     Q[2][1] = B2x+B2y
+ * 
+ */
+  ((__pyx_v_Q[1])[1]) = __Pyx_c_prod_double(__Pyx_c_neg_double(__pyx_v_H0), __pyx_v_H1);
+
+  /* "quantumc.pyx":523
+ *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
+ *     Q[1][1] = -H0*H1
+ *     Q[2][1] = B2x+B2y             # <<<<<<<<<<<<<<
+ * 
+ *     # Calculate first eigenvector by the formula
+ */
+  ((__pyx_v_Q[2])[1]) = __pyx_t_double_complex_from_parts((__pyx_v_B2x + __pyx_v_B2y), 0);
+
+  /* "quantumc.pyx":526
+ * 
+ *     # Calculate first eigenvector by the formula
+ *     Q[0][0] = Q[0][1]             # <<<<<<<<<<<<<<
+ *     Q[1][0] = Q[1][1] + H1*w[0]
+ *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
+ */
+  ((__pyx_v_Q[0])[0]) = ((__pyx_v_Q[0])[1]);
+
+  /* "quantumc.pyx":527
+ *     # Calculate first eigenvector by the formula
+ *     Q[0][0] = Q[0][1]
+ *     Q[1][0] = Q[1][1] + H1*w[0]             # <<<<<<<<<<<<<<
+ *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
+ *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)
+ */
+  ((__pyx_v_Q[1])[0]) = __Pyx_c_sum_double(((__pyx_v_Q[1])[1]), __Pyx_c_prod_double(__pyx_v_H1, __pyx_t_double_complex_from_parts((__pyx_v_w[0]), 0)));
+
+  /* "quantumc.pyx":528
+ *     Q[0][0] = Q[0][1]
+ *     Q[1][0] = Q[1][1] + H1*w[0]
+ *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]             # <<<<<<<<<<<<<<
+ *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)
+ * 
+ */
+  ((__pyx_v_Q[2])[0]) = __Pyx_c_diff_double(__Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_v_H0, __pyx_t_double_complex_from_parts((__pyx_v_w[0]), 0)), __pyx_t_double_complex_from_parts((-(__pyx_v_w[0])), 0)), ((__pyx_v_Q[2])[1]));
+
+  /* "quantumc.pyx":529
+ *     Q[1][0] = Q[1][1] + H1*w[0]
+ *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
+ *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)             # <<<<<<<<<<<<<<
+ * 
+ *     # If vectors are nearly linearly dependent, or if there might have
+ */
+  __pyx_v_norm = ((__pyx_f_8quantumc_absquare(((__pyx_v_Q[0])[0])) + __pyx_f_8quantumc_absquare(((__pyx_v_Q[1])[0]))) + __pyx_f_8quantumc_square(__Pyx_CREAL(((__pyx_v_Q[2])[0]))));
+
+  /* "quantumc.pyx":540
+ *         QL33(B, Q, w)
+ *     else:'''                      # This is the standard branch
+ *     norm = sqrt(1.0 / norm)             # <<<<<<<<<<<<<<
+ *     if norm <= 1e-20:
+ *         print('fuck')
+ */
+  __pyx_v_norm = sqrt((1.0 / __pyx_v_norm));
+
+  /* "quantumc.pyx":541
+ *     else:'''                      # This is the standard branch
+ *     norm = sqrt(1.0 / norm)
+ *     if norm <= 1e-20:             # <<<<<<<<<<<<<<
+ *         print('fuck')
+ *     for j in range(0,3):
+ */
+  __pyx_t_1 = ((__pyx_v_norm <= 1e-20) != 0);
+  if (__pyx_t_1) {
+
+    /* "quantumc.pyx":542
+ *     norm = sqrt(1.0 / norm)
+ *     if norm <= 1e-20:
+ *         print('fuck')             # <<<<<<<<<<<<<<
+ *     for j in range(0,3):
+ *         Q[j][0] = Q[j][0] * norm
+ */
+    if (__Pyx_PrintOne(0, __pyx_n_s_fuck) < 0) __PYX_ERR(0, 542, __pyx_L1_error)
+
+    /* "quantumc.pyx":541
+ *     else:'''                      # This is the standard branch
+ *     norm = sqrt(1.0 / norm)
+ *     if norm <= 1e-20:             # <<<<<<<<<<<<<<
+ *         print('fuck')
+ *     for j in range(0,3):
+ */
+  }
+
+  /* "quantumc.pyx":543
+ *     if norm <= 1e-20:
+ *         print('fuck')
+ *     for j in range(0,3):             # <<<<<<<<<<<<<<
+ *         Q[j][0] = Q[j][0] * norm
+ * 
+ */
+  for (__pyx_t_2 = 0; __pyx_t_2 < 3; __pyx_t_2+=1) {
+    __pyx_v_j = __pyx_t_2;
+
+    /* "quantumc.pyx":544
+ *         print('fuck')
+ *     for j in range(0,3):
+ *         Q[j][0] = Q[j][0] * norm             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+    ((__pyx_v_Q[__pyx_v_j])[0]) = __Pyx_c_prod_double(((__pyx_v_Q[__pyx_v_j])[0]), __pyx_t_double_complex_from_parts(__pyx_v_norm, 0));
+  }
+
+  /* "quantumc.pyx":549
+ *     # Calculate second eigenvector by the formula
+ *     #   v[1] =  (A - w.conjugate()1]).e1 x (A - w[1]).e2 )
+ *     Q[0][1]  = Q[0][1]             # <<<<<<<<<<<<<<
+ *     Q[1][1]  = Q[1][1] + H1*w[1]
+ *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
+ */
+  ((__pyx_v_Q[0])[1]) = ((__pyx_v_Q[0])[1]);
+
+  /* "quantumc.pyx":550
+ *     #   v[1] =  (A - w.conjugate()1]).e1 x (A - w[1]).e2 )
+ *     Q[0][1]  = Q[0][1]
+ *     Q[1][1]  = Q[1][1] + H1*w[1]             # <<<<<<<<<<<<<<
+ *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
+ *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
+ */
+  ((__pyx_v_Q[1])[1]) = __Pyx_c_sum_double(((__pyx_v_Q[1])[1]), __Pyx_c_prod_double(__pyx_v_H1, __pyx_t_double_complex_from_parts((__pyx_v_w[1]), 0)));
+
+  /* "quantumc.pyx":551
+ *     Q[0][1]  = Q[0][1]
+ *     Q[1][1]  = Q[1][1] + H1*w[1]
+ *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real             # <<<<<<<<<<<<<<
+ *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
+ *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
+ */
+  ((__pyx_v_Q[2])[1]) = __Pyx_c_diff_double(__Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_v_H0, __pyx_t_double_complex_from_parts((__pyx_v_w[1]), 0)), __pyx_t_double_complex_from_parts((-(__pyx_v_w[1])), 0)), __pyx_t_double_complex_from_parts(__Pyx_CREAL(((__pyx_v_Q[2])[1])), 0));
+
+  /* "quantumc.pyx":553
+ *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
+ *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
+ *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2             # <<<<<<<<<<<<<<
+ * 
+ *     if (norm <= error):
+ */
+  __pyx_v_norm = (__Pyx_CREAL(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double(((__pyx_v_Q[0])[1])), ((__pyx_v_Q[0])[1])), __Pyx_c_prod_double(__Pyx_c_conj_double(((__pyx_v_Q[1])[1])), ((__pyx_v_Q[1])[1])))) + pow(__Pyx_CREAL(((__pyx_v_Q[2])[1])), 2.0));
+
+  /* "quantumc.pyx":555
+ *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
+ * 
+ *     if (norm <= error):             # <<<<<<<<<<<<<<
+ *         QL33(B, Q, w)
+ *     else:
+ */
+  __pyx_t_1 = ((__pyx_v_norm <= __pyx_v_error) != 0);
+  if (__pyx_t_1) {
+
+    /* "quantumc.pyx":556
+ * 
+ *     if (norm <= error):
+ *         QL33(B, Q, w)             # <<<<<<<<<<<<<<
+ *     else:
+ *         if norm <= 1e-20:
+ */
+    __pyx_f_8quantumc_QL33(__pyx_v_B, __pyx_v_Q, __pyx_v_w);
+
+    /* "quantumc.pyx":555
+ *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
+ * 
+ *     if (norm <= error):             # <<<<<<<<<<<<<<
+ *         QL33(B, Q, w)
+ *     else:
+ */
+    goto __pyx_L9;
+  }
+
+  /* "quantumc.pyx":558
+ *         QL33(B, Q, w)
+ *     else:
+ *         if norm <= 1e-20:             # <<<<<<<<<<<<<<
+ *             print('you')
+ * 
+ */
+  /*else*/ {
+    __pyx_t_1 = ((__pyx_v_norm <= 1e-20) != 0);
+    if (__pyx_t_1) {
+
+      /* "quantumc.pyx":559
+ *     else:
+ *         if norm <= 1e-20:
+ *             print('you')             # <<<<<<<<<<<<<<
+ * 
+ *         norm = sqrt(1.0 / norm)
+ */
+      if (__Pyx_PrintOne(0, __pyx_n_s_you) < 0) __PYX_ERR(0, 559, __pyx_L1_error)
+
+      /* "quantumc.pyx":558
+ *         QL33(B, Q, w)
+ *     else:
+ *         if norm <= 1e-20:             # <<<<<<<<<<<<<<
+ *             print('you')
+ * 
+ */
+    }
+
+    /* "quantumc.pyx":561
+ *             print('you')
+ * 
+ *         norm = sqrt(1.0 / norm)             # <<<<<<<<<<<<<<
+ *         for j in range(0,3):
+ *             Q[j][1] = Q[j][1] * norm
+ */
+    __pyx_v_norm = sqrt((1.0 / __pyx_v_norm));
+
+    /* "quantumc.pyx":562
+ * 
+ *         norm = sqrt(1.0 / norm)
+ *         for j in range(0,3):             # <<<<<<<<<<<<<<
+ *             Q[j][1] = Q[j][1] * norm
+ * 
+ */
+    for (__pyx_t_2 = 0; __pyx_t_2 < 3; __pyx_t_2+=1) {
+      __pyx_v_j = __pyx_t_2;
+
+      /* "quantumc.pyx":563
+ *         norm = sqrt(1.0 / norm)
+ *         for j in range(0,3):
+ *             Q[j][1] = Q[j][1] * norm             # <<<<<<<<<<<<<<
+ * 
+ *     # Calculate third eigenvector according to
+ */
+      ((__pyx_v_Q[__pyx_v_j])[1]) = __Pyx_c_prod_double(((__pyx_v_Q[__pyx_v_j])[1]), __pyx_t_double_complex_from_parts(__pyx_v_norm, 0));
+    }
+  }
+  __pyx_L9:;
+
+  /* "quantumc.pyx":567
+ *     # Calculate third eigenvector according to
+ *     #   v[2] = v[0] x .conjugate()[1])
+ *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()             # <<<<<<<<<<<<<<
+ *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()
+ *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()
+ */
+  ((__pyx_v_Q[0])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[1])[0]), ((__pyx_v_Q[2])[1])), __Pyx_c_prod_double(((__pyx_v_Q[2])[0]), ((__pyx_v_Q[1])[1]))));
+
+  /* "quantumc.pyx":568
+ *     #   v[2] = v[0] x .conjugate()[1])
+ *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()
+ *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()             # <<<<<<<<<<<<<<
+ *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()
+ * 
+ */
+  ((__pyx_v_Q[1])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[2])[0]), ((__pyx_v_Q[0])[1])), __Pyx_c_prod_double(((__pyx_v_Q[0])[0]), ((__pyx_v_Q[2])[1]))));
+
+  /* "quantumc.pyx":569
+ *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()
+ *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()
+ *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()             # <<<<<<<<<<<<<<
+ * 
+ *     cdef double complex e[3]
+ */
+  ((__pyx_v_Q[2])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[0])[0]), ((__pyx_v_Q[1])[1])), __Pyx_c_prod_double(((__pyx_v_Q[1])[0]), ((__pyx_v_Q[0])[1]))));
+
+  /* "quantumc.pyx":573
+ *     cdef double complex e[3]
+ * 
+ *     w[0] *= dt             # <<<<<<<<<<<<<<
+ *     w[1] *= dt
+ *     w[2] *= dt
+ */
+  __pyx_t_3 = 0;
+  (__pyx_v_w[__pyx_t_3]) = ((__pyx_v_w[__pyx_t_3]) * __pyx_v_dt);
+
+  /* "quantumc.pyx":574
+ * 
+ *     w[0] *= dt
+ *     w[1] *= dt             # <<<<<<<<<<<<<<
+ *     w[2] *= dt
+ * 
+ */
+  __pyx_t_3 = 1;
+  (__pyx_v_w[__pyx_t_3]) = ((__pyx_v_w[__pyx_t_3]) * __pyx_v_dt);
+
+  /* "quantumc.pyx":575
+ *     w[0] *= dt
+ *     w[1] *= dt
+ *     w[2] *= dt             # <<<<<<<<<<<<<<
+ * 
+ *     e[0] = cos(w[0])-1j*sin(w[0])
+ */
+  __pyx_t_3 = 2;
+  (__pyx_v_w[__pyx_t_3]) = ((__pyx_v_w[__pyx_t_3]) * __pyx_v_dt);
+
+  /* "quantumc.pyx":577
+ *     w[2] *= dt
+ * 
+ *     e[0] = cos(w[0])-1j*sin(w[0])             # <<<<<<<<<<<<<<
+ *     e[1] = cos(w[1])-1j*sin(w[1])
+ *     e[2] = cos(w[2])-1j*sin(w[2])
+ */
+  (__pyx_v_e[0]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_w[0])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_w[0])), 0)));
+
+  /* "quantumc.pyx":578
+ * 
+ *     e[0] = cos(w[0])-1j*sin(w[0])
+ *     e[1] = cos(w[1])-1j*sin(w[1])             # <<<<<<<<<<<<<<
+ *     e[2] = cos(w[2])-1j*sin(w[2])
+ * 
+ */
+  (__pyx_v_e[1]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_w[1])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_w[1])), 0)));
+
+  /* "quantumc.pyx":579
+ *     e[0] = cos(w[0])-1j*sin(w[0])
+ *     e[1] = cos(w[1])-1j*sin(w[1])
+ *     e[2] = cos(w[2])-1j*sin(w[2])             # <<<<<<<<<<<<<<
+ * 
+ *     U[0][0] = e[0]*Q[0][0].conjugate()*Q[0][0] + e[1]*Q[0][1].conjugate()*Q[0][1] + e[2]*Q[0][2].conjugate()*Q[0][2]
+ */
+  (__pyx_v_e[2]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_w[2])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_w[2])), 0)));
+
+  /* "quantumc.pyx":581
+ *     e[2] = cos(w[2])-1j*sin(w[2])
+ * 
+ *     U[0][0] = e[0]*Q[0][0].conjugate()*Q[0][0] + e[1]*Q[0][1].conjugate()*Q[0][1] + e[2]*Q[0][2].conjugate()*Q[0][2]             # <<<<<<<<<<<<<<
+ *     U[1][0] = e[0]*Q[0][0].conjugate()*Q[1][0] + e[1]*Q[0][1].conjugate()*Q[1][1] + e[2]*Q[0][2].conjugate()*Q[1][2]
+ *     U[2][0] = e[0]*Q[0][0].conjugate()*Q[2][0] + e[1]*Q[0][1].conjugate()*Q[2][1] + e[2]*Q[0][2].conjugate()*Q[2][2]
+ */
+  ((__pyx_v_U[0])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[0])[0]))), ((__pyx_v_Q[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[0])[1]))), ((__pyx_v_Q[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[0])[2]))), ((__pyx_v_Q[0])[2])));
+
+  /* "quantumc.pyx":582
+ * 
+ *     U[0][0] = e[0]*Q[0][0].conjugate()*Q[0][0] + e[1]*Q[0][1].conjugate()*Q[0][1] + e[2]*Q[0][2].conjugate()*Q[0][2]
+ *     U[1][0] = e[0]*Q[0][0].conjugate()*Q[1][0] + e[1]*Q[0][1].conjugate()*Q[1][1] + e[2]*Q[0][2].conjugate()*Q[1][2]             # <<<<<<<<<<<<<<
+ *     U[2][0] = e[0]*Q[0][0].conjugate()*Q[2][0] + e[1]*Q[0][1].conjugate()*Q[2][1] + e[2]*Q[0][2].conjugate()*Q[2][2]
+ *     U[0][1] = e[0]*Q[1][0].conjugate()*Q[0][0] + e[1]*Q[1][1].conjugate()*Q[0][1] + e[2]*Q[1][2].conjugate()*Q[0][2]
+ */
+  ((__pyx_v_U[1])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[0])[0]))), ((__pyx_v_Q[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[0])[1]))), ((__pyx_v_Q[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[0])[2]))), ((__pyx_v_Q[1])[2])));
+
+  /* "quantumc.pyx":583
+ *     U[0][0] = e[0]*Q[0][0].conjugate()*Q[0][0] + e[1]*Q[0][1].conjugate()*Q[0][1] + e[2]*Q[0][2].conjugate()*Q[0][2]
+ *     U[1][0] = e[0]*Q[0][0].conjugate()*Q[1][0] + e[1]*Q[0][1].conjugate()*Q[1][1] + e[2]*Q[0][2].conjugate()*Q[1][2]
+ *     U[2][0] = e[0]*Q[0][0].conjugate()*Q[2][0] + e[1]*Q[0][1].conjugate()*Q[2][1] + e[2]*Q[0][2].conjugate()*Q[2][2]             # <<<<<<<<<<<<<<
+ *     U[0][1] = e[0]*Q[1][0].conjugate()*Q[0][0] + e[1]*Q[1][1].conjugate()*Q[0][1] + e[2]*Q[1][2].conjugate()*Q[0][2]
+ *     U[1][1] = e[0]*Q[1][0].conjugate()*Q[1][0] + e[1]*Q[1][1].conjugate()*Q[1][1] + e[2]*Q[1][2].conjugate()*Q[1][2]
+ */
+  ((__pyx_v_U[2])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[0])[0]))), ((__pyx_v_Q[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[0])[1]))), ((__pyx_v_Q[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[0])[2]))), ((__pyx_v_Q[2])[2])));
+
+  /* "quantumc.pyx":584
+ *     U[1][0] = e[0]*Q[0][0].conjugate()*Q[1][0] + e[1]*Q[0][1].conjugate()*Q[1][1] + e[2]*Q[0][2].conjugate()*Q[1][2]
+ *     U[2][0] = e[0]*Q[0][0].conjugate()*Q[2][0] + e[1]*Q[0][1].conjugate()*Q[2][1] + e[2]*Q[0][2].conjugate()*Q[2][2]
+ *     U[0][1] = e[0]*Q[1][0].conjugate()*Q[0][0] + e[1]*Q[1][1].conjugate()*Q[0][1] + e[2]*Q[1][2].conjugate()*Q[0][2]             # <<<<<<<<<<<<<<
+ *     U[1][1] = e[0]*Q[1][0].conjugate()*Q[1][0] + e[1]*Q[1][1].conjugate()*Q[1][1] + e[2]*Q[1][2].conjugate()*Q[1][2]
+ *     U[2][1] = e[0]*Q[1][0].conjugate()*Q[2][0] + e[1]*Q[1][1].conjugate()*Q[2][1] + e[2]*Q[1][2].conjugate()*Q[2][2]
+ */
+  ((__pyx_v_U[0])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[1])[0]))), ((__pyx_v_Q[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[1])[1]))), ((__pyx_v_Q[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[1])[2]))), ((__pyx_v_Q[0])[2])));
+
+  /* "quantumc.pyx":585
+ *     U[2][0] = e[0]*Q[0][0].conjugate()*Q[2][0] + e[1]*Q[0][1].conjugate()*Q[2][1] + e[2]*Q[0][2].conjugate()*Q[2][2]
+ *     U[0][1] = e[0]*Q[1][0].conjugate()*Q[0][0] + e[1]*Q[1][1].conjugate()*Q[0][1] + e[2]*Q[1][2].conjugate()*Q[0][2]
+ *     U[1][1] = e[0]*Q[1][0].conjugate()*Q[1][0] + e[1]*Q[1][1].conjugate()*Q[1][1] + e[2]*Q[1][2].conjugate()*Q[1][2]             # <<<<<<<<<<<<<<
+ *     U[2][1] = e[0]*Q[1][0].conjugate()*Q[2][0] + e[1]*Q[1][1].conjugate()*Q[2][1] + e[2]*Q[1][2].conjugate()*Q[2][2]
+ *     U[0][2] = e[0]*Q[2][0].conjugate()*Q[0][0] + e[1]*Q[2][1].conjugate()*Q[0][1] + e[2]*Q[2][2].conjugate()*Q[0][2]
+ */
+  ((__pyx_v_U[1])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[1])[0]))), ((__pyx_v_Q[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[1])[1]))), ((__pyx_v_Q[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[1])[2]))), ((__pyx_v_Q[1])[2])));
+
+  /* "quantumc.pyx":586
+ *     U[0][1] = e[0]*Q[1][0].conjugate()*Q[0][0] + e[1]*Q[1][1].conjugate()*Q[0][1] + e[2]*Q[1][2].conjugate()*Q[0][2]
+ *     U[1][1] = e[0]*Q[1][0].conjugate()*Q[1][0] + e[1]*Q[1][1].conjugate()*Q[1][1] + e[2]*Q[1][2].conjugate()*Q[1][2]
+ *     U[2][1] = e[0]*Q[1][0].conjugate()*Q[2][0] + e[1]*Q[1][1].conjugate()*Q[2][1] + e[2]*Q[1][2].conjugate()*Q[2][2]             # <<<<<<<<<<<<<<
+ *     U[0][2] = e[0]*Q[2][0].conjugate()*Q[0][0] + e[1]*Q[2][1].conjugate()*Q[0][1] + e[2]*Q[2][2].conjugate()*Q[0][2]
+ *     U[1][2] = e[0]*Q[2][0].conjugate()*Q[1][0] + e[1]*Q[2][1].conjugate()*Q[1][1] + e[2]*Q[2][2].conjugate()*Q[1][2]
+ */
+  ((__pyx_v_U[2])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[1])[0]))), ((__pyx_v_Q[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[1])[1]))), ((__pyx_v_Q[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[1])[2]))), ((__pyx_v_Q[2])[2])));
+
+  /* "quantumc.pyx":587
+ *     U[1][1] = e[0]*Q[1][0].conjugate()*Q[1][0] + e[1]*Q[1][1].conjugate()*Q[1][1] + e[2]*Q[1][2].conjugate()*Q[1][2]
+ *     U[2][1] = e[0]*Q[1][0].conjugate()*Q[2][0] + e[1]*Q[1][1].conjugate()*Q[2][1] + e[2]*Q[1][2].conjugate()*Q[2][2]
+ *     U[0][2] = e[0]*Q[2][0].conjugate()*Q[0][0] + e[1]*Q[2][1].conjugate()*Q[0][1] + e[2]*Q[2][2].conjugate()*Q[0][2]             # <<<<<<<<<<<<<<
+ *     U[1][2] = e[0]*Q[2][0].conjugate()*Q[1][0] + e[1]*Q[2][1].conjugate()*Q[1][1] + e[2]*Q[2][2].conjugate()*Q[1][2]
+ *     U[2][2] = e[0]*Q[2][0].conjugate()*Q[2][0] + e[1]*Q[2][1].conjugate()*Q[2][1] + e[2]*Q[2][2].conjugate()*Q[2][2]
+ */
+  ((__pyx_v_U[0])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[2])[0]))), ((__pyx_v_Q[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[2])[1]))), ((__pyx_v_Q[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[2])[2]))), ((__pyx_v_Q[0])[2])));
+
+  /* "quantumc.pyx":588
+ *     U[2][1] = e[0]*Q[1][0].conjugate()*Q[2][0] + e[1]*Q[1][1].conjugate()*Q[2][1] + e[2]*Q[1][2].conjugate()*Q[2][2]
+ *     U[0][2] = e[0]*Q[2][0].conjugate()*Q[0][0] + e[1]*Q[2][1].conjugate()*Q[0][1] + e[2]*Q[2][2].conjugate()*Q[0][2]
+ *     U[1][2] = e[0]*Q[2][0].conjugate()*Q[1][0] + e[1]*Q[2][1].conjugate()*Q[1][1] + e[2]*Q[2][2].conjugate()*Q[1][2]             # <<<<<<<<<<<<<<
+ *     U[2][2] = e[0]*Q[2][0].conjugate()*Q[2][0] + e[1]*Q[2][1].conjugate()*Q[2][1] + e[2]*Q[2][2].conjugate()*Q[2][2]
+ * 
+ */
+  ((__pyx_v_U[1])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[2])[0]))), ((__pyx_v_Q[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[2])[1]))), ((__pyx_v_Q[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[2])[2]))), ((__pyx_v_Q[1])[2])));
+
+  /* "quantumc.pyx":589
+ *     U[0][2] = e[0]*Q[2][0].conjugate()*Q[0][0] + e[1]*Q[2][1].conjugate()*Q[0][1] + e[2]*Q[2][2].conjugate()*Q[0][2]
+ *     U[1][2] = e[0]*Q[2][0].conjugate()*Q[1][0] + e[1]*Q[2][1].conjugate()*Q[1][1] + e[2]*Q[2][2].conjugate()*Q[1][2]
+ *     U[2][2] = e[0]*Q[2][0].conjugate()*Q[2][0] + e[1]*Q[2][1].conjugate()*Q[2][1] + e[2]*Q[2][2].conjugate()*Q[2][2]             # <<<<<<<<<<<<<<
+ * 
+ *     '''print('B',B[0],B[1],B[2],B[3])
+ */
+  ((__pyx_v_U[2])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Q[2])[0]))), ((__pyx_v_Q[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Q[2])[1]))), ((__pyx_v_Q[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Q[2])[2]))), ((__pyx_v_Q[2])[2])));
+
+  /* "quantumc.pyx":462
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * cdef void unitary33(double dt, double complex state[3], double B[4]):             # <<<<<<<<<<<<<<
- *     #3x3 hermitian matrix is stored as 6 entries
- *     #H[i] -> H[i][i] for i =0,1,2, H[3]->H[0][1], H[4]->H[0][2], H[5]->H[1][2]
+ * @cython.cdivision(True)
+ * cdef void unitary33(double dt, double B[4], double complex U[3][3]):             # <<<<<<<<<<<<<<
+ *  #based on the algorithm dsyevh3
+ * # ----------------------------------------------------------------------------
  */
 
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_WriteUnraisable("quantumc.unitary33", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":529
+/* "quantumc.pyx":602
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void initFastB(Params *params):             # <<<<<<<<<<<<<<
@@ -5023,7 +5823,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("initFastB", 0);
 
-  /* "quantumc.pyx":530
+  /* "quantumc.pyx":603
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void initFastB(Params *params):
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
@@ -5032,7 +5832,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
  */
   __pyx_v_params->cdtrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rff) * __pyx_v_params->dt));
 
-  /* "quantumc.pyx":531
+  /* "quantumc.pyx":604
  * cdef inline void initFastB(Params *params):
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
@@ -5041,7 +5841,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
  */
   __pyx_v_params->sdtrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rff) * __pyx_v_params->dt));
 
-  /* "quantumc.pyx":532
+  /* "quantumc.pyx":605
  *     params.cdtrabi = cos(M_TAU*params.rff*params.dt)#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
  *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
@@ -5050,7 +5850,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
  */
   __pyx_v_params->ctcrabi = 1.0;
 
-  /* "quantumc.pyx":533
+  /* "quantumc.pyx":606
  *     params.sdtrabi = sin(M_TAU*params.rff*params.dt) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
  *     params.ctcrabi = 1.0 #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
  *     params.stcrabi = 0.0 #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
@@ -5059,7 +5859,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
  */
   __pyx_v_params->stcrabi = 0.0;
 
-  /* "quantumc.pyx":529
+  /* "quantumc.pyx":602
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void initFastB(Params *params):             # <<<<<<<<<<<<<<
@@ -5071,304 +5871,145 @@ static CYTHON_INLINE void __pyx_f_8quantumc_initFastB(__pyx_t_8quantumc_Params *
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":542
+/* "quantumc.pyx":615
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void fastB(double t, Params *params, double B[4]):             # <<<<<<<<<<<<<<
- *     B[3] = params.quad
- *     B[0] = 0.0
+ *     #B[3] = params.quad #as is constant don't need to update
+ *     cdef double tmp #temporary storage for field calculations
  */
 
 static CYTHON_INLINE void __pyx_f_8quantumc_fastB(double __pyx_v_t, __pyx_t_8quantumc_Params *__pyx_v_params, double *__pyx_v_B) {
-  double __pyx_v_omegaD;
-  double __pyx_v_detune;
+  double __pyx_v_tmp;
   __Pyx_RefNannyDeclarations
-  double __pyx_t_1;
+  long __pyx_t_1;
   int __pyx_t_2;
-  long __pyx_t_3;
-  int __pyx_t_4;
+  int __pyx_t_3;
   __Pyx_RefNannySetupContext("fastB", 0);
 
-  /* "quantumc.pyx":543
- * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * cdef inline void fastB(double t, Params *params, double B[4]):
- *     B[3] = params.quad             # <<<<<<<<<<<<<<
- *     B[0] = 0.0
- *     B[1] = 0.0
+  /* "quantumc.pyx":618
+ *     #B[3] = params.quad #as is constant don't need to update
+ *     cdef double tmp #temporary storage for field calculations
+ *     B[0] = (params.cdtrabi*params.ctcrabi - params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)             # <<<<<<<<<<<<<<
+ *     params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
+ *     params.ctcrabi = B[0]
  */
-  __pyx_t_1 = __pyx_v_params->quad;
-  (__pyx_v_B[3]) = __pyx_t_1;
+  (__pyx_v_B[0]) = ((__pyx_v_params->cdtrabi * __pyx_v_params->ctcrabi) - (__pyx_v_params->sdtrabi * __pyx_v_params->stcrabi));
 
-  /* "quantumc.pyx":544
- * cdef inline void fastB(double t, Params *params, double B[4]):
- *     B[3] = params.quad
- *     B[0] = 0.0             # <<<<<<<<<<<<<<
- *     B[1] = 0.0
+  /* "quantumc.pyx":619
+ *     cdef double tmp #temporary storage for field calculations
+ *     B[0] = (params.cdtrabi*params.ctcrabi - params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
+ *     params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)             # <<<<<<<<<<<<<<
+ *     params.ctcrabi = B[0]
+ *     B[0] *= M_TAU*params.rabi
+ */
+  __pyx_v_params->stcrabi = ((__pyx_v_params->cdtrabi * __pyx_v_params->stcrabi) + (__pyx_v_params->sdtrabi * __pyx_v_params->ctcrabi));
+
+  /* "quantumc.pyx":620
+ *     B[0] = (params.cdtrabi*params.ctcrabi - params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
+ *     params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
+ *     params.ctcrabi = B[0]             # <<<<<<<<<<<<<<
+ *     B[0] *= M_TAU*params.rabi
+ *     #B[1] = 0.0 #as is constant don't need to update
+ */
+  __pyx_v_params->ctcrabi = (__pyx_v_B[0]);
+
+  /* "quantumc.pyx":621
+ *     params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
+ *     params.ctcrabi = B[0]
+ *     B[0] *= M_TAU*params.rabi             # <<<<<<<<<<<<<<
+ *     #B[1] = 0.0 #as is constant don't need to update
  *     B[2] = M_TAU*params.larmor
  */
-  (__pyx_v_B[0]) = 0.0;
+  __pyx_t_1 = 0;
+  (__pyx_v_B[__pyx_t_1]) = ((__pyx_v_B[__pyx_t_1]) * (__pyx_v_8quantumc_M_TAU * __pyx_v_params->rabi));
 
-  /* "quantumc.pyx":545
- *     B[3] = params.quad
- *     B[0] = 0.0
- *     B[1] = 0.0             # <<<<<<<<<<<<<<
- *     B[2] = M_TAU*params.larmor
- * 
- */
-  (__pyx_v_B[1]) = 0.0;
-
-  /* "quantumc.pyx":546
- *     B[0] = 0.0
- *     B[1] = 0.0
+  /* "quantumc.pyx":623
+ *     B[0] *= M_TAU*params.rabi
+ *     #B[1] = 0.0 #as is constant don't need to update
  *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
  * 
- *     # check if detuning run needs to be applied
+ *     if params.xlamp != 0.0 and t >= params.tr2:
  */
   (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params->larmor);
 
-  /* "quantumc.pyx":549
+  /* "quantumc.pyx":625
+ *     B[2] = M_TAU*params.larmor
  * 
- *     # check if detuning run needs to be applied
- *     if t < params.dett:             # <<<<<<<<<<<<<<
- *         # define generic fields using structure constants
- *         B[0] += (params.cdtrabi*params.ctcrabi-params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
+ *     if params.xlamp != 0.0 and t >= params.tr2:             # <<<<<<<<<<<<<<
+ *             #print('k')
+ *             tmp = params.cdtxl*params.ctcxl - params.sdtxl*params.stcxl
  */
-  __pyx_t_2 = ((__pyx_v_t < __pyx_v_params->dett) != 0);
-  if (__pyx_t_2) {
-
-    /* "quantumc.pyx":551
- *     if t < params.dett:
- *         # define generic fields using structure constants
- *         B[0] += (params.cdtrabi*params.ctcrabi-params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)             # <<<<<<<<<<<<<<
- *         params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
- *         params.ctcrabi = B[0]
- */
-    __pyx_t_3 = 0;
-    (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + ((__pyx_v_params->cdtrabi * __pyx_v_params->ctcrabi) - (__pyx_v_params->sdtrabi * __pyx_v_params->stcrabi)));
-
-    /* "quantumc.pyx":552
- *         # define generic fields using structure constants
- *         B[0] += (params.cdtrabi*params.ctcrabi-params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
- *         params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)             # <<<<<<<<<<<<<<
- *         params.ctcrabi = B[0]
- *         B[0] *= M_TAU*params.rabi
- */
-    __pyx_v_params->stcrabi = ((__pyx_v_params->cdtrabi * __pyx_v_params->stcrabi) + (__pyx_v_params->sdtrabi * __pyx_v_params->ctcrabi));
-
-    /* "quantumc.pyx":553
- *         B[0] += (params.cdtrabi*params.ctcrabi-params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
- *         params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
- *         params.ctcrabi = B[0]             # <<<<<<<<<<<<<<
- *         B[0] *= M_TAU*params.rabi
- * 
- */
-    __pyx_v_params->ctcrabi = (__pyx_v_B[0]);
-
-    /* "quantumc.pyx":554
- *         params.stcrabi = (params.cdtrabi*params.stcrabi+params.sdtrabi*params.ctcrabi)
- *         params.ctcrabi = B[0]
- *         B[0] *= M_TAU*params.rabi             # <<<<<<<<<<<<<<
- * 
- *         if params.xlamp != 0.0:
- */
-    __pyx_t_3 = 0;
-    (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) * (__pyx_v_8quantumc_M_TAU * __pyx_v_params->rabi));
-
-    /* "quantumc.pyx":556
- *         B[0] *= M_TAU*params.rabi
- * 
- *         if params.xlamp != 0.0:             # <<<<<<<<<<<<<<
- *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
- * 
- */
-    __pyx_t_2 = ((__pyx_v_params->xlamp != 0.0) != 0);
-    if (__pyx_t_2) {
-
-      /* "quantumc.pyx":557
- * 
- *         if params.xlamp != 0.0:
- *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt             # <<<<<<<<<<<<<<
- * 
- *         # add neural impulse
- */
-      __pyx_t_3 = 0;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->xlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlfreq) * __pyx_v_t) + __pyx_v_params->xlphase))));
-
-      /* "quantumc.pyx":556
- *         B[0] *= M_TAU*params.rabi
- * 
- *         if params.xlamp != 0.0:             # <<<<<<<<<<<<<<
- *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
- * 
- */
-    }
-
-    /* "quantumc.pyx":560
- * 
- *         # add neural impulse
- *         if params.zlamp != 0.0:             # <<<<<<<<<<<<<<
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- *         if t >= params.nt and t <= params.nte:
- */
-    __pyx_t_2 = ((__pyx_v_params->zlamp != 0.0) != 0);
-    if (__pyx_t_2) {
-
-      /* "quantumc.pyx":561
- *         # add neural impulse
- *         if params.zlamp != 0.0:
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt             # <<<<<<<<<<<<<<
- *         if t >= params.nt and t <= params.nte:
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
- */
-      __pyx_t_3 = 2;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
-
-      /* "quantumc.pyx":560
- * 
- *         # add neural impulse
- *         if params.zlamp != 0.0:             # <<<<<<<<<<<<<<
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- *         if t >= params.nt and t <= params.nte:
- */
-    }
-
-    /* "quantumc.pyx":562
- *         if params.zlamp != 0.0:
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- *         if t >= params.nt and t <= params.nte:             # <<<<<<<<<<<<<<
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
- * 
- */
-    __pyx_t_4 = ((__pyx_v_t >= __pyx_v_params->nt) != 0);
-    if (__pyx_t_4) {
-    } else {
-      __pyx_t_2 = __pyx_t_4;
-      goto __pyx_L7_bool_binop_done;
-    }
-    __pyx_t_4 = ((__pyx_v_t <= __pyx_v_params->nte) != 0);
-    __pyx_t_2 = __pyx_t_4;
-    __pyx_L7_bool_binop_done:;
-    if (__pyx_t_2) {
-
-      /* "quantumc.pyx":563
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- *         if t >= params.nt and t <= params.nte:
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))             # <<<<<<<<<<<<<<
- * 
- *     elif t < params.dete and params.beta > 0.0:
- */
-      __pyx_t_3 = 2;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->sA * sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->nf) * (__pyx_v_t - __pyx_v_params->nt)))));
-
-      /* "quantumc.pyx":562
- *         if params.zlamp != 0.0:
- *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- *         if t >= params.nt and t <= params.nte:             # <<<<<<<<<<<<<<
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
- * 
- */
-    }
-
-    /* "quantumc.pyx":549
- * 
- *     # check if detuning run needs to be applied
- *     if t < params.dett:             # <<<<<<<<<<<<<<
- *         # define generic fields using structure constants
- *         B[0] += (params.cdtrabi*params.ctcrabi-params.sdtrabi*params.stcrabi) #M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
- */
-    goto __pyx_L3;
-  }
-
-  /* "quantumc.pyx":565
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
- * 
- *     elif t < params.dete and params.beta > 0.0:             # <<<<<<<<<<<<<<
- *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
- *         detune = params.detA*tanh(params.beta*(t-params.dett))
- */
-  __pyx_t_4 = ((__pyx_v_t < __pyx_v_params->dete) != 0);
-  if (__pyx_t_4) {
+  __pyx_t_3 = ((__pyx_v_params->xlamp != 0.0) != 0);
+  if (__pyx_t_3) {
   } else {
-    __pyx_t_2 = __pyx_t_4;
-    goto __pyx_L9_bool_binop_done;
+    __pyx_t_2 = __pyx_t_3;
+    goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_4 = ((__pyx_v_params->beta > 0.0) != 0);
-  __pyx_t_2 = __pyx_t_4;
-  __pyx_L9_bool_binop_done:;
+  __pyx_t_3 = ((__pyx_v_t >= __pyx_v_params->tr2) != 0);
+  __pyx_t_2 = __pyx_t_3;
+  __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "quantumc.pyx":566
- * 
- *     elif t < params.dete and params.beta > 0.0:
- *         omegaD = params.rabi*sech(params.beta*(t-params.dett))             # <<<<<<<<<<<<<<
- *         detune = params.detA*tanh(params.beta*(t-params.dett))
- *         B[0] = M_TAU*(omegaD*cos(M_TAU*(params.rff+detune)*(t-params.dett)))
+    /* "quantumc.pyx":627
+ *     if params.xlamp != 0.0 and t >= params.tr2:
+ *             #print('k')
+ *             tmp = params.cdtxl*params.ctcxl - params.sdtxl*params.stcxl             # <<<<<<<<<<<<<<
+ *             B[0] += M_TAU*params.xlamp*tmp
+ *             params.stcxl = (params.cdtxl*params.stcxl + params.sdtxl*params.ctcxl)
  */
-    __pyx_v_omegaD = (__pyx_v_params->rabi * __pyx_f_8quantumc_sech((__pyx_v_params->beta * (__pyx_v_t - __pyx_v_params->dett))));
+    __pyx_v_tmp = ((__pyx_v_params->cdtxl * __pyx_v_params->ctcxl) - (__pyx_v_params->sdtxl * __pyx_v_params->stcxl));
 
-    /* "quantumc.pyx":567
- *     elif t < params.dete and params.beta > 0.0:
- *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
- *         detune = params.detA*tanh(params.beta*(t-params.dett))             # <<<<<<<<<<<<<<
- *         B[0] = M_TAU*(omegaD*cos(M_TAU*(params.rff+detune)*(t-params.dett)))
- * 
+    /* "quantumc.pyx":628
+ *             #print('k')
+ *             tmp = params.cdtxl*params.ctcxl - params.sdtxl*params.stcxl
+ *             B[0] += M_TAU*params.xlamp*tmp             # <<<<<<<<<<<<<<
+ *             params.stcxl = (params.cdtxl*params.stcxl + params.sdtxl*params.ctcxl)
+ *             params.ctcxl = tmp
  */
-    __pyx_v_detune = (__pyx_v_params->detA * __pyx_f_8quantumc_tanh((__pyx_v_params->beta * (__pyx_v_t - __pyx_v_params->dett))));
+    __pyx_t_1 = 0;
+    (__pyx_v_B[__pyx_t_1]) = ((__pyx_v_B[__pyx_t_1]) + ((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlamp) * __pyx_v_tmp));
 
-    /* "quantumc.pyx":568
- *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
- *         detune = params.detA*tanh(params.beta*(t-params.dett))
- *         B[0] = M_TAU*(omegaD*cos(M_TAU*(params.rff+detune)*(t-params.dett)))             # <<<<<<<<<<<<<<
+    /* "quantumc.pyx":629
+ *             tmp = params.cdtxl*params.ctcxl - params.sdtxl*params.stcxl
+ *             B[0] += M_TAU*params.xlamp*tmp
+ *             params.stcxl = (params.cdtxl*params.stcxl + params.sdtxl*params.ctcxl)             # <<<<<<<<<<<<<<
+ *             params.ctcxl = tmp
  * 
- *     else:
  */
-    (__pyx_v_B[0]) = (__pyx_v_8quantumc_M_TAU * (__pyx_v_omegaD * cos(((__pyx_v_8quantumc_M_TAU * (__pyx_v_params->rff + __pyx_v_detune)) * (__pyx_v_t - __pyx_v_params->dett)))));
+    __pyx_v_params->stcxl = ((__pyx_v_params->cdtxl * __pyx_v_params->stcxl) + (__pyx_v_params->sdtxl * __pyx_v_params->ctcxl));
 
-    /* "quantumc.pyx":565
- *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
+    /* "quantumc.pyx":630
+ *             B[0] += M_TAU*params.xlamp*tmp
+ *             params.stcxl = (params.cdtxl*params.stcxl + params.sdtxl*params.ctcxl)
+ *             params.ctcxl = tmp             # <<<<<<<<<<<<<<
  * 
- *     elif t < params.dete and params.beta > 0.0:             # <<<<<<<<<<<<<<
- *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
- *         detune = params.detA*tanh(params.beta*(t-params.dett))
+ * 
  */
-    goto __pyx_L3;
+    __pyx_v_params->ctcxl = __pyx_v_tmp;
+
+    /* "quantumc.pyx":625
+ *     B[2] = M_TAU*params.larmor
+ * 
+ *     if params.xlamp != 0.0 and t >= params.tr2:             # <<<<<<<<<<<<<<
+ *             #print('k')
+ *             tmp = params.cdtxl*params.ctcxl - params.sdtxl*params.stcxl
+ */
   }
 
-  /* "quantumc.pyx":572
- *     else:
- *         # detuning truncation
- *         B[0] = params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt             # <<<<<<<<<<<<<<
- *         B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
- * 
- */
-  /*else*/ {
-    (__pyx_v_B[0]) = (__pyx_v_params->xlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlfreq) * __pyx_v_t) + __pyx_v_params->xlphase)));
-
-    /* "quantumc.pyx":573
- *         # detuning truncation
- *         B[0] = params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
- *         B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt             # <<<<<<<<<<<<<<
- * 
- * 
- */
-    __pyx_t_3 = 2;
-    (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
-  }
-  __pyx_L3:;
-
-  /* "quantumc.pyx":542
+  /* "quantumc.pyx":615
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void fastB(double t, Params *params, double B[4]):             # <<<<<<<<<<<<<<
- *     B[3] = params.quad
- *     B[0] = 0.0
+ *     #B[3] = params.quad #as is constant don't need to update
+ *     cdef double tmp #temporary storage for field calculations
  */
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":581
+/* "quantumc.pyx":638
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void getField(double t, Params *params, double B[4]):             # <<<<<<<<<<<<<<
@@ -5380,33 +6021,31 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
   double __pyx_v_omegaD;
   double __pyx_v_detune;
   __Pyx_RefNannyDeclarations
-  double __pyx_t_1;
-  int __pyx_t_2;
-  long __pyx_t_3;
-  int __pyx_t_4;
+  int __pyx_t_1;
+  long __pyx_t_2;
+  int __pyx_t_3;
   __Pyx_RefNannySetupContext("getField", 0);
 
-  /* "quantumc.pyx":585
+  /* "quantumc.pyx":642
  *     cdef double omegaD, detune
  * 
- *     B[3] = params.quad             # <<<<<<<<<<<<<<
+ *     B[3] = M_TAU*params.quad             # <<<<<<<<<<<<<<
  *     B[0] = 0.0
  *     B[1] = 0.0
  */
-  __pyx_t_1 = __pyx_v_params->quad;
-  (__pyx_v_B[3]) = __pyx_t_1;
+  (__pyx_v_B[3]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params->quad);
 
-  /* "quantumc.pyx":586
+  /* "quantumc.pyx":643
  * 
- *     B[3] = params.quad
+ *     B[3] = M_TAU*params.quad
  *     B[0] = 0.0             # <<<<<<<<<<<<<<
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor
  */
   (__pyx_v_B[0]) = 0.0;
 
-  /* "quantumc.pyx":587
- *     B[3] = params.quad
+  /* "quantumc.pyx":644
+ *     B[3] = M_TAU*params.quad
  *     B[0] = 0.0
  *     B[1] = 0.0             # <<<<<<<<<<<<<<
  *     B[2] = M_TAU*params.larmor
@@ -5414,7 +6053,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
   (__pyx_v_B[1]) = 0.0;
 
-  /* "quantumc.pyx":588
+  /* "quantumc.pyx":645
  *     B[0] = 0.0
  *     B[1] = 0.0
  *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
@@ -5423,37 +6062,37 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
   (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params->larmor);
 
-  /* "quantumc.pyx":591
+  /* "quantumc.pyx":648
  * 
  *     # check if detuning run needs to be applied
  *     if t < params.dett:             # <<<<<<<<<<<<<<
  *         # define generic fields using structure constants
  *         if params.rabi != 0.0:
  */
-  __pyx_t_2 = ((__pyx_v_t < __pyx_v_params->dett) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_1 = ((__pyx_v_t < __pyx_v_params->dett) != 0);
+  if (__pyx_t_1) {
 
-    /* "quantumc.pyx":593
+    /* "quantumc.pyx":650
  *     if t < params.dett:
  *         # define generic fields using structure constants
  *         if params.rabi != 0.0:             # <<<<<<<<<<<<<<
  *             B[0] += M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
  *         if params.xlamp != 0.0:
  */
-    __pyx_t_2 = ((__pyx_v_params->rabi != 0.0) != 0);
-    if (__pyx_t_2) {
+    __pyx_t_1 = ((__pyx_v_params->rabi != 0.0) != 0);
+    if (__pyx_t_1) {
 
-      /* "quantumc.pyx":594
+      /* "quantumc.pyx":651
  *         # define generic fields using structure constants
  *         if params.rabi != 0.0:
  *             B[0] += M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)             # <<<<<<<<<<<<<<
  *         if params.xlamp != 0.0:
  *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
  */
-      __pyx_t_3 = 0;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + ((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rabi) * cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rff) * __pyx_v_t))));
+      __pyx_t_2 = 0;
+      (__pyx_v_B[__pyx_t_2]) = ((__pyx_v_B[__pyx_t_2]) + ((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rabi) * cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->rff) * __pyx_v_t))));
 
-      /* "quantumc.pyx":593
+      /* "quantumc.pyx":650
  *     if t < params.dett:
  *         # define generic fields using structure constants
  *         if params.rabi != 0.0:             # <<<<<<<<<<<<<<
@@ -5462,27 +6101,27 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     }
 
-    /* "quantumc.pyx":595
+    /* "quantumc.pyx":652
  *         if params.rabi != 0.0:
  *             B[0] += M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
  *         if params.xlamp != 0.0:             # <<<<<<<<<<<<<<
  *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
  * 
  */
-    __pyx_t_2 = ((__pyx_v_params->xlamp != 0.0) != 0);
-    if (__pyx_t_2) {
+    __pyx_t_1 = ((__pyx_v_params->xlamp != 0.0) != 0);
+    if (__pyx_t_1) {
 
-      /* "quantumc.pyx":596
+      /* "quantumc.pyx":653
  *             B[0] += M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
  *         if params.xlamp != 0.0:
  *             B[0] += params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt             # <<<<<<<<<<<<<<
  * 
  *         # add neural impulse
  */
-      __pyx_t_3 = 0;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->xlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlfreq) * __pyx_v_t) + __pyx_v_params->xlphase))));
+      __pyx_t_2 = 0;
+      (__pyx_v_B[__pyx_t_2]) = ((__pyx_v_B[__pyx_t_2]) + (__pyx_v_params->xlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlfreq) * __pyx_v_t) + __pyx_v_params->xlphase))));
 
-      /* "quantumc.pyx":595
+      /* "quantumc.pyx":652
  *         if params.rabi != 0.0:
  *             B[0] += M_TAU*params.rabi*cos(M_TAU*(params.rff)*t)
  *         if params.xlamp != 0.0:             # <<<<<<<<<<<<<<
@@ -5491,27 +6130,27 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     }
 
-    /* "quantumc.pyx":599
+    /* "quantumc.pyx":656
  * 
  *         # add neural impulse
  *         if params.zlamp != 0.0:             # <<<<<<<<<<<<<<
  *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
  *         if t >= params.nt and t <= params.nte:
  */
-    __pyx_t_2 = ((__pyx_v_params->zlamp != 0.0) != 0);
-    if (__pyx_t_2) {
+    __pyx_t_1 = ((__pyx_v_params->zlamp != 0.0) != 0);
+    if (__pyx_t_1) {
 
-      /* "quantumc.pyx":600
+      /* "quantumc.pyx":657
  *         # add neural impulse
  *         if params.zlamp != 0.0:
  *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt             # <<<<<<<<<<<<<<
  *         if t >= params.nt and t <= params.nte:
  *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
  */
-      __pyx_t_3 = 2;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
+      __pyx_t_2 = 2;
+      (__pyx_v_B[__pyx_t_2]) = ((__pyx_v_B[__pyx_t_2]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
 
-      /* "quantumc.pyx":599
+      /* "quantumc.pyx":656
  * 
  *         # add neural impulse
  *         if params.zlamp != 0.0:             # <<<<<<<<<<<<<<
@@ -5520,35 +6159,35 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     }
 
-    /* "quantumc.pyx":601
+    /* "quantumc.pyx":658
  *         if params.zlamp != 0.0:
  *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
  *         if t >= params.nt and t <= params.nte:             # <<<<<<<<<<<<<<
  *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))
  * 
  */
-    __pyx_t_4 = ((__pyx_v_t >= __pyx_v_params->nt) != 0);
-    if (__pyx_t_4) {
+    __pyx_t_3 = ((__pyx_v_t >= __pyx_v_params->nt) != 0);
+    if (__pyx_t_3) {
     } else {
-      __pyx_t_2 = __pyx_t_4;
+      __pyx_t_1 = __pyx_t_3;
       goto __pyx_L8_bool_binop_done;
     }
-    __pyx_t_4 = ((__pyx_v_t <= __pyx_v_params->nte) != 0);
-    __pyx_t_2 = __pyx_t_4;
+    __pyx_t_3 = ((__pyx_v_t <= __pyx_v_params->nte) != 0);
+    __pyx_t_1 = __pyx_t_3;
     __pyx_L8_bool_binop_done:;
-    if (__pyx_t_2) {
+    if (__pyx_t_1) {
 
-      /* "quantumc.pyx":602
+      /* "quantumc.pyx":659
  *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
  *         if t >= params.nt and t <= params.nte:
  *            B[2] += params.sA*sin(M_TAU*params.nf*(t-params.nt))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-      __pyx_t_3 = 2;
-      (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->sA * sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->nf) * (__pyx_v_t - __pyx_v_params->nt)))));
+      __pyx_t_2 = 2;
+      (__pyx_v_B[__pyx_t_2]) = ((__pyx_v_B[__pyx_t_2]) + (__pyx_v_params->sA * sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params->nf) * (__pyx_v_t - __pyx_v_params->nt)))));
 
-      /* "quantumc.pyx":601
+      /* "quantumc.pyx":658
  *         if params.zlamp != 0.0:
  *            B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt
  *         if t >= params.nt and t <= params.nte:             # <<<<<<<<<<<<<<
@@ -5557,7 +6196,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     }
 
-    /* "quantumc.pyx":591
+    /* "quantumc.pyx":648
  * 
  *     # check if detuning run needs to be applied
  *     if t < params.dett:             # <<<<<<<<<<<<<<
@@ -5567,25 +6206,25 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
     goto __pyx_L3;
   }
 
-  /* "quantumc.pyx":605
+  /* "quantumc.pyx":662
  * 
  * 
  *     elif t < params.dete and params.beta > 0.0:             # <<<<<<<<<<<<<<
  *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
  *         detune = params.detA*tanh(params.beta*(t-params.dett))
  */
-  __pyx_t_4 = ((__pyx_v_t < __pyx_v_params->dete) != 0);
-  if (__pyx_t_4) {
+  __pyx_t_3 = ((__pyx_v_t < __pyx_v_params->dete) != 0);
+  if (__pyx_t_3) {
   } else {
-    __pyx_t_2 = __pyx_t_4;
+    __pyx_t_1 = __pyx_t_3;
     goto __pyx_L10_bool_binop_done;
   }
-  __pyx_t_4 = ((__pyx_v_params->beta > 0.0) != 0);
-  __pyx_t_2 = __pyx_t_4;
+  __pyx_t_3 = ((__pyx_v_params->beta > 0.0) != 0);
+  __pyx_t_1 = __pyx_t_3;
   __pyx_L10_bool_binop_done:;
-  if (__pyx_t_2) {
+  if (__pyx_t_1) {
 
-    /* "quantumc.pyx":606
+    /* "quantumc.pyx":663
  * 
  *     elif t < params.dete and params.beta > 0.0:
  *         omegaD = params.rabi*sech(params.beta*(t-params.dett))             # <<<<<<<<<<<<<<
@@ -5594,7 +6233,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     __pyx_v_omegaD = (__pyx_v_params->rabi * __pyx_f_8quantumc_sech((__pyx_v_params->beta * (__pyx_v_t - __pyx_v_params->dett))));
 
-    /* "quantumc.pyx":607
+    /* "quantumc.pyx":664
  *     elif t < params.dete and params.beta > 0.0:
  *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
  *         detune = params.detA*tanh(params.beta*(t-params.dett))             # <<<<<<<<<<<<<<
@@ -5603,7 +6242,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     __pyx_v_detune = (__pyx_v_params->detA * __pyx_f_8quantumc_tanh((__pyx_v_params->beta * (__pyx_v_t - __pyx_v_params->dett))));
 
-    /* "quantumc.pyx":608
+    /* "quantumc.pyx":665
  *         omegaD = params.rabi*sech(params.beta*(t-params.dett))
  *         detune = params.detA*tanh(params.beta*(t-params.dett))
  *         B[0] = M_TAU*(omegaD*cos(M_TAU*(params.rff+detune)*(t-params.dett)))             # <<<<<<<<<<<<<<
@@ -5612,7 +6251,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
  */
     (__pyx_v_B[0]) = (__pyx_v_8quantumc_M_TAU * (__pyx_v_omegaD * cos(((__pyx_v_8quantumc_M_TAU * (__pyx_v_params->rff + __pyx_v_detune)) * (__pyx_v_t - __pyx_v_params->dett)))));
 
-    /* "quantumc.pyx":605
+    /* "quantumc.pyx":662
  * 
  * 
  *     elif t < params.dete and params.beta > 0.0:             # <<<<<<<<<<<<<<
@@ -5622,7 +6261,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
     goto __pyx_L3;
   }
 
-  /* "quantumc.pyx":612
+  /* "quantumc.pyx":669
  *     else:
  *         # detuning truncation
  *         B[0] = params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt             # <<<<<<<<<<<<<<
@@ -5632,19 +6271,19 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
   /*else*/ {
     (__pyx_v_B[0]) = (__pyx_v_params->xlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->xlfreq) * __pyx_v_t) + __pyx_v_params->xlphase)));
 
-    /* "quantumc.pyx":613
+    /* "quantumc.pyx":670
  *         # detuning truncation
  *         B[0] = params.xlamp*sin(M_TAU*params.xlfreq*t + params.xlphase)#*params.dt
  *         B[2] += params.zlamp*sin(M_TAU*params.zlfreq*t + params.zlphase)#*params.dt             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_3 = 2;
-    (__pyx_v_B[__pyx_t_3]) = ((__pyx_v_B[__pyx_t_3]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
+    __pyx_t_2 = 2;
+    (__pyx_v_B[__pyx_t_2]) = ((__pyx_v_B[__pyx_t_2]) + (__pyx_v_params->zlamp * sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params->zlfreq) * __pyx_v_t) + __pyx_v_params->zlphase))));
   }
   __pyx_L3:;
 
-  /* "quantumc.pyx":581
+  /* "quantumc.pyx":638
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * cdef inline void getField(double t, Params *params, double B[4]):             # <<<<<<<<<<<<<<
@@ -5656,7 +6295,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_getField(double __pyx_v_t, __pyx_t_8
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":620
+/* "quantumc.pyx":677
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def Bfield(double [:] time, paramdict, double [:,:] Bfield):             # <<<<<<<<<<<<<<
@@ -5700,17 +6339,17 @@ static PyObject *__pyx_pw_8quantumc_7Bfield(PyObject *__pyx_self, PyObject *__py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_paramdict)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, 1); __PYX_ERR(0, 620, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, 1); __PYX_ERR(0, 677, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Bfield)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, 2); __PYX_ERR(0, 620, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, 2); __PYX_ERR(0, 677, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Bfield") < 0)) __PYX_ERR(0, 620, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Bfield") < 0)) __PYX_ERR(0, 677, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -5719,13 +6358,13 @@ static PyObject *__pyx_pw_8quantumc_7Bfield(PyObject *__pyx_self, PyObject *__py
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_time = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_time.memview)) __PYX_ERR(0, 620, __pyx_L3_error)
+    __pyx_v_time = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_time.memview)) __PYX_ERR(0, 677, __pyx_L3_error)
     __pyx_v_paramdict = values[1];
-    __pyx_v_Bfield = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_Bfield.memview)) __PYX_ERR(0, 620, __pyx_L3_error)
+    __pyx_v_Bfield = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_Bfield.memview)) __PYX_ERR(0, 677, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 620, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("Bfield", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 677, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("quantumc.Bfield", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5741,88 +6380,269 @@ static PyObject *__pyx_pw_8quantumc_7Bfield(PyObject *__pyx_self, PyObject *__py
 static PyObject *__pyx_pf_8quantumc_6Bfield(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_time, PyObject *__pyx_v_paramdict, __Pyx_memviewslice __pyx_v_Bfield) {
   __pyx_t_8quantumc_Params __pyx_v_params;
   double __pyx_v_B[4];
+  CYTHON_UNUSED double __pyx_v_t;
   int __pyx_v_i;
   int __pyx_v_j;
-  int __pyx_v_steps;
+  unsigned long __pyx_v_steps;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __pyx_t_8quantumc_Params __pyx_t_1;
-  size_t __pyx_t_2;
+  double __pyx_t_2;
   int __pyx_t_3;
-  int __pyx_t_4;
-  int __pyx_t_5;
-  Py_ssize_t __pyx_t_6;
+  long __pyx_t_4;
+  unsigned long __pyx_t_5;
+  unsigned long __pyx_t_6;
   int __pyx_t_7;
   Py_ssize_t __pyx_t_8;
-  Py_ssize_t __pyx_t_9;
+  int __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("Bfield", 0);
 
-  /* "quantumc.pyx":626
+  /* "quantumc.pyx":683
  *     # inialise C-type dictionary -> structure
  *     cdef Params params
  *     params = paramdict             # <<<<<<<<<<<<<<
  *     cdef double B[4]
  * 
  */
-  __pyx_t_1 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 626, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert__from_py___pyx_t_8quantumc_Params(__pyx_v_paramdict); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 683, __pyx_L1_error)
   __pyx_v_params = __pyx_t_1;
 
-  /* "quantumc.pyx":631
+  /* "quantumc.pyx":687
+ * 
+ *     #Intialise cos and sin values for fast field calculations
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ */
+  __pyx_v_params.cdtrabi = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
+
+  /* "quantumc.pyx":688
+ *     #Intialise cos and sin values for fast field calculations
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ */
+  __pyx_v_params.sdtrabi = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.dt));
+
+  /* "quantumc.pyx":689
+ *     params.cdtrabi = cos(M_TAU*params.rff*params.dt                 )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ * 
+ */
+  __pyx_v_params.ctcrabi = cos((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart) + __pyx_v_params.rph));
+
+  /* "quantumc.pyx":690
+ *     params.sdtrabi = sin(M_TAU*params.rff*params.dt                 ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcrabi = cos(M_TAU*params.rff*params.tstart + params.rph) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ * 
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ */
+  __pyx_v_params.stcrabi = sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rff) * __pyx_v_params.tstart) + __pyx_v_params.rph));
+
+  /* "quantumc.pyx":692
+ *     params.stcrabi = sin(M_TAU*params.rff*params.tstart + params.rph)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ * 
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ */
+  __pyx_v_params.cdtxl = cos(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.dt));
+
+  /* "quantumc.pyx":693
+ * 
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation             # <<<<<<<<<<<<<<
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ */
+  __pyx_v_params.sdtxl = sin(((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.dt));
+
+  /* "quantumc.pyx":694
+ *     params.cdtxl   = cos(M_TAU*params.xlfreq*params.dt                  )#2*Pi*Rabi*cos(2*Pi*rff*dt) - constant over simulation
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ * 
+ */
+  __pyx_v_params.ctcxl = cos((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.tr2) + __pyx_v_params.xlphase));
+
+  /* "quantumc.pyx":695
+ *     params.sdtxl   = sin(M_TAU*params.xlfreq*params.dt                  ) #2*Pi*Rabi*sin(2*Pi*rff*dt) - constant over simulation
+ *     params.ctcxl   = cos(M_TAU*params.xlfreq*params.tr2 + params.xlphase) #cos(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation
+ *     params.stcxl   = sin(M_TAU*params.xlfreq*params.tr2 + params.xlphase)  #sin(2*Pi*rff*t) - where t is the 'current simulation' time. This changes over simulation             # <<<<<<<<<<<<<<
+ * 
+ *     #print(params.xlamp,params.cdtxl,params.sdtxl,params.stcxl)
+ */
+  __pyx_v_params.stcxl = sin((((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlfreq) * __pyx_v_params.tr2) + __pyx_v_params.xlphase));
+
+  /* "quantumc.pyx":699
+ *     #print(params.xlamp,params.cdtxl,params.sdtxl,params.stcxl)
+ *     # set time step to half
+ *     cdef double t = params.tstart             # <<<<<<<<<<<<<<
+ *     params.dt *= 0.5
+ * 
+ */
+  __pyx_t_2 = __pyx_v_params.tstart;
+  __pyx_v_t = __pyx_t_2;
+
+  /* "quantumc.pyx":700
+ *     # set time step to half
+ *     cdef double t = params.tstart
+ *     params.dt *= 0.5             # <<<<<<<<<<<<<<
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi
+ */
+  __pyx_v_params.dt = (__pyx_v_params.dt * 0.5);
+
+  /* "quantumc.pyx":702
+ *     params.dt *= 0.5
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi             # <<<<<<<<<<<<<<
+ *     if params.tr2 == params.tstart:
+ *         #print('yay')
+ */
+  (__pyx_v_B[0]) = ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.rabi) * __pyx_v_params.ctcrabi);
+
+  /* "quantumc.pyx":703
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi
+ *     if params.tr2 == params.tstart:             # <<<<<<<<<<<<<<
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ */
+  __pyx_t_3 = ((__pyx_v_params.tr2 == __pyx_v_params.tstart) != 0);
+  if (__pyx_t_3) {
+
+    /* "quantumc.pyx":705
+ *     if params.tr2 == params.tstart:
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl             # <<<<<<<<<<<<<<
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor
+ */
+    __pyx_t_4 = 0;
+    (__pyx_v_B[__pyx_t_4]) = ((__pyx_v_B[__pyx_t_4]) + ((__pyx_v_8quantumc_M_TAU * __pyx_v_params.xlamp) * __pyx_v_params.ctcxl));
+
+    /* "quantumc.pyx":703
+ * 
+ *     B[0] = M_TAU*params.rabi*params.ctcrabi
+ *     if params.tr2 == params.tstart:             # <<<<<<<<<<<<<<
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ */
+  }
+
+  /* "quantumc.pyx":706
+ *         #print('yay')
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ *     B[1] = 0.0             # <<<<<<<<<<<<<<
+ *     B[2] = M_TAU*params.larmor
+ *     B[3] = M_TAU*params.quad
+ */
+  (__pyx_v_B[1]) = 0.0;
+
+  /* "quantumc.pyx":707
+ *         B[0] += M_TAU*params.xlamp*params.ctcxl
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor             # <<<<<<<<<<<<<<
+ *     B[3] = M_TAU*params.quad
+ * 
+ */
+  (__pyx_v_B[2]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.larmor);
+
+  /* "quantumc.pyx":708
+ *     B[1] = 0.0
+ *     B[2] = M_TAU*params.larmor
+ *     B[3] = M_TAU*params.quad             # <<<<<<<<<<<<<<
+ * 
+ *     # define loop constants
+ */
+  (__pyx_v_B[3]) = (__pyx_v_8quantumc_M_TAU * __pyx_v_params.quad);
+
+  /* "quantumc.pyx":712
  *     # define loop constants
  *     cdef int i, j
- *     cdef int steps = len(time)             # <<<<<<<<<<<<<<
- * 
+ *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt)             # <<<<<<<<<<<<<<
+ *     print('k')
  *     # iterate through time
  */
-  __pyx_t_2 = __Pyx_MemoryView_Len(__pyx_v_time); 
-  __pyx_v_steps = __pyx_t_2;
+  __pyx_t_2 = (__pyx_v_params.tend - __pyx_v_params.tstart);
+  if (unlikely(__pyx_v_params.dt == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 712, __pyx_L1_error)
+  }
+  __pyx_v_steps = ((int)ceil((__pyx_t_2 / __pyx_v_params.dt)));
 
-  /* "quantumc.pyx":634
- * 
+  /* "quantumc.pyx":713
+ *     cdef int i, j
+ *     cdef unsigned long int steps = <int>ceil((params.tend-params.tstart)/params.dt)
+ *     print('k')             # <<<<<<<<<<<<<<
+ *     # iterate through time
+ *     for i in range(0,steps):
+ */
+  if (__Pyx_PrintOne(0, __pyx_n_s_k) < 0) __PYX_ERR(0, 713, __pyx_L1_error)
+
+  /* "quantumc.pyx":715
+ *     print('k')
  *     # iterate through time
  *     for i in range(0,steps):             # <<<<<<<<<<<<<<
- *         getField(time[i], &params, B)
- *         for j in range(0,3):
+ *         fastB(time[i], &params, B)
+ *         for j in range(0,4):
  */
-  __pyx_t_3 = __pyx_v_steps;
-  __pyx_t_4 = __pyx_t_3;
-  for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
-    __pyx_v_i = __pyx_t_5;
+  __pyx_t_5 = __pyx_v_steps;
+  __pyx_t_6 = __pyx_t_5;
+  for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
+    __pyx_v_i = __pyx_t_7;
 
-    /* "quantumc.pyx":635
+    /* "quantumc.pyx":716
  *     # iterate through time
  *     for i in range(0,steps):
- *         getField(time[i], &params, B)             # <<<<<<<<<<<<<<
- *         for j in range(0,3):
+ *         fastB(time[i], &params, B)             # <<<<<<<<<<<<<<
+ *         for j in range(0,4):
  *             Bfield[i][j] = B[j]
  */
-    __pyx_t_6 = __pyx_v_i;
-    __pyx_f_8quantumc_getField((*((double *) ( /* dim=0 */ (__pyx_v_time.data + __pyx_t_6 * __pyx_v_time.strides[0]) ))), (&__pyx_v_params), __pyx_v_B);
+    __pyx_t_8 = __pyx_v_i;
+    __pyx_f_8quantumc_fastB((*((double *) ( /* dim=0 */ (__pyx_v_time.data + __pyx_t_8 * __pyx_v_time.strides[0]) ))), (&__pyx_v_params), __pyx_v_B);
 
-    /* "quantumc.pyx":636
+    /* "quantumc.pyx":717
  *     for i in range(0,steps):
- *         getField(time[i], &params, B)
- *         for j in range(0,3):             # <<<<<<<<<<<<<<
+ *         fastB(time[i], &params, B)
+ *         for j in range(0,4):             # <<<<<<<<<<<<<<
  *             Bfield[i][j] = B[j]
  * 
  */
-    for (__pyx_t_7 = 0; __pyx_t_7 < 3; __pyx_t_7+=1) {
-      __pyx_v_j = __pyx_t_7;
+    for (__pyx_t_9 = 0; __pyx_t_9 < 4; __pyx_t_9+=1) {
+      __pyx_v_j = __pyx_t_9;
 
-      /* "quantumc.pyx":637
- *         getField(time[i], &params, B)
- *         for j in range(0,3):
+      /* "quantumc.pyx":718
+ *         fastB(time[i], &params, B)
+ *         for j in range(0,4):
  *             Bfield[i][j] = B[j]             # <<<<<<<<<<<<<<
  * 
- * 
+ *     print('yay')
  */
-      __pyx_t_8 = __pyx_v_i;
-      __pyx_t_9 = __pyx_v_j;
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Bfield.data + __pyx_t_8 * __pyx_v_Bfield.strides[0]) ) + __pyx_t_9 * __pyx_v_Bfield.strides[1]) )) = (__pyx_v_B[__pyx_v_j]);
+      __pyx_t_10 = __pyx_v_i;
+      __pyx_t_11 = __pyx_v_j;
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_Bfield.data + __pyx_t_10 * __pyx_v_Bfield.strides[0]) ) + __pyx_t_11 * __pyx_v_Bfield.strides[1]) )) = (__pyx_v_B[__pyx_v_j]);
     }
   }
 
-  /* "quantumc.pyx":620
+  /* "quantumc.pyx":720
+ *             Bfield[i][j] = B[j]
+ * 
+ *     print('yay')             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  if (__Pyx_PrintOne(0, __pyx_n_s_yay) < 0) __PYX_ERR(0, 720, __pyx_L1_error)
+
+  /* "quantumc.pyx":677
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def Bfield(double [:] time, paramdict, double [:,:] Bfield):             # <<<<<<<<<<<<<<
@@ -5844,171 +6664,30 @@ static PyObject *__pyx_pf_8quantumc_6Bfield(CYTHON_UNUSED PyObject *__pyx_self, 
   return __pyx_r;
 }
 
-/* "quantumc.pyx":643
+/* "quantumc.pyx":726
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * cdef inline void updateState33(double dt, double complex state[3], double Eval[3], double complex Evec[3][3]):             # <<<<<<<<<<<<<<
- *     '''    cdef int i, j, k
- *     cdef double complex e[3]
+ * cdef inline void updateState33(double complex state[3], double complex U[3][3]):             # <<<<<<<<<<<<<<
+ *     cdef double complex state_out[3]
+ *     state_out[0] = U[0][0] * state[0] + U[0][1] * state[1] + U[0][2] * state[2]
  */
 
-static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double __pyx_v_dt, __pyx_t_double_complex *__pyx_v_state, double *__pyx_v_Eval, __pyx_t_double_complex (*__pyx_v_Evec)[3]) {
-  __pyx_t_double_complex __pyx_v_e[3];
-  __pyx_t_double_complex __pyx_v_U[3][3];
+static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(__pyx_t_double_complex *__pyx_v_state, __pyx_t_double_complex (*__pyx_v_U)[3]) {
   __pyx_t_double_complex __pyx_v_state_out[3];
   __Pyx_RefNannyDeclarations
-  long __pyx_t_1;
   __Pyx_RefNannySetupContext("updateState33", 0);
 
-  /* "quantumc.pyx":673
+  /* "quantumc.pyx":728
+ * cdef inline void updateState33(double complex state[3], double complex U[3][3]):
  *     cdef double complex state_out[3]
- * 
- *     Eval[0] *= dt             # <<<<<<<<<<<<<<
- *     Eval[1] *= dt
- *     Eval[2] *= dt
- */
-  __pyx_t_1 = 0;
-  (__pyx_v_Eval[__pyx_t_1]) = ((__pyx_v_Eval[__pyx_t_1]) * __pyx_v_dt);
-
-  /* "quantumc.pyx":674
- * 
- *     Eval[0] *= dt
- *     Eval[1] *= dt             # <<<<<<<<<<<<<<
- *     Eval[2] *= dt
- * 
- */
-  __pyx_t_1 = 1;
-  (__pyx_v_Eval[__pyx_t_1]) = ((__pyx_v_Eval[__pyx_t_1]) * __pyx_v_dt);
-
-  /* "quantumc.pyx":675
- *     Eval[0] *= dt
- *     Eval[1] *= dt
- *     Eval[2] *= dt             # <<<<<<<<<<<<<<
- * 
- *     e[0] = cos(Eval[0])-1j*sin(Eval[0])
- */
-  __pyx_t_1 = 2;
-  (__pyx_v_Eval[__pyx_t_1]) = ((__pyx_v_Eval[__pyx_t_1]) * __pyx_v_dt);
-
-  /* "quantumc.pyx":677
- *     Eval[2] *= dt
- * 
- *     e[0] = cos(Eval[0])-1j*sin(Eval[0])             # <<<<<<<<<<<<<<
- *     e[1] = cos(Eval[1])-1j*sin(Eval[1])
- *     e[2] = cos(Eval[2])-1j*sin(Eval[2])
- */
-  (__pyx_v_e[0]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_Eval[0])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_Eval[0])), 0)));
-
-  /* "quantumc.pyx":678
- * 
- *     e[0] = cos(Eval[0])-1j*sin(Eval[0])
- *     e[1] = cos(Eval[1])-1j*sin(Eval[1])             # <<<<<<<<<<<<<<
- *     e[2] = cos(Eval[2])-1j*sin(Eval[2])
- * 
- */
-  (__pyx_v_e[1]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_Eval[1])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_Eval[1])), 0)));
-
-  /* "quantumc.pyx":679
- *     e[0] = cos(Eval[0])-1j*sin(Eval[0])
- *     e[1] = cos(Eval[1])-1j*sin(Eval[1])
- *     e[2] = cos(Eval[2])-1j*sin(Eval[2])             # <<<<<<<<<<<<<<
- * 
- *     U[0][0] = e[0]*Evec[0][0].conjugate()*Evec[0][0] + e[1]*Evec[0][1].conjugate()*Evec[0][1] + e[2]*Evec[0][2].conjugate()*Evec[0][2]
- */
-  (__pyx_v_e[2]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts(cos((__pyx_v_Eval[2])), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts(sin((__pyx_v_Eval[2])), 0)));
-
-  /* "quantumc.pyx":681
- *     e[2] = cos(Eval[2])-1j*sin(Eval[2])
- * 
- *     U[0][0] = e[0]*Evec[0][0].conjugate()*Evec[0][0] + e[1]*Evec[0][1].conjugate()*Evec[0][1] + e[2]*Evec[0][2].conjugate()*Evec[0][2]             # <<<<<<<<<<<<<<
- *     U[1][0] = e[0]*Evec[0][0].conjugate()*Evec[1][0] + e[1]*Evec[0][1].conjugate()*Evec[1][1] + e[2]*Evec[0][2].conjugate()*Evec[1][2]
- *     U[2][0] = e[0]*Evec[0][0].conjugate()*Evec[2][0] + e[1]*Evec[0][1].conjugate()*Evec[2][1] + e[2]*Evec[0][2].conjugate()*Evec[2][2]
- */
-  ((__pyx_v_U[0])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[0]))), ((__pyx_v_Evec[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[1]))), ((__pyx_v_Evec[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[2]))), ((__pyx_v_Evec[0])[2])));
-
-  /* "quantumc.pyx":682
- * 
- *     U[0][0] = e[0]*Evec[0][0].conjugate()*Evec[0][0] + e[1]*Evec[0][1].conjugate()*Evec[0][1] + e[2]*Evec[0][2].conjugate()*Evec[0][2]
- *     U[1][0] = e[0]*Evec[0][0].conjugate()*Evec[1][0] + e[1]*Evec[0][1].conjugate()*Evec[1][1] + e[2]*Evec[0][2].conjugate()*Evec[1][2]             # <<<<<<<<<<<<<<
- *     U[2][0] = e[0]*Evec[0][0].conjugate()*Evec[2][0] + e[1]*Evec[0][1].conjugate()*Evec[2][1] + e[2]*Evec[0][2].conjugate()*Evec[2][2]
- *     U[0][1] = e[0]*Evec[1][0].conjugate()*Evec[0][0] + e[1]*Evec[1][1].conjugate()*Evec[0][1] + e[2]*Evec[1][2].conjugate()*Evec[0][2]
- */
-  ((__pyx_v_U[1])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[0]))), ((__pyx_v_Evec[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[1]))), ((__pyx_v_Evec[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[2]))), ((__pyx_v_Evec[1])[2])));
-
-  /* "quantumc.pyx":683
- *     U[0][0] = e[0]*Evec[0][0].conjugate()*Evec[0][0] + e[1]*Evec[0][1].conjugate()*Evec[0][1] + e[2]*Evec[0][2].conjugate()*Evec[0][2]
- *     U[1][0] = e[0]*Evec[0][0].conjugate()*Evec[1][0] + e[1]*Evec[0][1].conjugate()*Evec[1][1] + e[2]*Evec[0][2].conjugate()*Evec[1][2]
- *     U[2][0] = e[0]*Evec[0][0].conjugate()*Evec[2][0] + e[1]*Evec[0][1].conjugate()*Evec[2][1] + e[2]*Evec[0][2].conjugate()*Evec[2][2]             # <<<<<<<<<<<<<<
- *     U[0][1] = e[0]*Evec[1][0].conjugate()*Evec[0][0] + e[1]*Evec[1][1].conjugate()*Evec[0][1] + e[2]*Evec[1][2].conjugate()*Evec[0][2]
- *     U[1][1] = e[0]*Evec[1][0].conjugate()*Evec[1][0] + e[1]*Evec[1][1].conjugate()*Evec[1][1] + e[2]*Evec[1][2].conjugate()*Evec[1][2]
- */
-  ((__pyx_v_U[2])[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[0]))), ((__pyx_v_Evec[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[1]))), ((__pyx_v_Evec[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[0])[2]))), ((__pyx_v_Evec[2])[2])));
-
-  /* "quantumc.pyx":684
- *     U[1][0] = e[0]*Evec[0][0].conjugate()*Evec[1][0] + e[1]*Evec[0][1].conjugate()*Evec[1][1] + e[2]*Evec[0][2].conjugate()*Evec[1][2]
- *     U[2][0] = e[0]*Evec[0][0].conjugate()*Evec[2][0] + e[1]*Evec[0][1].conjugate()*Evec[2][1] + e[2]*Evec[0][2].conjugate()*Evec[2][2]
- *     U[0][1] = e[0]*Evec[1][0].conjugate()*Evec[0][0] + e[1]*Evec[1][1].conjugate()*Evec[0][1] + e[2]*Evec[1][2].conjugate()*Evec[0][2]             # <<<<<<<<<<<<<<
- *     U[1][1] = e[0]*Evec[1][0].conjugate()*Evec[1][0] + e[1]*Evec[1][1].conjugate()*Evec[1][1] + e[2]*Evec[1][2].conjugate()*Evec[1][2]
- *     U[2][1] = e[0]*Evec[1][0].conjugate()*Evec[2][0] + e[1]*Evec[1][1].conjugate()*Evec[2][1] + e[2]*Evec[1][2].conjugate()*Evec[2][2]
- */
-  ((__pyx_v_U[0])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[0]))), ((__pyx_v_Evec[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[1]))), ((__pyx_v_Evec[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[2]))), ((__pyx_v_Evec[0])[2])));
-
-  /* "quantumc.pyx":685
- *     U[2][0] = e[0]*Evec[0][0].conjugate()*Evec[2][0] + e[1]*Evec[0][1].conjugate()*Evec[2][1] + e[2]*Evec[0][2].conjugate()*Evec[2][2]
- *     U[0][1] = e[0]*Evec[1][0].conjugate()*Evec[0][0] + e[1]*Evec[1][1].conjugate()*Evec[0][1] + e[2]*Evec[1][2].conjugate()*Evec[0][2]
- *     U[1][1] = e[0]*Evec[1][0].conjugate()*Evec[1][0] + e[1]*Evec[1][1].conjugate()*Evec[1][1] + e[2]*Evec[1][2].conjugate()*Evec[1][2]             # <<<<<<<<<<<<<<
- *     U[2][1] = e[0]*Evec[1][0].conjugate()*Evec[2][0] + e[1]*Evec[1][1].conjugate()*Evec[2][1] + e[2]*Evec[1][2].conjugate()*Evec[2][2]
- *     U[0][2] = e[0]*Evec[2][0].conjugate()*Evec[0][0] + e[1]*Evec[2][1].conjugate()*Evec[0][1] + e[2]*Evec[2][2].conjugate()*Evec[0][2]
- */
-  ((__pyx_v_U[1])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[0]))), ((__pyx_v_Evec[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[1]))), ((__pyx_v_Evec[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[2]))), ((__pyx_v_Evec[1])[2])));
-
-  /* "quantumc.pyx":686
- *     U[0][1] = e[0]*Evec[1][0].conjugate()*Evec[0][0] + e[1]*Evec[1][1].conjugate()*Evec[0][1] + e[2]*Evec[1][2].conjugate()*Evec[0][2]
- *     U[1][1] = e[0]*Evec[1][0].conjugate()*Evec[1][0] + e[1]*Evec[1][1].conjugate()*Evec[1][1] + e[2]*Evec[1][2].conjugate()*Evec[1][2]
- *     U[2][1] = e[0]*Evec[1][0].conjugate()*Evec[2][0] + e[1]*Evec[1][1].conjugate()*Evec[2][1] + e[2]*Evec[1][2].conjugate()*Evec[2][2]             # <<<<<<<<<<<<<<
- *     U[0][2] = e[0]*Evec[2][0].conjugate()*Evec[0][0] + e[1]*Evec[2][1].conjugate()*Evec[0][1] + e[2]*Evec[2][2].conjugate()*Evec[0][2]
- *     U[1][2] = e[0]*Evec[2][0].conjugate()*Evec[1][0] + e[1]*Evec[2][1].conjugate()*Evec[1][1] + e[2]*Evec[2][2].conjugate()*Evec[1][2]
- */
-  ((__pyx_v_U[2])[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[0]))), ((__pyx_v_Evec[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[1]))), ((__pyx_v_Evec[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[1])[2]))), ((__pyx_v_Evec[2])[2])));
-
-  /* "quantumc.pyx":687
- *     U[1][1] = e[0]*Evec[1][0].conjugate()*Evec[1][0] + e[1]*Evec[1][1].conjugate()*Evec[1][1] + e[2]*Evec[1][2].conjugate()*Evec[1][2]
- *     U[2][1] = e[0]*Evec[1][0].conjugate()*Evec[2][0] + e[1]*Evec[1][1].conjugate()*Evec[2][1] + e[2]*Evec[1][2].conjugate()*Evec[2][2]
- *     U[0][2] = e[0]*Evec[2][0].conjugate()*Evec[0][0] + e[1]*Evec[2][1].conjugate()*Evec[0][1] + e[2]*Evec[2][2].conjugate()*Evec[0][2]             # <<<<<<<<<<<<<<
- *     U[1][2] = e[0]*Evec[2][0].conjugate()*Evec[1][0] + e[1]*Evec[2][1].conjugate()*Evec[1][1] + e[2]*Evec[2][2].conjugate()*Evec[1][2]
- *     U[2][2] = e[0]*Evec[2][0].conjugate()*Evec[2][0] + e[1]*Evec[2][1].conjugate()*Evec[2][1] + e[2]*Evec[2][2].conjugate()*Evec[2][2]
- */
-  ((__pyx_v_U[0])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[0]))), ((__pyx_v_Evec[0])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[1]))), ((__pyx_v_Evec[0])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[2]))), ((__pyx_v_Evec[0])[2])));
-
-  /* "quantumc.pyx":688
- *     U[2][1] = e[0]*Evec[1][0].conjugate()*Evec[2][0] + e[1]*Evec[1][1].conjugate()*Evec[2][1] + e[2]*Evec[1][2].conjugate()*Evec[2][2]
- *     U[0][2] = e[0]*Evec[2][0].conjugate()*Evec[0][0] + e[1]*Evec[2][1].conjugate()*Evec[0][1] + e[2]*Evec[2][2].conjugate()*Evec[0][2]
- *     U[1][2] = e[0]*Evec[2][0].conjugate()*Evec[1][0] + e[1]*Evec[2][1].conjugate()*Evec[1][1] + e[2]*Evec[2][2].conjugate()*Evec[1][2]             # <<<<<<<<<<<<<<
- *     U[2][2] = e[0]*Evec[2][0].conjugate()*Evec[2][0] + e[1]*Evec[2][1].conjugate()*Evec[2][1] + e[2]*Evec[2][2].conjugate()*Evec[2][2]
- * 
- */
-  ((__pyx_v_U[1])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[0]))), ((__pyx_v_Evec[1])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[1]))), ((__pyx_v_Evec[1])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[2]))), ((__pyx_v_Evec[1])[2])));
-
-  /* "quantumc.pyx":689
- *     U[0][2] = e[0]*Evec[2][0].conjugate()*Evec[0][0] + e[1]*Evec[2][1].conjugate()*Evec[0][1] + e[2]*Evec[2][2].conjugate()*Evec[0][2]
- *     U[1][2] = e[0]*Evec[2][0].conjugate()*Evec[1][0] + e[1]*Evec[2][1].conjugate()*Evec[1][1] + e[2]*Evec[2][2].conjugate()*Evec[1][2]
- *     U[2][2] = e[0]*Evec[2][0].conjugate()*Evec[2][0] + e[1]*Evec[2][1].conjugate()*Evec[2][1] + e[2]*Evec[2][2].conjugate()*Evec[2][2]             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  ((__pyx_v_U[2])[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[0]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[0]))), ((__pyx_v_Evec[2])[0])), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[1]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[1]))), ((__pyx_v_Evec[2])[1]))), __Pyx_c_prod_double(__Pyx_c_prod_double((__pyx_v_e[2]), __Pyx_c_conj_double(((__pyx_v_Evec[2])[2]))), ((__pyx_v_Evec[2])[2])));
-
-  /* "quantumc.pyx":692
- * 
- * 
  *     state_out[0] = U[0][0] * state[0] + U[0][1] * state[1] + U[0][2] * state[2]             # <<<<<<<<<<<<<<
  *     state_out[1] = U[1][0] * state[0] + U[1][1] * state[1] + U[1][2] * state[2]
  *     state_out[2] = U[2][0] * state[0] + U[2][1] * state[1] + U[2][2] * state[2]
  */
   (__pyx_v_state_out[0]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(((__pyx_v_U[0])[0]), (__pyx_v_state[0])), __Pyx_c_prod_double(((__pyx_v_U[0])[1]), (__pyx_v_state[1]))), __Pyx_c_prod_double(((__pyx_v_U[0])[2]), (__pyx_v_state[2])));
 
-  /* "quantumc.pyx":693
- * 
+  /* "quantumc.pyx":729
+ *     cdef double complex state_out[3]
  *     state_out[0] = U[0][0] * state[0] + U[0][1] * state[1] + U[0][2] * state[2]
  *     state_out[1] = U[1][0] * state[0] + U[1][1] * state[1] + U[1][2] * state[2]             # <<<<<<<<<<<<<<
  *     state_out[2] = U[2][0] * state[0] + U[2][1] * state[1] + U[2][2] * state[2]
@@ -6016,7 +6695,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double __pyx_v_dt, __p
  */
   (__pyx_v_state_out[1]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(((__pyx_v_U[1])[0]), (__pyx_v_state[0])), __Pyx_c_prod_double(((__pyx_v_U[1])[1]), (__pyx_v_state[1]))), __Pyx_c_prod_double(((__pyx_v_U[1])[2]), (__pyx_v_state[2])));
 
-  /* "quantumc.pyx":694
+  /* "quantumc.pyx":730
  *     state_out[0] = U[0][0] * state[0] + U[0][1] * state[1] + U[0][2] * state[2]
  *     state_out[1] = U[1][0] * state[0] + U[1][1] * state[1] + U[1][2] * state[2]
  *     state_out[2] = U[2][0] * state[0] + U[2][1] * state[1] + U[2][2] * state[2]             # <<<<<<<<<<<<<<
@@ -6025,7 +6704,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double __pyx_v_dt, __p
  */
   (__pyx_v_state_out[2]) = __Pyx_c_sum_double(__Pyx_c_sum_double(__Pyx_c_prod_double(((__pyx_v_U[2])[0]), (__pyx_v_state[0])), __Pyx_c_prod_double(((__pyx_v_U[2])[1]), (__pyx_v_state[1]))), __Pyx_c_prod_double(((__pyx_v_U[2])[2]), (__pyx_v_state[2])));
 
-  /* "quantumc.pyx":696
+  /* "quantumc.pyx":732
  *     state_out[2] = U[2][0] * state[0] + U[2][1] * state[1] + U[2][2] * state[2]
  * 
  *     state[0]  = state_out[0]             # <<<<<<<<<<<<<<
@@ -6034,7 +6713,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double __pyx_v_dt, __p
  */
   (__pyx_v_state[0]) = (__pyx_v_state_out[0]);
 
-  /* "quantumc.pyx":697
+  /* "quantumc.pyx":733
  * 
  *     state[0]  = state_out[0]
  *     state[1]  = state_out[1]             # <<<<<<<<<<<<<<
@@ -6043,28 +6722,28 @@ static CYTHON_INLINE void __pyx_f_8quantumc_updateState33(double __pyx_v_dt, __p
  */
   (__pyx_v_state[1]) = (__pyx_v_state_out[1]);
 
-  /* "quantumc.pyx":698
+  /* "quantumc.pyx":734
  *     state[0]  = state_out[0]
  *     state[1]  = state_out[1]
  *     state[2]  = state_out[2]             # <<<<<<<<<<<<<<
  * 
- *     #print('U')
+ *     ##print('U')
  */
   (__pyx_v_state[2]) = (__pyx_v_state_out[2]);
 
-  /* "quantumc.pyx":643
+  /* "quantumc.pyx":726
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * cdef inline void updateState33(double dt, double complex state[3], double Eval[3], double complex Evec[3][3]):             # <<<<<<<<<<<<<<
- *     '''    cdef int i, j, k
- *     cdef double complex e[3]
+ * cdef inline void updateState33(double complex state[3], double complex U[3][3]):             # <<<<<<<<<<<<<<
+ *     cdef double complex state_out[3]
+ *     state_out[0] = U[0][0] * state[0] + U[0][1] * state[1] + U[0][2] * state[2]
  */
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":711
+/* "quantumc.pyx":747
  * @cython.cdivision(True)
  * # ----------------------------------------------------------------------------
  * cdef inline void eval33(double B[4], double w[3]):             # <<<<<<<<<<<<<<
@@ -6080,117 +6759,199 @@ static CYTHON_INLINE void __pyx_f_8quantumc_eval33(double *__pyx_v_B, double *__
   double __pyx_v_q2;
   double __pyx_v_B2;
   __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  long __pyx_t_2;
   __Pyx_RefNannySetupContext("eval33", 0);
 
-  /* "quantumc.pyx":724
- * 
+  /* "quantumc.pyx":761
  *     cdef double r, s, u, c, q2, B2
- *     q2 = B[3]*B[3]             # <<<<<<<<<<<<<<
- *     B2 = B[0]*B[0]+B[1]*B[1]+B[2]*B[2]
  * 
- */
-  __pyx_v_q2 = ((__pyx_v_B[3]) * (__pyx_v_B[3]));
-
-  /* "quantumc.pyx":725
- *     cdef double r, s, u, c, q2, B2
- *     q2 = B[3]*B[3]
  *     B2 = B[0]*B[0]+B[1]*B[1]+B[2]*B[2]             # <<<<<<<<<<<<<<
  * 
- *     r = sqrt((q2/3.0+B2)/3.0)
+ *     if B[3] == 0.0:
  */
   __pyx_v_B2 = ((((__pyx_v_B[0]) * (__pyx_v_B[0])) + ((__pyx_v_B[1]) * (__pyx_v_B[1]))) + ((__pyx_v_B[2]) * (__pyx_v_B[2])));
 
-  /* "quantumc.pyx":727
+  /* "quantumc.pyx":763
  *     B2 = B[0]*B[0]+B[1]*B[1]+B[2]*B[2]
  * 
- *     r = sqrt((q2/3.0+B2)/3.0)             # <<<<<<<<<<<<<<
- *     s = 1.0/27.0*B[3]*(q2-9.0*B2)
- *     ###print(r)
+ *     if B[3] == 0.0:             # <<<<<<<<<<<<<<
+ *         #With no quadratic Zeeman shift |B| defines splitting
+ *         w[2] = sqrt(B2)
  */
-  __pyx_v_r = sqrt((((__pyx_v_q2 / 3.0) + __pyx_v_B2) / 3.0));
+  __pyx_t_1 = (((__pyx_v_B[3]) == 0.0) != 0);
+  if (__pyx_t_1) {
 
-  /* "quantumc.pyx":728
- * 
- *     r = sqrt((q2/3.0+B2)/3.0)
- *     s = 1.0/27.0*B[3]*(q2-9.0*B2)             # <<<<<<<<<<<<<<
- *     ###print(r)
- *     u = 1.0/3.0*acos(s/(r*r*r))
+    /* "quantumc.pyx":765
+ *     if B[3] == 0.0:
+ *         #With no quadratic Zeeman shift |B| defines splitting
+ *         w[2] = sqrt(B2)             # <<<<<<<<<<<<<<
+ *         w[1] = 0.0
+ *         w[0] = -w[2]
  */
-  __pyx_v_s = (((1.0 / 27.0) * (__pyx_v_B[3])) * (__pyx_v_q2 - (9.0 * __pyx_v_B2)));
+    (__pyx_v_w[2]) = sqrt(__pyx_v_B2);
 
-  /* "quantumc.pyx":730
- *     s = 1.0/27.0*B[3]*(q2-9.0*B2)
- *     ###print(r)
- *     u = 1.0/3.0*acos(s/(r*r*r))             # <<<<<<<<<<<<<<
- *     #sincos(u, s, c) #computes sin and cos simultaneously
- *     c = cos(u)
+    /* "quantumc.pyx":766
+ *         #With no quadratic Zeeman shift |B| defines splitting
+ *         w[2] = sqrt(B2)
+ *         w[1] = 0.0             # <<<<<<<<<<<<<<
+ *         w[0] = -w[2]
+ *     else:
  */
-  __pyx_v_u = ((1.0 / 3.0) * acos((__pyx_v_s / ((__pyx_v_r * __pyx_v_r) * __pyx_v_r))));
+    (__pyx_v_w[1]) = 0.0;
 
-  /* "quantumc.pyx":732
- *     u = 1.0/3.0*acos(s/(r*r*r))
- *     #sincos(u, s, c) #computes sin and cos simultaneously
- *     c = cos(u)             # <<<<<<<<<<<<<<
- *     #s = sin(u)
- *     s = sqrt(1-cos(u)**2)
+    /* "quantumc.pyx":767
+ *         w[2] = sqrt(B2)
+ *         w[1] = 0.0
+ *         w[0] = -w[2]             # <<<<<<<<<<<<<<
+ *     else:
+ *         #Use transformation from wiki and solve cubic equation with q
  */
-  __pyx_v_c = cos(__pyx_v_u);
+    (__pyx_v_w[0]) = (-(__pyx_v_w[2]));
 
-  /* "quantumc.pyx":734
- *     c = cos(u)
- *     #s = sin(u)
- *     s = sqrt(1-cos(u)**2)             # <<<<<<<<<<<<<<
+    /* "quantumc.pyx":763
+ *     B2 = B[0]*B[0]+B[1]*B[1]+B[2]*B[2]
  * 
- *     c *= r
+ *     if B[3] == 0.0:             # <<<<<<<<<<<<<<
+ *         #With no quadratic Zeeman shift |B| defines splitting
+ *         w[2] = sqrt(B2)
  */
-  __pyx_v_s = sqrt((1.0 - pow(cos(__pyx_v_u), 2.0)));
+    goto __pyx_L3;
+  }
 
-  /* "quantumc.pyx":736
- *     s = sqrt(1-cos(u)**2)
- * 
- *     c *= r             # <<<<<<<<<<<<<<
- *     s *= M_SQRT3*r
+  /* "quantumc.pyx":773
+ *         #transform det(H-wI)=0 with w=X+2q/3
+ *         #solve transformed cubic equation. Transform back to get w's
+ *         q2 = B[3]*B[3]             # <<<<<<<<<<<<<<
+ *         r = sqrt((q2/3.0+B2)/3.0)
+ *         s = -B[3]*(q2/27.0+B2/6.0-0.5*B[2]*B[2])
+ */
+  /*else*/ {
+    __pyx_v_q2 = ((__pyx_v_B[3]) * (__pyx_v_B[3]));
+
+    /* "quantumc.pyx":774
+ *         #solve transformed cubic equation. Transform back to get w's
+ *         q2 = B[3]*B[3]
+ *         r = sqrt((q2/3.0+B2)/3.0)             # <<<<<<<<<<<<<<
+ *         s = -B[3]*(q2/27.0+B2/6.0-0.5*B[2]*B[2])
+ *         ####print(r)
+ */
+    __pyx_v_r = sqrt((((__pyx_v_q2 / 3.0) + __pyx_v_B2) / 3.0));
+
+    /* "quantumc.pyx":775
+ *         q2 = B[3]*B[3]
+ *         r = sqrt((q2/3.0+B2)/3.0)
+ *         s = -B[3]*(q2/27.0+B2/6.0-0.5*B[2]*B[2])             # <<<<<<<<<<<<<<
+ *         ####print(r)
+ *         u = acos(s/(r*r*r))/3.0
+ */
+    __pyx_v_s = ((-(__pyx_v_B[3])) * (((__pyx_v_q2 / 27.0) + (__pyx_v_B2 / 6.0)) - ((0.5 * (__pyx_v_B[2])) * (__pyx_v_B[2]))));
+
+    /* "quantumc.pyx":777
+ *         s = -B[3]*(q2/27.0+B2/6.0-0.5*B[2]*B[2])
+ *         ####print(r)
+ *         u = acos(s/(r*r*r))/3.0             # <<<<<<<<<<<<<<
+ *         #sincos(u, s, c) #computes sin and cos simultaneously
+ *         c = cos(u)
+ */
+    __pyx_v_u = (acos((__pyx_v_s / ((__pyx_v_r * __pyx_v_r) * __pyx_v_r))) / 3.0);
+
+    /* "quantumc.pyx":779
+ *         u = acos(s/(r*r*r))/3.0
+ *         #sincos(u, s, c) #computes sin and cos simultaneously
+ *         c = cos(u)             # <<<<<<<<<<<<<<
+ *         s = sin(u)
  * 
  */
-  __pyx_v_c = (__pyx_v_c * __pyx_v_r);
+    __pyx_v_c = cos(__pyx_v_u);
 
-  /* "quantumc.pyx":737
+    /* "quantumc.pyx":780
+ *         #sincos(u, s, c) #computes sin and cos simultaneously
+ *         c = cos(u)
+ *         s = sin(u)             # <<<<<<<<<<<<<<
  * 
- *     c *= r
- *     s *= M_SQRT3*r             # <<<<<<<<<<<<<<
- * 
- *     w[0] = 2*c
+ *         c *= r
  */
-  __pyx_v_s = (__pyx_v_s * (__pyx_v_8quantumc_M_SQRT3 * __pyx_v_r));
+    __pyx_v_s = sin(__pyx_v_u);
 
-  /* "quantumc.pyx":739
- *     s *= M_SQRT3*r
+    /* "quantumc.pyx":782
+ *         s = sin(u)
  * 
- *     w[0] = 2*c             # <<<<<<<<<<<<<<
- *     w[1] = s-c
- *     w[2] = -s-c
- */
-  (__pyx_v_w[0]) = (2.0 * __pyx_v_c);
-
-  /* "quantumc.pyx":740
- * 
- *     w[0] = 2*c
- *     w[1] = s-c             # <<<<<<<<<<<<<<
- *     w[2] = -s-c
+ *         c *= r             # <<<<<<<<<<<<<<
+ *         s *= M_SQRT3*r
  * 
  */
-  (__pyx_v_w[1]) = (__pyx_v_s - __pyx_v_c);
+    __pyx_v_c = (__pyx_v_c * __pyx_v_r);
 
-  /* "quantumc.pyx":741
- *     w[0] = 2*c
- *     w[1] = s-c
- *     w[2] = -s-c             # <<<<<<<<<<<<<<
+    /* "quantumc.pyx":783
+ * 
+ *         c *= r
+ *         s *= M_SQRT3*r             # <<<<<<<<<<<<<<
+ * 
+ *         #Transform back to get roots
+ */
+    __pyx_v_s = (__pyx_v_s * (__pyx_v_8quantumc_M_SQRT3 * __pyx_v_r));
+
+    /* "quantumc.pyx":786
+ * 
+ *         #Transform back to get roots
+ *         w[0] = 2.0*B[3]/3.0             # <<<<<<<<<<<<<<
+ *         w[1] = w[0]
+ *         w[2] = w[0]
+ */
+    (__pyx_v_w[0]) = ((2.0 * (__pyx_v_B[3])) / 3.0);
+
+    /* "quantumc.pyx":787
+ *         #Transform back to get roots
+ *         w[0] = 2.0*B[3]/3.0
+ *         w[1] = w[0]             # <<<<<<<<<<<<<<
+ *         w[2] = w[0]
+ * 
+ */
+    (__pyx_v_w[1]) = (__pyx_v_w[0]);
+
+    /* "quantumc.pyx":788
+ *         w[0] = 2.0*B[3]/3.0
+ *         w[1] = w[0]
+ *         w[2] = w[0]             # <<<<<<<<<<<<<<
+ * 
+ *         w[0] += 2.0*c
+ */
+    (__pyx_v_w[2]) = (__pyx_v_w[0]);
+
+    /* "quantumc.pyx":790
+ *         w[2] = w[0]
+ * 
+ *         w[0] += 2.0*c             # <<<<<<<<<<<<<<
+ *         w[1] += s-c
+ *         w[2] += -s-c
+ */
+    __pyx_t_2 = 0;
+    (__pyx_v_w[__pyx_t_2]) = ((__pyx_v_w[__pyx_t_2]) + (2.0 * __pyx_v_c));
+
+    /* "quantumc.pyx":791
+ * 
+ *         w[0] += 2.0*c
+ *         w[1] += s-c             # <<<<<<<<<<<<<<
+ *         w[2] += -s-c
+ * 
+ */
+    __pyx_t_2 = 1;
+    (__pyx_v_w[__pyx_t_2]) = ((__pyx_v_w[__pyx_t_2]) + (__pyx_v_s - __pyx_v_c));
+
+    /* "quantumc.pyx":792
+ *         w[0] += 2.0*c
+ *         w[1] += s-c
+ *         w[2] += -s-c             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  (__pyx_v_w[2]) = ((-__pyx_v_s) - __pyx_v_c);
+    __pyx_t_2 = 2;
+    (__pyx_v_w[__pyx_t_2]) = ((__pyx_v_w[__pyx_t_2]) + ((-__pyx_v_s) - __pyx_v_c));
+  }
+  __pyx_L3:;
 
-  /* "quantumc.pyx":711
+  /* "quantumc.pyx":747
  * @cython.cdivision(True)
  * # ----------------------------------------------------------------------------
  * cdef inline void eval33(double B[4], double w[3]):             # <<<<<<<<<<<<<<
@@ -6202,436 +6963,7 @@ static CYTHON_INLINE void __pyx_f_8quantumc_eval33(double *__pyx_v_B, double *__
   __Pyx_RefNannyFinishContext();
 }
 
-/* "quantumc.pyx":748
- * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * @cython.cdivision(True)
- * cdef void esys33(double B[4], double w[3], double complex Q[3][3]):             # <<<<<<<<<<<<<<
- * #based on the algorithm dsyevh3
- * # ----------------------------------------------------------------------------
- */
-
-static void __pyx_f_8quantumc_esys33(double *__pyx_v_B, double *__pyx_v_w, __pyx_t_double_complex (*__pyx_v_Q)[3]) {
-  double __pyx_v_norm;
-  double __pyx_v_error;
-  double __pyx_v_t;
-  double __pyx_v_u;
-  int __pyx_v_j;
-  __pyx_t_double_complex __pyx_v_H0;
-  __pyx_t_double_complex __pyx_v_H1;
-  double __pyx_v_B2x;
-  double __pyx_v_B2y;
-  __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  int __pyx_t_2;
-  __Pyx_RefNannySetupContext("esys33", 0);
-
-  /* "quantumc.pyx":779
- *   # Calculate eigenvalues
- *     ###print(B[0],B[1],B[2])
- *     eval33(B, w)             # <<<<<<<<<<<<<<
- *     ###print(w[0],w[1],w[2])
- *     #Calculates maximum eigenvalue and sets error bound
- */
-  __pyx_f_8quantumc_eval33(__pyx_v_B, __pyx_v_w);
-
-  /* "quantumc.pyx":783
- *     #Calculates maximum eigenvalue and sets error bound
- * 
- *     t = abs(w[0])             # <<<<<<<<<<<<<<
- *     u = abs(w[1])
- *     if (u > t):
- */
-  __pyx_v_t = fabs((__pyx_v_w[0]));
-
-  /* "quantumc.pyx":784
- * 
- *     t = abs(w[0])
- *     u = abs(w[1])             # <<<<<<<<<<<<<<
- *     if (u > t):
- *         t = u
- */
-  __pyx_v_u = fabs((__pyx_v_w[1]));
-
-  /* "quantumc.pyx":785
- *     t = abs(w[0])
- *     u = abs(w[1])
- *     if (u > t):             # <<<<<<<<<<<<<<
- *         t = u
- *     u = abs(w[2])
- */
-  __pyx_t_1 = ((__pyx_v_u > __pyx_v_t) != 0);
-  if (__pyx_t_1) {
-
-    /* "quantumc.pyx":786
- *     u = abs(w[1])
- *     if (u > t):
- *         t = u             # <<<<<<<<<<<<<<
- *     u = abs(w[2])
- *     if (u > t):
- */
-    __pyx_v_t = __pyx_v_u;
-
-    /* "quantumc.pyx":785
- *     t = abs(w[0])
- *     u = abs(w[1])
- *     if (u > t):             # <<<<<<<<<<<<<<
- *         t = u
- *     u = abs(w[2])
- */
-  }
-
-  /* "quantumc.pyx":787
- *     if (u > t):
- *         t = u
- *     u = abs(w[2])             # <<<<<<<<<<<<<<
- *     if (u > t):
- *         t = u
- */
-  __pyx_v_u = fabs((__pyx_v_w[2]));
-
-  /* "quantumc.pyx":788
- *         t = u
- *     u = abs(w[2])
- *     if (u > t):             # <<<<<<<<<<<<<<
- *         t = u
- *     if (t < 1.0):
- */
-  __pyx_t_1 = ((__pyx_v_u > __pyx_v_t) != 0);
-  if (__pyx_t_1) {
-
-    /* "quantumc.pyx":789
- *     u = abs(w[2])
- *     if (u > t):
- *         t = u             # <<<<<<<<<<<<<<
- *     if (t < 1.0):
- *         u = t
- */
-    __pyx_v_t = __pyx_v_u;
-
-    /* "quantumc.pyx":788
- *         t = u
- *     u = abs(w[2])
- *     if (u > t):             # <<<<<<<<<<<<<<
- *         t = u
- *     if (t < 1.0):
- */
-  }
-
-  /* "quantumc.pyx":790
- *     if (u > t):
- *         t = u
- *     if (t < 1.0):             # <<<<<<<<<<<<<<
- *         u = t
- *     else:
- */
-  __pyx_t_1 = ((__pyx_v_t < 1.0) != 0);
-  if (__pyx_t_1) {
-
-    /* "quantumc.pyx":791
- *         t = u
- *     if (t < 1.0):
- *         u = t             # <<<<<<<<<<<<<<
- *     else:
- *         u = t*t
- */
-    __pyx_v_u = __pyx_v_t;
-
-    /* "quantumc.pyx":790
- *     if (u > t):
- *         t = u
- *     if (t < 1.0):             # <<<<<<<<<<<<<<
- *         u = t
- *     else:
- */
-    goto __pyx_L5;
-  }
-
-  /* "quantumc.pyx":793
- *         u = t
- *     else:
- *         u = t*t             # <<<<<<<<<<<<<<
- *     error = 256.0 * eps * u*u
- * 
- */
-  /*else*/ {
-    __pyx_v_u = (__pyx_v_t * __pyx_v_t);
-  }
-  __pyx_L5:;
-
-  /* "quantumc.pyx":794
- *     else:
- *         u = t*t
- *     error = 256.0 * eps * u*u             # <<<<<<<<<<<<<<
- * 
- *     cdef double complex H0, H1
- */
-  __pyx_v_error = (((256.0 * __pyx_v_8quantumc_eps) * __pyx_v_u) * __pyx_v_u);
-
-  /* "quantumc.pyx":799
- *     cdef double B2x, B2y
- * 
- *     B2x = 0.5*B[0]*B[0]             # <<<<<<<<<<<<<<
- *     B2y = 0.5*B[1]*B[1]
- * 
- */
-  __pyx_v_B2x = ((0.5 * (__pyx_v_B[0])) * (__pyx_v_B[0]));
-
-  /* "quantumc.pyx":800
- * 
- *     B2x = 0.5*B[0]*B[0]
- *     B2y = 0.5*B[1]*B[1]             # <<<<<<<<<<<<<<
- * 
- *     H0 = B[2] + B[3] #try treating as a double or complex double
- */
-  __pyx_v_B2y = ((0.5 * (__pyx_v_B[1])) * (__pyx_v_B[1]));
-
-  /* "quantumc.pyx":802
- *     B2y = 0.5*B[1]*B[1]
- * 
- *     H0 = B[2] + B[3] #try treating as a double or complex double             # <<<<<<<<<<<<<<
- *     H1 = (B[0]-1j*B[1])*invsqrt2
- * 
- */
-  __pyx_v_H0 = __pyx_t_double_complex_from_parts(((__pyx_v_B[2]) + (__pyx_v_B[3])), 0);
-
-  /* "quantumc.pyx":803
- * 
- *     H0 = B[2] + B[3] #try treating as a double or complex double
- *     H1 = (B[0]-1j*B[1])*invsqrt2             # <<<<<<<<<<<<<<
- * 
- *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
- */
-  __pyx_v_H1 = __Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_t_double_complex_from_parts((__pyx_v_B[0]), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts((__pyx_v_B[1]), 0))), __pyx_t_double_complex_from_parts(__pyx_v_8quantumc_invsqrt2, 0));
-
-  /* "quantumc.pyx":805
- *     H1 = (B[0]-1j*B[1])*invsqrt2
- * 
- *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]             # <<<<<<<<<<<<<<
- *     Q[1][1] = -H0*H1
- *     Q[2][1] = B2x+B2y
- */
-  ((__pyx_v_Q[0])[1]) = __Pyx_c_diff_double(__pyx_t_double_complex_from_parts((__pyx_v_B2x - __pyx_v_B2y), 0), __Pyx_c_prod_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts((__pyx_v_B[0]), 0)), __pyx_t_double_complex_from_parts((__pyx_v_B[1]), 0)));
-
-  /* "quantumc.pyx":806
- * 
- *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
- *     Q[1][1] = -H0*H1             # <<<<<<<<<<<<<<
- *     Q[2][1] = B2x+B2y
- * 
- */
-  ((__pyx_v_Q[1])[1]) = __Pyx_c_prod_double(__Pyx_c_neg_double(__pyx_v_H0), __pyx_v_H1);
-
-  /* "quantumc.pyx":807
- *     Q[0][1] = B2x - B2y - 1j*B[0]*B[1]
- *     Q[1][1] = -H0*H1
- *     Q[2][1] = B2x+B2y             # <<<<<<<<<<<<<<
- * 
- *     # Calculate first eigenvector by the formula
- */
-  ((__pyx_v_Q[2])[1]) = __pyx_t_double_complex_from_parts((__pyx_v_B2x + __pyx_v_B2y), 0);
-
-  /* "quantumc.pyx":810
- * 
- *     # Calculate first eigenvector by the formula
- *     Q[0][0] = Q[0][1]             # <<<<<<<<<<<<<<
- *     Q[1][0] = Q[1][1] + H1*w[0]
- *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
- */
-  ((__pyx_v_Q[0])[0]) = ((__pyx_v_Q[0])[1]);
-
-  /* "quantumc.pyx":811
- *     # Calculate first eigenvector by the formula
- *     Q[0][0] = Q[0][1]
- *     Q[1][0] = Q[1][1] + H1*w[0]             # <<<<<<<<<<<<<<
- *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
- *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)
- */
-  ((__pyx_v_Q[1])[0]) = __Pyx_c_sum_double(((__pyx_v_Q[1])[1]), __Pyx_c_prod_double(__pyx_v_H1, __pyx_t_double_complex_from_parts((__pyx_v_w[0]), 0)));
-
-  /* "quantumc.pyx":812
- *     Q[0][0] = Q[0][1]
- *     Q[1][0] = Q[1][1] + H1*w[0]
- *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]             # <<<<<<<<<<<<<<
- *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)
- * 
- */
-  ((__pyx_v_Q[2])[0]) = __Pyx_c_diff_double(__Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_v_H0, __pyx_t_double_complex_from_parts((__pyx_v_w[0]), 0)), __pyx_t_double_complex_from_parts((-(__pyx_v_w[0])), 0)), ((__pyx_v_Q[2])[1]));
-
-  /* "quantumc.pyx":813
- *     Q[1][0] = Q[1][1] + H1*w[0]
- *     Q[2][0] = (H0 - w[0]) * (- w[0]) - Q[2][1]
- *     norm    = absquare(Q[0][0]) + absquare(Q[1][0]) + square(Q[2][0].real)             # <<<<<<<<<<<<<<
- * 
- *     # If vectors are nearly linearly dependent, or if there might have
- */
-  __pyx_v_norm = ((__pyx_f_8quantumc_absquare(((__pyx_v_Q[0])[0])) + __pyx_f_8quantumc_absquare(((__pyx_v_Q[1])[0]))) + __pyx_f_8quantumc_square(__Pyx_CREAL(((__pyx_v_Q[2])[0]))));
-
-  /* "quantumc.pyx":824
- *         QL33(B, Q, w)
- *     else:'''                      # This is the standard branch
- *     norm = sqrt(1.0 / norm)             # <<<<<<<<<<<<<<
- *     for j in range(0,3):
- *         Q[j][0] = Q[j][0] * norm
- */
-  __pyx_v_norm = sqrt((1.0 / __pyx_v_norm));
-
-  /* "quantumc.pyx":825
- *     else:'''                      # This is the standard branch
- *     norm = sqrt(1.0 / norm)
- *     for j in range(0,3):             # <<<<<<<<<<<<<<
- *         Q[j][0] = Q[j][0] * norm
- * 
- */
-  for (__pyx_t_2 = 0; __pyx_t_2 < 3; __pyx_t_2+=1) {
-    __pyx_v_j = __pyx_t_2;
-
-    /* "quantumc.pyx":826
- *     norm = sqrt(1.0 / norm)
- *     for j in range(0,3):
- *         Q[j][0] = Q[j][0] * norm             # <<<<<<<<<<<<<<
- * 
- * 
- */
-    ((__pyx_v_Q[__pyx_v_j])[0]) = __Pyx_c_prod_double(((__pyx_v_Q[__pyx_v_j])[0]), __pyx_t_double_complex_from_parts(__pyx_v_norm, 0));
-  }
-
-  /* "quantumc.pyx":831
- *     # Calculate second eigenvector by the formula
- *     #   v[1] =  (A - w.conjugate()1]).e1 x (A - w[1]).e2 )
- *     Q[0][1]  = Q[0][1]             # <<<<<<<<<<<<<<
- *     Q[1][1]  = Q[1][1] + H1*w[1]
- *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
- */
-  ((__pyx_v_Q[0])[1]) = ((__pyx_v_Q[0])[1]);
-
-  /* "quantumc.pyx":832
- *     #   v[1] =  (A - w.conjugate()1]).e1 x (A - w[1]).e2 )
- *     Q[0][1]  = Q[0][1]
- *     Q[1][1]  = Q[1][1] + H1*w[1]             # <<<<<<<<<<<<<<
- *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
- *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
- */
-  ((__pyx_v_Q[1])[1]) = __Pyx_c_sum_double(((__pyx_v_Q[1])[1]), __Pyx_c_prod_double(__pyx_v_H1, __pyx_t_double_complex_from_parts((__pyx_v_w[1]), 0)));
-
-  /* "quantumc.pyx":833
- *     Q[0][1]  = Q[0][1]
- *     Q[1][1]  = Q[1][1] + H1*w[1]
- *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real             # <<<<<<<<<<<<<<
- *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
- *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
- */
-  ((__pyx_v_Q[2])[1]) = __Pyx_c_diff_double(__Pyx_c_prod_double(__Pyx_c_diff_double(__pyx_v_H0, __pyx_t_double_complex_from_parts((__pyx_v_w[1]), 0)), __pyx_t_double_complex_from_parts((-(__pyx_v_w[1])), 0)), __pyx_t_double_complex_from_parts(__Pyx_CREAL(((__pyx_v_Q[2])[1])), 0));
-
-  /* "quantumc.pyx":835
- *     Q[2][1]  = (H0 - w[1]) * (- w[1]) - Q[2][1].real
- *     #norm     = absquare(Q[0][1]) + absquare(Q[1][1]) + square(Q[2][1].real)
- *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2             # <<<<<<<<<<<<<<
- * 
- *     if (norm <= error):
- */
-  __pyx_v_norm = (__Pyx_CREAL(__Pyx_c_sum_double(__Pyx_c_prod_double(__Pyx_c_conj_double(((__pyx_v_Q[0])[1])), ((__pyx_v_Q[0])[1])), __Pyx_c_prod_double(__Pyx_c_conj_double(((__pyx_v_Q[1])[1])), ((__pyx_v_Q[1])[1])))) + pow(__Pyx_CREAL(((__pyx_v_Q[2])[1])), 2.0));
-
-  /* "quantumc.pyx":837
- *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
- * 
- *     if (norm <= error):             # <<<<<<<<<<<<<<
- *         QL33(B, Q, w)
- *     else:
- */
-  __pyx_t_1 = ((__pyx_v_norm <= __pyx_v_error) != 0);
-  if (__pyx_t_1) {
-
-    /* "quantumc.pyx":838
- * 
- *     if (norm <= error):
- *         QL33(B, Q, w)             # <<<<<<<<<<<<<<
- *     else:
- *         norm = sqrt(1.0 / norm)
- */
-    __pyx_f_8quantumc_QL33(__pyx_v_B, __pyx_v_Q, __pyx_v_w);
-
-    /* "quantumc.pyx":837
- *     norm     = (Q[0][1].conjugate()*Q[0][1] + Q[1][1].conjugate()*Q[1][1]).real + (Q[2][1].real)**2
- * 
- *     if (norm <= error):             # <<<<<<<<<<<<<<
- *         QL33(B, Q, w)
- *     else:
- */
-    goto __pyx_L8;
-  }
-
-  /* "quantumc.pyx":840
- *         QL33(B, Q, w)
- *     else:
- *         norm = sqrt(1.0 / norm)             # <<<<<<<<<<<<<<
- *         for j in range(0,3):
- *             Q[j][1] = Q[j][1] * norm
- */
-  /*else*/ {
-    __pyx_v_norm = sqrt((1.0 / __pyx_v_norm));
-
-    /* "quantumc.pyx":841
- *     else:
- *         norm = sqrt(1.0 / norm)
- *         for j in range(0,3):             # <<<<<<<<<<<<<<
- *             Q[j][1] = Q[j][1] * norm
- * 
- */
-    for (__pyx_t_2 = 0; __pyx_t_2 < 3; __pyx_t_2+=1) {
-      __pyx_v_j = __pyx_t_2;
-
-      /* "quantumc.pyx":842
- *         norm = sqrt(1.0 / norm)
- *         for j in range(0,3):
- *             Q[j][1] = Q[j][1] * norm             # <<<<<<<<<<<<<<
- * 
- *     # Calculate third eigenvector according to
- */
-      ((__pyx_v_Q[__pyx_v_j])[1]) = __Pyx_c_prod_double(((__pyx_v_Q[__pyx_v_j])[1]), __pyx_t_double_complex_from_parts(__pyx_v_norm, 0));
-    }
-  }
-  __pyx_L8:;
-
-  /* "quantumc.pyx":846
- *     # Calculate third eigenvector according to
- *     #   v[2] = v[0] x .conjugate()[1])
- *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()             # <<<<<<<<<<<<<<
- *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()
- *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()
- */
-  ((__pyx_v_Q[0])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[1])[0]), ((__pyx_v_Q[2])[1])), __Pyx_c_prod_double(((__pyx_v_Q[2])[0]), ((__pyx_v_Q[1])[1]))));
-
-  /* "quantumc.pyx":847
- *     #   v[2] = v[0] x .conjugate()[1])
- *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()
- *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()             # <<<<<<<<<<<<<<
- *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()
- * 
- */
-  ((__pyx_v_Q[1])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[2])[0]), ((__pyx_v_Q[0])[1])), __Pyx_c_prod_double(((__pyx_v_Q[0])[0]), ((__pyx_v_Q[2])[1]))));
-
-  /* "quantumc.pyx":848
- *     Q[0][2] = (Q[1][0]*Q[2][1] - Q[2][0]*Q[1][1]).conjugate()
- *     Q[1][2] = (Q[2][0]*Q[0][1] - Q[0][0]*Q[2][1]).conjugate()
- *     Q[2][2] = (Q[0][0]*Q[1][1] - Q[1][0]*Q[0][1]).conjugate()             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  ((__pyx_v_Q[2])[2]) = __Pyx_c_conj_double(__Pyx_c_diff_double(__Pyx_c_prod_double(((__pyx_v_Q[0])[0]), ((__pyx_v_Q[1])[1])), __Pyx_c_prod_double(((__pyx_v_Q[1])[0]), ((__pyx_v_Q[0])[1]))));
-
-  /* "quantumc.pyx":748
- * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
- * @cython.cdivision(True)
- * cdef void esys33(double B[4], double w[3], double complex Q[3][3]):             # <<<<<<<<<<<<<<
- * #based on the algorithm dsyevh3
- * # ----------------------------------------------------------------------------
- */
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-}
-
-/* "quantumc.pyx":856
+/* "quantumc.pyx":800
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * @cython.cdivision(True)
  * cdef void QL33(double B[4], double complex Q[3][3], double w[3]):             # <<<<<<<<<<<<<<
@@ -6665,7 +6997,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   long __pyx_t_8;
   __Pyx_RefNannySetupContext("QL33", 0);
 
-  /* "quantumc.pyx":879
+  /* "quantumc.pyx":823
  *     cdef int m, l, i
  * 
  *     w[0] = B[3] + B[2]             # <<<<<<<<<<<<<<
@@ -6674,7 +7006,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
   (__pyx_v_w[0]) = ((__pyx_v_B[3]) + (__pyx_v_B[2]));
 
-  /* "quantumc.pyx":880
+  /* "quantumc.pyx":824
  * 
  *     w[0] = B[3] + B[2]
  *     w[1] = 0.0             # <<<<<<<<<<<<<<
@@ -6683,7 +7015,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
   (__pyx_v_w[1]) = 0.0;
 
-  /* "quantumc.pyx":881
+  /* "quantumc.pyx":825
  *     w[0] = B[3] + B[2]
  *     w[1] = 0.0
  *     w[2] = B[3] - B[2]             # <<<<<<<<<<<<<<
@@ -6692,7 +7024,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
   (__pyx_v_w[2]) = ((__pyx_v_B[3]) - (__pyx_v_B[2]));
 
-  /* "quantumc.pyx":884
+  /* "quantumc.pyx":828
  * 
  *     #store unitary transform to real tridiagonal form in eigenvectors matrix
  *     for i in range(0,3):             # <<<<<<<<<<<<<<
@@ -6702,7 +7034,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   for (__pyx_t_1 = 0; __pyx_t_1 < 3; __pyx_t_1+=1) {
     __pyx_v_i = __pyx_t_1;
 
-    /* "quantumc.pyx":885
+    /* "quantumc.pyx":829
  *     #store unitary transform to real tridiagonal form in eigenvectors matrix
  *     for i in range(0,3):
  *         Q[i][i] = 1.0             # <<<<<<<<<<<<<<
@@ -6711,7 +7043,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     ((__pyx_v_Q[__pyx_v_i])[__pyx_v_i]) = __pyx_t_double_complex_from_parts(1.0, 0);
 
-    /* "quantumc.pyx":886
+    /* "quantumc.pyx":830
  *     for i in range(0,3):
  *         Q[i][i] = 1.0
  *         for l in range(0,i):             # <<<<<<<<<<<<<<
@@ -6723,7 +7055,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
       __pyx_v_l = __pyx_t_4;
 
-      /* "quantumc.pyx":887
+      /* "quantumc.pyx":831
  *         Q[i][i] = 1.0
  *         for l in range(0,i):
  *             Q[i][l] = 0.0             # <<<<<<<<<<<<<<
@@ -6732,7 +7064,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       ((__pyx_v_Q[__pyx_v_i])[__pyx_v_l]) = __pyx_t_double_complex_from_parts(0.0, 0);
 
-      /* "quantumc.pyx":888
+      /* "quantumc.pyx":832
  *         for l in range(0,i):
  *             Q[i][l] = 0.0
  *             Q[l][i] = 0.0             # <<<<<<<<<<<<<<
@@ -6743,7 +7075,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
     }
   }
 
-  /* "quantumc.pyx":895
+  /* "quantumc.pyx":839
  *     #            [       e     w[2] ]
  *     # The function accesses only the dia
  *     if B[1] == 0:             # <<<<<<<<<<<<<<
@@ -6753,7 +7085,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   __pyx_t_5 = (((__pyx_v_B[1]) == 0.0) != 0);
   if (__pyx_t_5) {
 
-    /* "quantumc.pyx":896
+    /* "quantumc.pyx":840
  *     # The function accesses only the dia
  *     if B[1] == 0:
  *         e[0] = B[0]*invsqrt2             # <<<<<<<<<<<<<<
@@ -6762,7 +7094,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     (__pyx_v_e[0]) = ((__pyx_v_B[0]) * __pyx_v_8quantumc_invsqrt2);
 
-    /* "quantumc.pyx":895
+    /* "quantumc.pyx":839
  *     #            [       e     w[2] ]
  *     # The function accesses only the dia
  *     if B[1] == 0:             # <<<<<<<<<<<<<<
@@ -6772,7 +7104,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
     goto __pyx_L7;
   }
 
-  /* "quantumc.pyx":898
+  /* "quantumc.pyx":842
  *         e[0] = B[0]*invsqrt2
  *     else:
  *         e[0] = sqrt(B[0]*B[0] + B[1]*B[1])             # <<<<<<<<<<<<<<
@@ -6782,7 +7114,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   /*else*/ {
     (__pyx_v_e[0]) = sqrt((((__pyx_v_B[0]) * (__pyx_v_B[0])) + ((__pyx_v_B[1]) * (__pyx_v_B[1]))));
 
-    /* "quantumc.pyx":899
+    /* "quantumc.pyx":843
  *     else:
  *         e[0] = sqrt(B[0]*B[0] + B[1]*B[1])
  *         Q[0][0] = (B[0]-1j*B[1])/e[0] #Unitary matrix is change of basis x-y fields point along x-axis             # <<<<<<<<<<<<<<
@@ -6791,7 +7123,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     ((__pyx_v_Q[0])[0]) = __Pyx_c_quot_double(__Pyx_c_diff_double(__pyx_t_double_complex_from_parts((__pyx_v_B[0]), 0), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(0, 1.0), __pyx_t_double_complex_from_parts((__pyx_v_B[1]), 0))), __pyx_t_double_complex_from_parts((__pyx_v_e[0]), 0));
 
-    /* "quantumc.pyx":900
+    /* "quantumc.pyx":844
  *         e[0] = sqrt(B[0]*B[0] + B[1]*B[1])
  *         Q[0][0] = (B[0]-1j*B[1])/e[0] #Unitary matrix is change of basis x-y fields point along x-axis
  *         Q[2][2] = Q[0][0].conjugate()             # <<<<<<<<<<<<<<
@@ -6800,7 +7132,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     ((__pyx_v_Q[2])[2]) = __Pyx_c_conj_double(((__pyx_v_Q[0])[0]));
 
-    /* "quantumc.pyx":901
+    /* "quantumc.pyx":845
  *         Q[0][0] = (B[0]-1j*B[1])/e[0] #Unitary matrix is change of basis x-y fields point along x-axis
  *         Q[2][2] = Q[0][0].conjugate()
  *         e[0] *= invsqrt2             # <<<<<<<<<<<<<<
@@ -6812,7 +7144,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   }
   __pyx_L7:;
 
-  /* "quantumc.pyx":902
+  /* "quantumc.pyx":846
  *         Q[2][2] = Q[0][0].conjugate()
  *         e[0] *= invsqrt2
  *     e[1] = e[0]             # <<<<<<<<<<<<<<
@@ -6821,7 +7153,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
   (__pyx_v_e[1]) = (__pyx_v_e[0]);
 
-  /* "quantumc.pyx":908
+  /* "quantumc.pyx":852
  *     #
  *     # Loop over all off-diagonal elements
  *     for l in range(0,2):             # <<<<<<<<<<<<<<
@@ -6831,7 +7163,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
   for (__pyx_t_1 = 0; __pyx_t_1 < 2; __pyx_t_1+=1) {
     __pyx_v_l = __pyx_t_1;
 
-    /* "quantumc.pyx":909
+    /* "quantumc.pyx":853
  *     # Loop over all off-diagonal elements
  *     for l in range(0,2):
  *         nIter = 0             # <<<<<<<<<<<<<<
@@ -6840,7 +7172,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     __pyx_v_nIter = 0;
 
-    /* "quantumc.pyx":910
+    /* "quantumc.pyx":854
  *     for l in range(0,2):
  *         nIter = 0
  *         while True:             # <<<<<<<<<<<<<<
@@ -6849,7 +7181,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
     while (1) {
 
-      /* "quantumc.pyx":913
+      /* "quantumc.pyx":857
  *             # Check for convergence and exit iteration loop if off-diagonal
  *             # element e(l) is zero
  *             for m in range(l,2):             # <<<<<<<<<<<<<<
@@ -6859,7 +7191,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       for (__pyx_t_2 = __pyx_v_l; __pyx_t_2 < 2; __pyx_t_2+=1) {
         __pyx_v_m = __pyx_t_2;
 
-        /* "quantumc.pyx":914
+        /* "quantumc.pyx":858
  *             # element e(l) is zero
  *             for m in range(l,2):
  *                 g = abs(w[m])+abs(w[m+1])             # <<<<<<<<<<<<<<
@@ -6868,7 +7200,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         __pyx_v_g = (fabs((__pyx_v_w[__pyx_v_m])) + fabs((__pyx_v_w[(__pyx_v_m + 1)])));
 
-        /* "quantumc.pyx":915
+        /* "quantumc.pyx":859
  *             for m in range(l,2):
  *                 g = abs(w[m])+abs(w[m+1])
  *                 if (abs(e[m]) + g == g):             # <<<<<<<<<<<<<<
@@ -6878,7 +7210,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
         __pyx_t_5 = (((fabs((__pyx_v_e[__pyx_v_m])) + __pyx_v_g) == __pyx_v_g) != 0);
         if (__pyx_t_5) {
 
-          /* "quantumc.pyx":916
+          /* "quantumc.pyx":860
  *                 g = abs(w[m])+abs(w[m+1])
  *                 if (abs(e[m]) + g == g):
  *                     break             # <<<<<<<<<<<<<<
@@ -6887,7 +7219,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
           goto __pyx_L13_break;
 
-          /* "quantumc.pyx":915
+          /* "quantumc.pyx":859
  *             for m in range(l,2):
  *                 g = abs(w[m])+abs(w[m+1])
  *                 if (abs(e[m]) + g == g):             # <<<<<<<<<<<<<<
@@ -6898,7 +7230,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       }
       __pyx_L13_break:;
 
-      /* "quantumc.pyx":917
+      /* "quantumc.pyx":861
  *                 if (abs(e[m]) + g == g):
  *                     break
  *             if (m == l):             # <<<<<<<<<<<<<<
@@ -6908,7 +7240,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       __pyx_t_5 = ((__pyx_v_m == __pyx_v_l) != 0);
       if (__pyx_t_5) {
 
-        /* "quantumc.pyx":918
+        /* "quantumc.pyx":862
  *                     break
  *             if (m == l):
  *                 break             # <<<<<<<<<<<<<<
@@ -6917,7 +7249,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         goto __pyx_L11_break;
 
-        /* "quantumc.pyx":917
+        /* "quantumc.pyx":861
  *                 if (abs(e[m]) + g == g):
  *                     break
  *             if (m == l):             # <<<<<<<<<<<<<<
@@ -6926,38 +7258,47 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       }
 
-      /* "quantumc.pyx":920
+      /* "quantumc.pyx":864
  *                 break
  * 
  *             if (nIter >= 30):             # <<<<<<<<<<<<<<
- *                 ##print("Error. QL33 doesn't converge")
+ *                 print("Error. QL33 doesn't converge")
  *                 exit()
  */
       __pyx_t_5 = ((__pyx_v_nIter >= 30) != 0);
       if (__pyx_t_5) {
 
-        /* "quantumc.pyx":922
+        /* "quantumc.pyx":865
+ * 
  *             if (nIter >= 30):
- *                 ##print("Error. QL33 doesn't converge")
+ *                 print("Error. QL33 doesn't converge")             # <<<<<<<<<<<<<<
+ *                 exit()
+ *             nIter += 1
+ */
+        if (__Pyx_PrintOne(0, __pyx_kp_s_Error_QL33_doesn_t_converge) < 0) __PYX_ERR(0, 865, __pyx_L1_error)
+
+        /* "quantumc.pyx":866
+ *             if (nIter >= 30):
+ *                 print("Error. QL33 doesn't converge")
  *                 exit()             # <<<<<<<<<<<<<<
  *             nIter += 1
  *             # Calculate g = d_m - k
  */
-        __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_builtin_exit); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 922, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_builtin_exit); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 866, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-        /* "quantumc.pyx":920
+        /* "quantumc.pyx":864
  *                 break
  * 
  *             if (nIter >= 30):             # <<<<<<<<<<<<<<
- *                 ##print("Error. QL33 doesn't converge")
+ *                 print("Error. QL33 doesn't converge")
  *                 exit()
  */
       }
 
-      /* "quantumc.pyx":923
- *                 ##print("Error. QL33 doesn't converge")
+      /* "quantumc.pyx":867
+ *                 print("Error. QL33 doesn't converge")
  *                 exit()
  *             nIter += 1             # <<<<<<<<<<<<<<
  *             # Calculate g = d_m - k
@@ -6965,27 +7306,27 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_nIter = (__pyx_v_nIter + 1);
 
-      /* "quantumc.pyx":925
+      /* "quantumc.pyx":869
  *             nIter += 1
  *             # Calculate g = d_m - k
  *             g = 0.5*(w[l+1] - w[l]) /e[l]             # <<<<<<<<<<<<<<
- *             r = sqrt(square(g) + 1.0)
+ *             r = sqrt(g*g + 1.0)
  *             if (g > 0):
  */
       __pyx_v_g = ((0.5 * ((__pyx_v_w[(__pyx_v_l + 1)]) - (__pyx_v_w[__pyx_v_l]))) / (__pyx_v_e[__pyx_v_l]));
 
-      /* "quantumc.pyx":926
+      /* "quantumc.pyx":870
  *             # Calculate g = d_m - k
  *             g = 0.5*(w[l+1] - w[l]) /e[l]
- *             r = sqrt(square(g) + 1.0)             # <<<<<<<<<<<<<<
+ *             r = sqrt(g*g + 1.0)             # <<<<<<<<<<<<<<
  *             if (g > 0):
  *                 g = w[m] - w[l] + e[l]/(g + r)
  */
-      __pyx_v_r = sqrt((__pyx_f_8quantumc_square(__pyx_v_g) + 1.0));
+      __pyx_v_r = sqrt(((__pyx_v_g * __pyx_v_g) + 1.0));
 
-      /* "quantumc.pyx":927
+      /* "quantumc.pyx":871
  *             g = 0.5*(w[l+1] - w[l]) /e[l]
- *             r = sqrt(square(g) + 1.0)
+ *             r = sqrt(g*g + 1.0)
  *             if (g > 0):             # <<<<<<<<<<<<<<
  *                 g = w[m] - w[l] + e[l]/(g + r)
  *             else:
@@ -6993,8 +7334,8 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       __pyx_t_5 = ((__pyx_v_g > 0.0) != 0);
       if (__pyx_t_5) {
 
-        /* "quantumc.pyx":928
- *             r = sqrt(square(g) + 1.0)
+        /* "quantumc.pyx":872
+ *             r = sqrt(g*g + 1.0)
  *             if (g > 0):
  *                 g = w[m] - w[l] + e[l]/(g + r)             # <<<<<<<<<<<<<<
  *             else:
@@ -7002,9 +7343,9 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         __pyx_v_g = (((__pyx_v_w[__pyx_v_m]) - (__pyx_v_w[__pyx_v_l])) + ((__pyx_v_e[__pyx_v_l]) / (__pyx_v_g + __pyx_v_r)));
 
-        /* "quantumc.pyx":927
+        /* "quantumc.pyx":871
  *             g = 0.5*(w[l+1] - w[l]) /e[l]
- *             r = sqrt(square(g) + 1.0)
+ *             r = sqrt(g*g + 1.0)
  *             if (g > 0):             # <<<<<<<<<<<<<<
  *                 g = w[m] - w[l] + e[l]/(g + r)
  *             else:
@@ -7012,7 +7353,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
         goto __pyx_L17;
       }
 
-      /* "quantumc.pyx":930
+      /* "quantumc.pyx":874
  *                 g = w[m] - w[l] + e[l]/(g + r)
  *             else:
  *                 g = w[m] - w[l] + e[l]/(g - r)             # <<<<<<<<<<<<<<
@@ -7024,7 +7365,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       }
       __pyx_L17:;
 
-      /* "quantumc.pyx":932
+      /* "quantumc.pyx":876
  *                 g = w[m] - w[l] + e[l]/(g - r)
  * 
  *             s = 1.0             # <<<<<<<<<<<<<<
@@ -7033,7 +7374,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_s = 1.0;
 
-      /* "quantumc.pyx":933
+      /* "quantumc.pyx":877
  * 
  *             s = 1.0
  *             c = 1.0             # <<<<<<<<<<<<<<
@@ -7042,7 +7383,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_c = 1.0;
 
-      /* "quantumc.pyx":934
+      /* "quantumc.pyx":878
  *             s = 1.0
  *             c = 1.0
  *             p = 0.0             # <<<<<<<<<<<<<<
@@ -7051,7 +7392,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_p = 0.0;
 
-      /* "quantumc.pyx":935
+      /* "quantumc.pyx":879
  *             c = 1.0
  *             p = 0.0
  *             for i in range(m-1, l - 1, -1):             # <<<<<<<<<<<<<<
@@ -7063,7 +7404,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       for (__pyx_t_2 = (__pyx_v_m - 1); __pyx_t_2 > __pyx_t_8; __pyx_t_2-=1) {
         __pyx_v_i = __pyx_t_2;
 
-        /* "quantumc.pyx":936
+        /* "quantumc.pyx":880
  *             p = 0.0
  *             for i in range(m-1, l - 1, -1):
  *                 f = s * e[i]             # <<<<<<<<<<<<<<
@@ -7072,7 +7413,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         __pyx_v_f = (__pyx_v_s * (__pyx_v_e[__pyx_v_i]));
 
-        /* "quantumc.pyx":937
+        /* "quantumc.pyx":881
  *             for i in range(m-1, l - 1, -1):
  *                 f = s * e[i]
  *                 b = c * e[i]             # <<<<<<<<<<<<<<
@@ -7081,45 +7422,45 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         __pyx_v_b = (__pyx_v_c * (__pyx_v_e[__pyx_v_i]));
 
-        /* "quantumc.pyx":938
+        /* "quantumc.pyx":882
  *                 f = s * e[i]
  *                 b = c * e[i]
  *                 if (abs(f) > abs(g)):             # <<<<<<<<<<<<<<
  *                     c      = g / f
- *                     r      = sqrt(square(c) + 1.0)
+ *                     r      = sqrt(c*c + 1.0)
  */
         __pyx_t_5 = ((fabs(__pyx_v_f) > fabs(__pyx_v_g)) != 0);
         if (__pyx_t_5) {
 
-          /* "quantumc.pyx":939
+          /* "quantumc.pyx":883
  *                 b = c * e[i]
  *                 if (abs(f) > abs(g)):
  *                     c      = g / f             # <<<<<<<<<<<<<<
- *                     r      = sqrt(square(c) + 1.0)
+ *                     r      = sqrt(c*c + 1.0)
  *                     e[i+1] = f * r
  */
           __pyx_v_c = (__pyx_v_g / __pyx_v_f);
 
-          /* "quantumc.pyx":940
+          /* "quantumc.pyx":884
  *                 if (abs(f) > abs(g)):
  *                     c      = g / f
- *                     r      = sqrt(square(c) + 1.0)             # <<<<<<<<<<<<<<
+ *                     r      = sqrt(c*c + 1.0)             # <<<<<<<<<<<<<<
  *                     e[i+1] = f * r
  *                     s      = 1.0/r
  */
-          __pyx_v_r = sqrt((__pyx_f_8quantumc_square(__pyx_v_c) + 1.0));
+          __pyx_v_r = sqrt(((__pyx_v_c * __pyx_v_c) + 1.0));
 
-          /* "quantumc.pyx":941
+          /* "quantumc.pyx":885
  *                     c      = g / f
- *                     r      = sqrt(square(c) + 1.0)
+ *                     r      = sqrt(c*c + 1.0)
  *                     e[i+1] = f * r             # <<<<<<<<<<<<<<
  *                     s      = 1.0/r
  *                     c     *= s
  */
           (__pyx_v_e[(__pyx_v_i + 1)]) = (__pyx_v_f * __pyx_v_r);
 
-          /* "quantumc.pyx":942
- *                     r      = sqrt(square(c) + 1.0)
+          /* "quantumc.pyx":886
+ *                     r      = sqrt(c*c + 1.0)
  *                     e[i+1] = f * r
  *                     s      = 1.0/r             # <<<<<<<<<<<<<<
  *                     c     *= s
@@ -7127,7 +7468,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
           __pyx_v_s = (1.0 / __pyx_v_r);
 
-          /* "quantumc.pyx":943
+          /* "quantumc.pyx":887
  *                     e[i+1] = f * r
  *                     s      = 1.0/r
  *                     c     *= s             # <<<<<<<<<<<<<<
@@ -7136,46 +7477,46 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
           __pyx_v_c = (__pyx_v_c * __pyx_v_s);
 
-          /* "quantumc.pyx":938
+          /* "quantumc.pyx":882
  *                 f = s * e[i]
  *                 b = c * e[i]
  *                 if (abs(f) > abs(g)):             # <<<<<<<<<<<<<<
  *                     c      = g / f
- *                     r      = sqrt(square(c) + 1.0)
+ *                     r      = sqrt(c*c + 1.0)
  */
           goto __pyx_L20;
         }
 
-        /* "quantumc.pyx":945
+        /* "quantumc.pyx":889
  *                     c     *= s
  *                 else:
  *                     s      = f / g             # <<<<<<<<<<<<<<
- *                     r      = sqrt(square(s) + 1.0)
+ *                     r      = sqrt(s*s + 1.0)
  *                     e[i+1] = g * r
  */
         /*else*/ {
           __pyx_v_s = (__pyx_v_f / __pyx_v_g);
 
-          /* "quantumc.pyx":946
+          /* "quantumc.pyx":890
  *                 else:
  *                     s      = f / g
- *                     r      = sqrt(square(s) + 1.0)             # <<<<<<<<<<<<<<
+ *                     r      = sqrt(s*s + 1.0)             # <<<<<<<<<<<<<<
  *                     e[i+1] = g * r
  *                     c      = 1.0/r
  */
-          __pyx_v_r = sqrt((__pyx_f_8quantumc_square(__pyx_v_s) + 1.0));
+          __pyx_v_r = sqrt(((__pyx_v_s * __pyx_v_s) + 1.0));
 
-          /* "quantumc.pyx":947
+          /* "quantumc.pyx":891
  *                     s      = f / g
- *                     r      = sqrt(square(s) + 1.0)
+ *                     r      = sqrt(s*s + 1.0)
  *                     e[i+1] = g * r             # <<<<<<<<<<<<<<
  *                     c      = 1.0/r
  *                     s     *= c
  */
           (__pyx_v_e[(__pyx_v_i + 1)]) = (__pyx_v_g * __pyx_v_r);
 
-          /* "quantumc.pyx":948
- *                     r      = sqrt(square(s) + 1.0)
+          /* "quantumc.pyx":892
+ *                     r      = sqrt(s*s + 1.0)
  *                     e[i+1] = g * r
  *                     c      = 1.0/r             # <<<<<<<<<<<<<<
  *                     s     *= c
@@ -7183,7 +7524,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
           __pyx_v_c = (1.0 / __pyx_v_r);
 
-          /* "quantumc.pyx":949
+          /* "quantumc.pyx":893
  *                     e[i+1] = g * r
  *                     c      = 1.0/r
  *                     s     *= c             # <<<<<<<<<<<<<<
@@ -7195,7 +7536,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
         __pyx_L20:;
       }
 
-      /* "quantumc.pyx":950
+      /* "quantumc.pyx":894
  *                     c      = 1.0/r
  *                     s     *= c
  *             g = w[i+1] - p             # <<<<<<<<<<<<<<
@@ -7204,7 +7545,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_g = ((__pyx_v_w[(__pyx_v_i + 1)]) - __pyx_v_p);
 
-      /* "quantumc.pyx":951
+      /* "quantumc.pyx":895
  *                     s     *= c
  *             g = w[i+1] - p
  *             r = (w[i] - g)*s + 2.0*c*b             # <<<<<<<<<<<<<<
@@ -7213,7 +7554,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_r = ((((__pyx_v_w[__pyx_v_i]) - __pyx_v_g) * __pyx_v_s) + ((2.0 * __pyx_v_c) * __pyx_v_b));
 
-      /* "quantumc.pyx":952
+      /* "quantumc.pyx":896
  *             g = w[i+1] - p
  *             r = (w[i] - g)*s + 2.0*c*b
  *             p = s * r             # <<<<<<<<<<<<<<
@@ -7222,7 +7563,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_p = (__pyx_v_s * __pyx_v_r);
 
-      /* "quantumc.pyx":953
+      /* "quantumc.pyx":897
  *             r = (w[i] - g)*s + 2.0*c*b
  *             p = s * r
  *             w[i+1] = g + p             # <<<<<<<<<<<<<<
@@ -7231,7 +7572,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       (__pyx_v_w[(__pyx_v_i + 1)]) = (__pyx_v_g + __pyx_v_p);
 
-      /* "quantumc.pyx":954
+      /* "quantumc.pyx":898
  *             p = s * r
  *             w[i+1] = g + p
  *             g = c*r - b             # <<<<<<<<<<<<<<
@@ -7240,7 +7581,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       __pyx_v_g = ((__pyx_v_c * __pyx_v_r) - __pyx_v_b);
 
-      /* "quantumc.pyx":957
+      /* "quantumc.pyx":901
  * 
  *             # Form eigenvectors
  *             for k in range(0, 3):             # <<<<<<<<<<<<<<
@@ -7250,7 +7591,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       for (__pyx_t_6 = 0; __pyx_t_6 < 3; __pyx_t_6+=1) {
         __pyx_v_k = __pyx_t_6;
 
-        /* "quantumc.pyx":958
+        /* "quantumc.pyx":902
  *             # Form eigenvectors
  *             for k in range(0, 3):
  *                 t = Q[k][i+1]             # <<<<<<<<<<<<<<
@@ -7259,7 +7600,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         __pyx_v_t = ((__pyx_v_Q[__pyx_v_k])[(__pyx_v_i + 1)]);
 
-        /* "quantumc.pyx":959
+        /* "quantumc.pyx":903
  *             for k in range(0, 3):
  *                 t = Q[k][i+1]
  *                 Q[k][i+1] = s*Q[k][i] + c*t             # <<<<<<<<<<<<<<
@@ -7268,7 +7609,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
         ((__pyx_v_Q[__pyx_v_k])[(__pyx_v_i + 1)]) = __Pyx_c_sum_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_s, 0), ((__pyx_v_Q[__pyx_v_k])[__pyx_v_i])), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_c, 0), __pyx_v_t));
 
-        /* "quantumc.pyx":960
+        /* "quantumc.pyx":904
  *                 t = Q[k][i+1]
  *                 Q[k][i+1] = s*Q[k][i] + c*t
  *                 Q[k][i]   = c*Q[k][i] - s*t             # <<<<<<<<<<<<<<
@@ -7278,7 +7619,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
         ((__pyx_v_Q[__pyx_v_k])[__pyx_v_i]) = __Pyx_c_diff_double(__Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_c, 0), ((__pyx_v_Q[__pyx_v_k])[__pyx_v_i])), __Pyx_c_prod_double(__pyx_t_double_complex_from_parts(__pyx_v_s, 0), __pyx_v_t));
       }
 
-      /* "quantumc.pyx":962
+      /* "quantumc.pyx":906
  *                 Q[k][i]   = c*Q[k][i] - s*t
  * 
  *             w[l] -= p             # <<<<<<<<<<<<<<
@@ -7288,7 +7629,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
       __pyx_t_2 = __pyx_v_l;
       (__pyx_v_w[__pyx_t_2]) = ((__pyx_v_w[__pyx_t_2]) - __pyx_v_p);
 
-      /* "quantumc.pyx":963
+      /* "quantumc.pyx":907
  * 
  *             w[l] -= p
  *             e[l]  = g             # <<<<<<<<<<<<<<
@@ -7296,7 +7637,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
  */
       (__pyx_v_e[__pyx_v_l]) = __pyx_v_g;
 
-      /* "quantumc.pyx":964
+      /* "quantumc.pyx":908
  *             w[l] -= p
  *             e[l]  = g
  *             e[m]  = 0.0             # <<<<<<<<<<<<<<
@@ -7306,7 +7647,7 @@ static void __pyx_f_8quantumc_QL33(double *__pyx_v_B, __pyx_t_double_complex (*_
     __pyx_L11_break:;
   }
 
-  /* "quantumc.pyx":856
+  /* "quantumc.pyx":800
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * @cython.cdivision(True)
  * cdef void QL33(double B[4], double complex Q[3][3], double w[3]):             # <<<<<<<<<<<<<<
@@ -9839,7 +10180,7 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
  *         raise ValueError("No value specified for struct attribute 'xlphase'")
  *     result.xlphase = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 120, __pyx_L1_error)
   __pyx_v_result.xlphase = __pyx_t_10;
@@ -9848,7 +10189,7 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
  *         raise ValueError("No value specified for struct attribute 'xlphase'")
  *     result.xlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:
  */
   {
@@ -9863,11 +10204,11 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       /* "FromPyStructUtility":122
  *     result.xlphase = value
  *     try:
- *         value = obj['zlamp']             # <<<<<<<<<<<<<<
+ *         value = obj['tr2']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
  */
-      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlamp); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 122, __pyx_L172_error)
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_tr2); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 122, __pyx_L172_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
       __pyx_t_8 = 0;
@@ -9876,7 +10217,7 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
  *         raise ValueError("No value specified for struct attribute 'xlphase'")
  *     result.xlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:
  */
     }
@@ -9892,10 +10233,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":123
  *     try:
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
+ *     result.tr2 = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -9906,10 +10247,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_2);
 
       /* "FromPyStructUtility":124
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlamp'")             # <<<<<<<<<<<<<<
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")             # <<<<<<<<<<<<<<
+ *     result.tr2 = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 124, __pyx_L174_except_error)
@@ -9925,7 +10266,7 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
  *         raise ValueError("No value specified for struct attribute 'xlphase'")
  *     result.xlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_5);
@@ -9938,19 +10279,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":125
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
- *     result.zlamp = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
+ *     result.tr2 = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 125, __pyx_L1_error)
-  __pyx_v_result.zlamp = __pyx_t_10;
+  __pyx_v_result.tr2 = __pyx_t_10;
 
   /* "FromPyStructUtility":126
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
+ *     result.tr2 = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:
  */
   {
@@ -9963,22 +10304,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":127
- *     result.zlamp = value
+ *     result.tr2 = value
  *     try:
- *         value = obj['zlfreq']             # <<<<<<<<<<<<<<
+ *         value = obj['zlamp']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
  */
-      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlfreq); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 127, __pyx_L180_error)
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlamp); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 127, __pyx_L180_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
       __pyx_t_2 = 0;
 
       /* "FromPyStructUtility":126
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
+ *     result.tr2 = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:
  */
     }
@@ -9994,10 +10335,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":128
  *     try:
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *     result.zlamp = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10008,10 +10349,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_8);
 
       /* "FromPyStructUtility":129
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")             # <<<<<<<<<<<<<<
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")             # <<<<<<<<<<<<<<
+ *     result.zlamp = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 129, __pyx_L182_except_error)
@@ -10024,10 +10365,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L182_except_error:;
 
     /* "FromPyStructUtility":126
- *         raise ValueError("No value specified for struct attribute 'zlamp'")
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")
+ *     result.tr2 = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_3);
@@ -10040,19 +10381,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":130
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
- *     result.zlfreq = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *     result.zlamp = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 130, __pyx_L1_error)
-  __pyx_v_result.zlfreq = __pyx_t_10;
+  __pyx_v_result.zlamp = __pyx_t_10;
 
   /* "FromPyStructUtility":131
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *     result.zlamp = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:
  */
   {
@@ -10065,22 +10406,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":132
- *     result.zlfreq = value
+ *     result.zlamp = value
  *     try:
- *         value = obj['zlphase']             # <<<<<<<<<<<<<<
+ *         value = obj['zlfreq']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
  */
-      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlphase); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 132, __pyx_L188_error)
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlfreq); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 132, __pyx_L188_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
       __pyx_t_8 = 0;
 
       /* "FromPyStructUtility":131
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *     result.zlamp = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:
  */
     }
@@ -10096,10 +10437,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":133
  *     try:
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *     result.zlfreq = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10110,10 +10451,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_2);
 
       /* "FromPyStructUtility":134
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlphase'")             # <<<<<<<<<<<<<<
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")             # <<<<<<<<<<<<<<
+ *     result.zlfreq = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__24, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 134, __pyx_L190_except_error)
@@ -10126,10 +10467,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L190_except_error:;
 
     /* "FromPyStructUtility":131
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")
+ *     result.zlamp = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_5);
@@ -10142,19 +10483,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":135
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
- *     result.zlphase = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *     result.zlfreq = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['proj']
+ *         value = obj['zlphase']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 135, __pyx_L1_error)
-  __pyx_v_result.zlphase = __pyx_t_10;
+  __pyx_v_result.zlfreq = __pyx_t_10;
 
   /* "FromPyStructUtility":136
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *     result.zlfreq = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:
  */
   {
@@ -10167,22 +10508,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":137
- *     result.zlphase = value
+ *     result.zlfreq = value
  *     try:
- *         value = obj['proj']             # <<<<<<<<<<<<<<
+ *         value = obj['zlphase']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'proj'")
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
  */
-      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_proj); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 137, __pyx_L196_error)
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_zlphase); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 137, __pyx_L196_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
       __pyx_t_2 = 0;
 
       /* "FromPyStructUtility":136
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *     result.zlfreq = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:
  */
     }
@@ -10198,10 +10539,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":138
  *     try:
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'proj'")
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *     result.zlphase = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10212,10 +10553,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_8);
 
       /* "FromPyStructUtility":139
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'proj'")             # <<<<<<<<<<<<<<
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")             # <<<<<<<<<<<<<<
+ *     result.zlphase = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 139, __pyx_L198_except_error)
@@ -10228,10 +10569,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L198_except_error:;
 
     /* "FromPyStructUtility":136
- *         raise ValueError("No value specified for struct attribute 'zlphase'")
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")
+ *     result.zlfreq = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_3);
@@ -10244,19 +10585,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":140
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'proj'")
- *     result.proj = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *     result.zlphase = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  */
-  if (unlikely(__Pyx_carray_from_py___pyx_t_double_complex(__pyx_v_value, __pyx_t_11, 3) < 0)) __PYX_ERR(1, 140, __pyx_L1_error)
-  memcpy(&(__pyx_v_result.proj[0]), __pyx_t_11, sizeof(__pyx_v_result.proj[0]) * (3));
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 140, __pyx_L1_error)
+  __pyx_v_result.zlphase = __pyx_t_10;
 
   /* "FromPyStructUtility":141
- *         raise ValueError("No value specified for struct attribute 'proj'")
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *     result.zlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:
  */
   {
@@ -10269,22 +10610,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":142
- *     result.proj = value
+ *     result.zlphase = value
  *     try:
- *         value = obj['cdtrabi']             # <<<<<<<<<<<<<<
+ *         value = obj['proj']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *         raise ValueError("No value specified for struct attribute 'proj'")
  */
-      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_cdtrabi); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 142, __pyx_L204_error)
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_proj); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 142, __pyx_L204_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
       __pyx_t_8 = 0;
 
       /* "FromPyStructUtility":141
- *         raise ValueError("No value specified for struct attribute 'proj'")
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *     result.zlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:
  */
     }
@@ -10300,10 +10641,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":143
  *     try:
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")
+ *     result.proj = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10314,10 +10655,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_2);
 
       /* "FromPyStructUtility":144
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")             # <<<<<<<<<<<<<<
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")             # <<<<<<<<<<<<<<
+ *     result.proj = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__26, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 144, __pyx_L206_except_error)
@@ -10330,10 +10671,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L206_except_error:;
 
     /* "FromPyStructUtility":141
- *         raise ValueError("No value specified for struct attribute 'proj'")
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")
+ *     result.zlphase = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_5);
@@ -10346,19 +10687,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":145
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
- *     result.cdtrabi = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'proj'")
+ *     result.proj = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  */
-  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 145, __pyx_L1_error)
-  __pyx_v_result.cdtrabi = __pyx_t_10;
+  if (unlikely(__Pyx_carray_from_py___pyx_t_double_complex(__pyx_v_value, __pyx_t_11, 3) < 0)) __PYX_ERR(1, 145, __pyx_L1_error)
+  memcpy(&(__pyx_v_result.proj[0]), __pyx_t_11, sizeof(__pyx_v_result.proj[0]) * (3));
 
   /* "FromPyStructUtility":146
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")
+ *     result.proj = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:
  */
   {
@@ -10371,22 +10712,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":147
- *     result.cdtrabi = value
+ *     result.proj = value
  *     try:
- *         value = obj['sdtrabi']             # <<<<<<<<<<<<<<
+ *         value = obj['cdtrabi']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
  */
-      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_sdtrabi); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 147, __pyx_L212_error)
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_cdtrabi); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 147, __pyx_L212_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
       __pyx_t_2 = 0;
 
       /* "FromPyStructUtility":146
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")
+ *     result.proj = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:
  */
     }
@@ -10402,10 +10743,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":148
  *     try:
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *     result.cdtrabi = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10416,10 +10757,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_8);
 
       /* "FromPyStructUtility":149
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")             # <<<<<<<<<<<<<<
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")             # <<<<<<<<<<<<<<
+ *     result.cdtrabi = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 149, __pyx_L214_except_error)
@@ -10432,10 +10773,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L214_except_error:;
 
     /* "FromPyStructUtility":146
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")
+ *     result.proj = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_3);
@@ -10448,19 +10789,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":150
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
- *     result.sdtrabi = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *     result.cdtrabi = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 150, __pyx_L1_error)
-  __pyx_v_result.sdtrabi = __pyx_t_10;
+  __pyx_v_result.cdtrabi = __pyx_t_10;
 
   /* "FromPyStructUtility":151
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *     result.cdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:
  */
   {
@@ -10473,22 +10814,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":152
- *     result.sdtrabi = value
+ *     result.cdtrabi = value
  *     try:
- *         value = obj['ctcrabi']             # <<<<<<<<<<<<<<
+ *         value = obj['sdtrabi']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
  */
-      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_ctcrabi); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 152, __pyx_L220_error)
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_sdtrabi); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 152, __pyx_L220_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
       __pyx_t_8 = 0;
 
       /* "FromPyStructUtility":151
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *     result.cdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:
  */
     }
@@ -10504,10 +10845,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":153
  *     try:
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *     result.sdtrabi = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10518,10 +10859,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_2);
 
       /* "FromPyStructUtility":154
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")             # <<<<<<<<<<<<<<
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")             # <<<<<<<<<<<<<<
+ *     result.sdtrabi = value
  *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 154, __pyx_L222_except_error)
@@ -10534,10 +10875,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L222_except_error:;
 
     /* "FromPyStructUtility":151
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")
+ *     result.cdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_5);
@@ -10550,19 +10891,19 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":155
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
- *     result.ctcrabi = value             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *     result.sdtrabi = value             # <<<<<<<<<<<<<<
  *     try:
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  */
   __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 155, __pyx_L1_error)
-  __pyx_v_result.ctcrabi = __pyx_t_10;
+  __pyx_v_result.sdtrabi = __pyx_t_10;
 
   /* "FromPyStructUtility":156
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *     result.sdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:
  */
   {
@@ -10575,22 +10916,22 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     /*try:*/ {
 
       /* "FromPyStructUtility":157
- *     result.ctcrabi = value
+ *     result.sdtrabi = value
  *     try:
- *         value = obj['stcrabi']             # <<<<<<<<<<<<<<
+ *         value = obj['ctcrabi']             # <<<<<<<<<<<<<<
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
  */
-      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_stcrabi); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 157, __pyx_L228_error)
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_ctcrabi); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 157, __pyx_L228_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
       __pyx_t_2 = 0;
 
       /* "FromPyStructUtility":156
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *     result.sdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:
  */
     }
@@ -10606,10 +10947,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
     /* "FromPyStructUtility":158
  *     try:
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:             # <<<<<<<<<<<<<<
- *         raise ValueError("No value specified for struct attribute 'stcrabi'")
- *     result.stcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *     result.ctcrabi = value
  */
     __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_6) {
@@ -10620,11 +10961,11 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
       __Pyx_GOTREF(__pyx_t_8);
 
       /* "FromPyStructUtility":159
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'stcrabi'")             # <<<<<<<<<<<<<<
- *     result.stcrabi = value
- *     return result
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")             # <<<<<<<<<<<<<<
+ *     result.ctcrabi = value
+ *     try:
  */
       __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 159, __pyx_L230_except_error)
       __Pyx_GOTREF(__pyx_t_9);
@@ -10636,10 +10977,10 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
     __pyx_L230_except_error:;
 
     /* "FromPyStructUtility":156
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")
+ *     result.sdtrabi = value
  *     try:             # <<<<<<<<<<<<<<
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:
  */
     __Pyx_XGIVEREF(__pyx_t_3);
@@ -10652,17 +10993,527 @@ static __pyx_t_8quantumc_Params __pyx_convert__from_py___pyx_t_8quantumc_Params(
 
   /* "FromPyStructUtility":160
  *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *     result.ctcrabi = value             # <<<<<<<<<<<<<<
+ *     try:
+ *         value = obj['stcrabi']
+ */
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 160, __pyx_L1_error)
+  __pyx_v_result.ctcrabi = __pyx_t_10;
+
+  /* "FromPyStructUtility":161
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *     result.ctcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcrabi']
+ *     except KeyError:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_5, &__pyx_t_4, &__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_5);
+    __Pyx_XGOTREF(__pyx_t_4);
+    __Pyx_XGOTREF(__pyx_t_3);
+    /*try:*/ {
+
+      /* "FromPyStructUtility":162
+ *     result.ctcrabi = value
+ *     try:
+ *         value = obj['stcrabi']             # <<<<<<<<<<<<<<
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ */
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_stcrabi); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 162, __pyx_L236_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "FromPyStructUtility":161
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *     result.ctcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcrabi']
+ *     except KeyError:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L241_try_end;
+    __pyx_L236_error:;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+    /* "FromPyStructUtility":163
+ *     try:
+ *         value = obj['stcrabi']
+ *     except KeyError:             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ *     result.stcrabi = value
+ */
+    __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
+    if (__pyx_t_6) {
+      __Pyx_AddTraceback("FromPyStructUtility.__pyx_convert__from_py___pyx_t_8quantumc_Params", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_7, &__pyx_t_2) < 0) __PYX_ERR(1, 163, __pyx_L238_except_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_2);
+
+      /* "FromPyStructUtility":164
+ *         value = obj['stcrabi']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")             # <<<<<<<<<<<<<<
+ *     result.stcrabi = value
+ *     try:
+ */
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 164, __pyx_L238_except_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __Pyx_Raise(__pyx_t_9, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      __PYX_ERR(1, 164, __pyx_L238_except_error)
+    }
+    goto __pyx_L238_except_error;
+    __pyx_L238_except_error:;
+
+    /* "FromPyStructUtility":161
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")
+ *     result.ctcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcrabi']
+ *     except KeyError:
+ */
+    __Pyx_XGIVEREF(__pyx_t_5);
+    __Pyx_XGIVEREF(__pyx_t_4);
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_ExceptionReset(__pyx_t_5, __pyx_t_4, __pyx_t_3);
+    goto __pyx_L1_error;
+    __pyx_L241_try_end:;
+  }
+
+  /* "FromPyStructUtility":165
+ *     except KeyError:
  *         raise ValueError("No value specified for struct attribute 'stcrabi'")
  *     result.stcrabi = value             # <<<<<<<<<<<<<<
+ *     try:
+ *         value = obj['cdtxl']
+ */
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_v_result.stcrabi = __pyx_t_10;
+
+  /* "FromPyStructUtility":166
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ *     result.stcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['cdtxl']
+ *     except KeyError:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_3, &__pyx_t_4, &__pyx_t_5);
+    __Pyx_XGOTREF(__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_4);
+    __Pyx_XGOTREF(__pyx_t_5);
+    /*try:*/ {
+
+      /* "FromPyStructUtility":167
+ *     result.stcrabi = value
+ *     try:
+ *         value = obj['cdtxl']             # <<<<<<<<<<<<<<
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ */
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_cdtxl); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 167, __pyx_L244_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
+      __pyx_t_2 = 0;
+
+      /* "FromPyStructUtility":166
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ *     result.stcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['cdtxl']
+ *     except KeyError:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    goto __pyx_L249_try_end;
+    __pyx_L244_error:;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+    /* "FromPyStructUtility":168
+ *     try:
+ *         value = obj['cdtxl']
+ *     except KeyError:             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ *     result.cdtxl = value
+ */
+    __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
+    if (__pyx_t_6) {
+      __Pyx_AddTraceback("FromPyStructUtility.__pyx_convert__from_py___pyx_t_8quantumc_Params", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(1, 168, __pyx_L246_except_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_8);
+
+      /* "FromPyStructUtility":169
+ *         value = obj['cdtxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")             # <<<<<<<<<<<<<<
+ *     result.cdtxl = value
+ *     try:
+ */
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__31, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 169, __pyx_L246_except_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __Pyx_Raise(__pyx_t_9, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      __PYX_ERR(1, 169, __pyx_L246_except_error)
+    }
+    goto __pyx_L246_except_error;
+    __pyx_L246_except_error:;
+
+    /* "FromPyStructUtility":166
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")
+ *     result.stcrabi = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['cdtxl']
+ *     except KeyError:
+ */
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_XGIVEREF(__pyx_t_4);
+    __Pyx_XGIVEREF(__pyx_t_5);
+    __Pyx_ExceptionReset(__pyx_t_3, __pyx_t_4, __pyx_t_5);
+    goto __pyx_L1_error;
+    __pyx_L249_try_end:;
+  }
+
+  /* "FromPyStructUtility":170
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ *     result.cdtxl = value             # <<<<<<<<<<<<<<
+ *     try:
+ *         value = obj['sdtxl']
+ */
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 170, __pyx_L1_error)
+  __pyx_v_result.cdtxl = __pyx_t_10;
+
+  /* "FromPyStructUtility":171
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ *     result.cdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['sdtxl']
+ *     except KeyError:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_5, &__pyx_t_4, &__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_5);
+    __Pyx_XGOTREF(__pyx_t_4);
+    __Pyx_XGOTREF(__pyx_t_3);
+    /*try:*/ {
+
+      /* "FromPyStructUtility":172
+ *     result.cdtxl = value
+ *     try:
+ *         value = obj['sdtxl']             # <<<<<<<<<<<<<<
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ */
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_sdtxl); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 172, __pyx_L252_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "FromPyStructUtility":171
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ *     result.cdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['sdtxl']
+ *     except KeyError:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L257_try_end;
+    __pyx_L252_error:;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+    /* "FromPyStructUtility":173
+ *     try:
+ *         value = obj['sdtxl']
+ *     except KeyError:             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ *     result.sdtxl = value
+ */
+    __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
+    if (__pyx_t_6) {
+      __Pyx_AddTraceback("FromPyStructUtility.__pyx_convert__from_py___pyx_t_8quantumc_Params", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_7, &__pyx_t_2) < 0) __PYX_ERR(1, 173, __pyx_L254_except_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_2);
+
+      /* "FromPyStructUtility":174
+ *         value = obj['sdtxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")             # <<<<<<<<<<<<<<
+ *     result.sdtxl = value
+ *     try:
+ */
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__32, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 174, __pyx_L254_except_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __Pyx_Raise(__pyx_t_9, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      __PYX_ERR(1, 174, __pyx_L254_except_error)
+    }
+    goto __pyx_L254_except_error;
+    __pyx_L254_except_error:;
+
+    /* "FromPyStructUtility":171
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")
+ *     result.cdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['sdtxl']
+ *     except KeyError:
+ */
+    __Pyx_XGIVEREF(__pyx_t_5);
+    __Pyx_XGIVEREF(__pyx_t_4);
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_ExceptionReset(__pyx_t_5, __pyx_t_4, __pyx_t_3);
+    goto __pyx_L1_error;
+    __pyx_L257_try_end:;
+  }
+
+  /* "FromPyStructUtility":175
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ *     result.sdtxl = value             # <<<<<<<<<<<<<<
+ *     try:
+ *         value = obj['ctcxl']
+ */
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 175, __pyx_L1_error)
+  __pyx_v_result.sdtxl = __pyx_t_10;
+
+  /* "FromPyStructUtility":176
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ *     result.sdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['ctcxl']
+ *     except KeyError:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_3, &__pyx_t_4, &__pyx_t_5);
+    __Pyx_XGOTREF(__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_4);
+    __Pyx_XGOTREF(__pyx_t_5);
+    /*try:*/ {
+
+      /* "FromPyStructUtility":177
+ *     result.sdtxl = value
+ *     try:
+ *         value = obj['ctcxl']             # <<<<<<<<<<<<<<
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ */
+      __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_ctcxl); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 177, __pyx_L260_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_2);
+      __pyx_t_2 = 0;
+
+      /* "FromPyStructUtility":176
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ *     result.sdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['ctcxl']
+ *     except KeyError:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    goto __pyx_L265_try_end;
+    __pyx_L260_error:;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+    /* "FromPyStructUtility":178
+ *     try:
+ *         value = obj['ctcxl']
+ *     except KeyError:             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ *     result.ctcxl = value
+ */
+    __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
+    if (__pyx_t_6) {
+      __Pyx_AddTraceback("FromPyStructUtility.__pyx_convert__from_py___pyx_t_8quantumc_Params", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(1, 178, __pyx_L262_except_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_8);
+
+      /* "FromPyStructUtility":179
+ *         value = obj['ctcxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")             # <<<<<<<<<<<<<<
+ *     result.ctcxl = value
+ *     try:
+ */
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__33, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 179, __pyx_L262_except_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __Pyx_Raise(__pyx_t_9, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      __PYX_ERR(1, 179, __pyx_L262_except_error)
+    }
+    goto __pyx_L262_except_error;
+    __pyx_L262_except_error:;
+
+    /* "FromPyStructUtility":176
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")
+ *     result.sdtxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['ctcxl']
+ *     except KeyError:
+ */
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_XGIVEREF(__pyx_t_4);
+    __Pyx_XGIVEREF(__pyx_t_5);
+    __Pyx_ExceptionReset(__pyx_t_3, __pyx_t_4, __pyx_t_5);
+    goto __pyx_L1_error;
+    __pyx_L265_try_end:;
+  }
+
+  /* "FromPyStructUtility":180
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ *     result.ctcxl = value             # <<<<<<<<<<<<<<
+ *     try:
+ *         value = obj['stcxl']
+ */
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 180, __pyx_L1_error)
+  __pyx_v_result.ctcxl = __pyx_t_10;
+
+  /* "FromPyStructUtility":181
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ *     result.ctcxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcxl']
+ *     except KeyError:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_5, &__pyx_t_4, &__pyx_t_3);
+    __Pyx_XGOTREF(__pyx_t_5);
+    __Pyx_XGOTREF(__pyx_t_4);
+    __Pyx_XGOTREF(__pyx_t_3);
+    /*try:*/ {
+
+      /* "FromPyStructUtility":182
+ *     result.ctcxl = value
+ *     try:
+ *         value = obj['stcxl']             # <<<<<<<<<<<<<<
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")
+ */
+      __pyx_t_8 = __Pyx_PyObject_Dict_GetItem(__pyx_v_obj, __pyx_n_s_stcxl); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 182, __pyx_L268_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_8);
+      __pyx_t_8 = 0;
+
+      /* "FromPyStructUtility":181
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ *     result.ctcxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcxl']
+ *     except KeyError:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L273_try_end;
+    __pyx_L268_error:;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+
+    /* "FromPyStructUtility":183
+ *     try:
+ *         value = obj['stcxl']
+ *     except KeyError:             # <<<<<<<<<<<<<<
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")
+ *     result.stcxl = value
+ */
+    __pyx_t_6 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
+    if (__pyx_t_6) {
+      __Pyx_AddTraceback("FromPyStructUtility.__pyx_convert__from_py___pyx_t_8quantumc_Params", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_7, &__pyx_t_2) < 0) __PYX_ERR(1, 183, __pyx_L270_except_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_2);
+
+      /* "FromPyStructUtility":184
+ *         value = obj['stcxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")             # <<<<<<<<<<<<<<
+ *     result.stcxl = value
+ *     return result
+ */
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__34, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 184, __pyx_L270_except_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __Pyx_Raise(__pyx_t_9, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      __PYX_ERR(1, 184, __pyx_L270_except_error)
+    }
+    goto __pyx_L270_except_error;
+    __pyx_L270_except_error:;
+
+    /* "FromPyStructUtility":181
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")
+ *     result.ctcxl = value
+ *     try:             # <<<<<<<<<<<<<<
+ *         value = obj['stcxl']
+ *     except KeyError:
+ */
+    __Pyx_XGIVEREF(__pyx_t_5);
+    __Pyx_XGIVEREF(__pyx_t_4);
+    __Pyx_XGIVEREF(__pyx_t_3);
+    __Pyx_ExceptionReset(__pyx_t_5, __pyx_t_4, __pyx_t_3);
+    goto __pyx_L1_error;
+    __pyx_L273_try_end:;
+  }
+
+  /* "FromPyStructUtility":185
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")
+ *     result.stcxl = value             # <<<<<<<<<<<<<<
  *     return result
  * 
  */
-  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 160, __pyx_L1_error)
-  __pyx_v_result.stcrabi = __pyx_t_10;
+  __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_v_result.stcxl = __pyx_t_10;
 
-  /* "FromPyStructUtility":161
- *         raise ValueError("No value specified for struct attribute 'stcrabi'")
- *     result.stcrabi = value
+  /* "FromPyStructUtility":186
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")
+ *     result.stcxl = value
  *     return result             # <<<<<<<<<<<<<<
  * 
  * 
@@ -10889,7 +11740,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if itemsize <= 0:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 132, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__35, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 132, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10921,7 +11772,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if not isinstance(format, bytes):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__31, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 135, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__36, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -11048,7 +11899,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  * 
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__32, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 147, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__37, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -11322,7 +12173,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *             if self.dtype_is_object:
  */
-      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__33, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 175, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__38, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 175, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_Raise(__pyx_t_10, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -11563,7 +12414,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.buf = self.data
  *         info.len = self.len
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__34, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 191, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__39, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 191, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -12279,7 +13130,7 @@ static PyObject *__pyx_pf___pyx_array___reduce_cython__(CYTHON_UNUSED struct __p
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__35, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__40, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -12332,7 +13183,7 @@ static PyObject *__pyx_pf___pyx_array_2__setstate_cython__(CYTHON_UNUSED struct 
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__36, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__41, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -13976,7 +14827,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
  * 
  *         have_slices, index = _unellipsify(index, self.view.ndim)
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__37, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 413, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__42, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 413, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -15003,7 +15854,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *         else:
  *             if len(self.view.format) == 1:
  */
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__38, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 490, __pyx_L5_except_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__43, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 490, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_Raise(__pyx_t_6, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -15359,7 +16210,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  * 
  *         if flags & PyBUF_STRIDES:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__39, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 515, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__44, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 515, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -15899,7 +16750,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  * 
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__40, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 565, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__45, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 565, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -16013,7 +16864,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->view.ndim); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 572, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__41, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 572, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__46, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 572, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
@@ -17014,7 +17865,7 @@ static PyObject *__pyx_pf___pyx_memoryview___reduce_cython__(CYTHON_UNUSED struc
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__42, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__47, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17067,7 +17918,7 @@ static PyObject *__pyx_pf___pyx_memoryview_2__setstate_cython__(CYTHON_UNUSED st
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__43, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__48, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17418,9 +18269,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
         __Pyx_GOTREF(__pyx_t_7);
         { Py_ssize_t __pyx_temp;
           for (__pyx_temp=0; __pyx_temp < ((__pyx_v_ndim - __pyx_t_8) + 1); __pyx_temp++) {
-            __Pyx_INCREF(__pyx_slice__44);
-            __Pyx_GIVEREF(__pyx_slice__44);
-            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__44);
+            __Pyx_INCREF(__pyx_slice__49);
+            __Pyx_GIVEREF(__pyx_slice__49);
+            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__49);
           }
         }
         __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_7); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(1, 677, __pyx_L1_error)
@@ -17453,7 +18304,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *         else:
  */
       /*else*/ {
-        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__44); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(1, 680, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__49); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(1, 680, __pyx_L1_error)
       }
       __pyx_L7:;
 
@@ -17593,9 +18444,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
     __Pyx_GOTREF(__pyx_t_3);
     { Py_ssize_t __pyx_temp;
       for (__pyx_temp=0; __pyx_temp < __pyx_v_nslices; __pyx_temp++) {
-        __Pyx_INCREF(__pyx_slice__44);
-        __Pyx_GIVEREF(__pyx_slice__44);
-        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__44);
+        __Pyx_INCREF(__pyx_slice__49);
+        __Pyx_GIVEREF(__pyx_slice__49);
+        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__49);
       }
     }
     __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_3); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(1, 691, __pyx_L1_error)
@@ -17719,7 +18570,7 @@ static PyObject *assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __
  * 
  * 
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__45, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 698, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__50, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 698, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -19882,7 +20733,7 @@ static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED 
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__46, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__51, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -19935,7 +20786,7 @@ static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUS
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__47, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__52, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -24191,6 +25042,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Cannot_index_with_type_s, __pyx_k_Cannot_index_with_type_s, sizeof(__pyx_k_Cannot_index_with_type_s), 0, 0, 1, 0},
   {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
+  {&__pyx_kp_s_Error_QL33_doesn_t_converge, __pyx_k_Error_QL33_doesn_t_converge, sizeof(__pyx_k_Error_QL33_doesn_t_converge), 0, 0, 1, 0},
   {&__pyx_n_s_F, __pyx_k_F, sizeof(__pyx_k_F), 0, 0, 1, 1},
   {&__pyx_n_s_F_arr, __pyx_k_F_arr, sizeof(__pyx_k_F_arr), 0, 0, 1, 1},
   {&__pyx_kp_s_Incompatible_checksums_s_vs_0xb0, __pyx_k_Incompatible_checksums_s_vs_0xb0, sizeof(__pyx_k_Incompatible_checksums_s_vs_0xb0), 0, 0, 1, 0},
@@ -24225,6 +25077,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_No_value_specified_for_struct_at_28, __pyx_k_No_value_specified_for_struct_at_28, sizeof(__pyx_k_No_value_specified_for_struct_at_28), 0, 0, 1, 0},
   {&__pyx_kp_s_No_value_specified_for_struct_at_29, __pyx_k_No_value_specified_for_struct_at_29, sizeof(__pyx_k_No_value_specified_for_struct_at_29), 0, 0, 1, 0},
   {&__pyx_kp_s_No_value_specified_for_struct_at_3, __pyx_k_No_value_specified_for_struct_at_3, sizeof(__pyx_k_No_value_specified_for_struct_at_3), 0, 0, 1, 0},
+  {&__pyx_kp_s_No_value_specified_for_struct_at_30, __pyx_k_No_value_specified_for_struct_at_30, sizeof(__pyx_k_No_value_specified_for_struct_at_30), 0, 0, 1, 0},
+  {&__pyx_kp_s_No_value_specified_for_struct_at_31, __pyx_k_No_value_specified_for_struct_at_31, sizeof(__pyx_k_No_value_specified_for_struct_at_31), 0, 0, 1, 0},
+  {&__pyx_kp_s_No_value_specified_for_struct_at_32, __pyx_k_No_value_specified_for_struct_at_32, sizeof(__pyx_k_No_value_specified_for_struct_at_32), 0, 0, 1, 0},
+  {&__pyx_kp_s_No_value_specified_for_struct_at_33, __pyx_k_No_value_specified_for_struct_at_33, sizeof(__pyx_k_No_value_specified_for_struct_at_33), 0, 0, 1, 0},
+  {&__pyx_kp_s_No_value_specified_for_struct_at_34, __pyx_k_No_value_specified_for_struct_at_34, sizeof(__pyx_k_No_value_specified_for_struct_at_34), 0, 0, 1, 0},
   {&__pyx_kp_s_No_value_specified_for_struct_at_4, __pyx_k_No_value_specified_for_struct_at_4, sizeof(__pyx_k_No_value_specified_for_struct_at_4), 0, 0, 1, 0},
   {&__pyx_kp_s_No_value_specified_for_struct_at_5, __pyx_k_No_value_specified_for_struct_at_5, sizeof(__pyx_k_No_value_specified_for_struct_at_5), 0, 0, 1, 0},
   {&__pyx_kp_s_No_value_specified_for_struct_at_6, __pyx_k_No_value_specified_for_struct_at_6, sizeof(__pyx_k_No_value_specified_for_struct_at_6), 0, 0, 1, 0},
@@ -24236,6 +25093,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_OverflowError, __pyx_k_OverflowError, sizeof(__pyx_k_OverflowError), 0, 0, 1, 1},
   {&__pyx_n_s_PickleError, __pyx_k_PickleError, sizeof(__pyx_k_PickleError), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
+  {&__pyx_n_s_U, __pyx_k_U, sizeof(__pyx_k_U), 0, 0, 1, 1},
   {&__pyx_kp_s_Unable_to_convert_item_to_object, __pyx_k_Unable_to_convert_item_to_object, sizeof(__pyx_k_Unable_to_convert_item_to_object), 0, 0, 1, 0},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_View_MemoryView, __pyx_k_View_MemoryView, sizeof(__pyx_k_View_MemoryView), 0, 0, 1, 1},
@@ -24245,11 +25103,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
   {&__pyx_n_s_cdtrabi, __pyx_k_cdtrabi, sizeof(__pyx_k_cdtrabi), 0, 0, 1, 1},
+  {&__pyx_n_s_cdtxl, __pyx_k_cdtxl, sizeof(__pyx_k_cdtxl), 0, 0, 1, 1},
   {&__pyx_n_s_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
   {&__pyx_n_s_ctcrabi, __pyx_k_ctcrabi, sizeof(__pyx_k_ctcrabi), 0, 0, 1, 1},
+  {&__pyx_n_s_ctcxl, __pyx_k_ctcxl, sizeof(__pyx_k_ctcxl), 0, 0, 1, 1},
   {&__pyx_n_s_detA, __pyx_k_detA, sizeof(__pyx_k_detA), 0, 0, 1, 1},
   {&__pyx_n_s_dete, __pyx_k_dete, sizeof(__pyx_k_dete), 0, 0, 1, 1},
   {&__pyx_n_s_dett, __pyx_k_dett, sizeof(__pyx_k_dett), 0, 0, 1, 1},
@@ -24258,17 +25118,20 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_dt, __pyx_k_dt, sizeof(__pyx_k_dt), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
+  {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_eps, __pyx_k_eps, sizeof(__pyx_k_eps), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
   {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
   {&__pyx_n_s_expm, __pyx_k_expm, sizeof(__pyx_k_expm), 0, 0, 1, 1},
+  {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_finfo, __pyx_k_finfo, sizeof(__pyx_k_finfo), 0, 0, 1, 1},
   {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
+  {&__pyx_n_s_fuck, __pyx_k_fuck, sizeof(__pyx_k_fuck), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
   {&__pyx_n_s_half, __pyx_k_half, sizeof(__pyx_k_half), 0, 0, 1, 1},
@@ -24278,13 +25141,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_j, __pyx_k_j, sizeof(__pyx_k_j), 0, 0, 1, 1},
+  {&__pyx_n_s_k, __pyx_k_k, sizeof(__pyx_k_k), 0, 0, 1, 1},
   {&__pyx_n_s_larmor, __pyx_k_larmor, sizeof(__pyx_k_larmor), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
   {&__pyx_n_s_mytime, __pyx_k_mytime, sizeof(__pyx_k_mytime), 0, 0, 1, 1},
+  {&__pyx_n_s_n_propagateF, __pyx_k_n_propagateF, sizeof(__pyx_k_n_propagateF), 0, 0, 1, 1},
   {&__pyx_n_s_n_propagateN, __pyx_k_n_propagateN, sizeof(__pyx_k_n_propagateN), 0, 0, 1, 1},
-  {&__pyx_n_s_n_propagate_F, __pyx_k_n_propagate_F, sizeof(__pyx_k_n_propagate_F), 0, 0, 1, 1},
   {&__pyx_n_s_n_propagate_lite, __pyx_k_n_propagate_lite, sizeof(__pyx_k_n_propagate_lite), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
@@ -24303,6 +25167,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_params, __pyx_k_params, sizeof(__pyx_k_params), 0, 0, 1, 1},
   {&__pyx_n_s_phi, __pyx_k_phi, sizeof(__pyx_k_phi), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
+  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_probs, __pyx_k_probs, sizeof(__pyx_k_probs), 0, 0, 1, 1},
   {&__pyx_n_s_proj, __pyx_k_proj, sizeof(__pyx_k_proj), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_PickleError, __pyx_k_pyx_PickleError, sizeof(__pyx_k_pyx_PickleError), 0, 0, 1, 1},
@@ -24327,6 +25192,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_savef, __pyx_k_savef, sizeof(__pyx_k_savef), 0, 0, 1, 1},
   {&__pyx_n_s_scipy_linalg, __pyx_k_scipy_linalg, sizeof(__pyx_k_scipy_linalg), 0, 0, 1, 1},
   {&__pyx_n_s_sdtrabi, __pyx_k_sdtrabi, sizeof(__pyx_k_sdtrabi), 0, 0, 1, 1},
+  {&__pyx_n_s_sdtxl, __pyx_k_sdtxl, sizeof(__pyx_k_sdtxl), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
@@ -24337,6 +25203,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_state_in, __pyx_k_state_in, sizeof(__pyx_k_state_in), 0, 0, 1, 1},
   {&__pyx_n_s_states, __pyx_k_states, sizeof(__pyx_k_states), 0, 0, 1, 1},
   {&__pyx_n_s_stcrabi, __pyx_k_stcrabi, sizeof(__pyx_k_stcrabi), 0, 0, 1, 1},
+  {&__pyx_n_s_stcxl, __pyx_k_stcxl, sizeof(__pyx_k_stcxl), 0, 0, 1, 1},
   {&__pyx_n_s_step, __pyx_k_step, sizeof(__pyx_k_step), 0, 0, 1, 1},
   {&__pyx_n_s_steps, __pyx_k_steps, sizeof(__pyx_k_steps), 0, 0, 1, 1},
   {&__pyx_n_s_stop, __pyx_k_stop, sizeof(__pyx_k_stop), 0, 0, 1, 1},
@@ -24349,6 +25216,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_tend, __pyx_k_tend, sizeof(__pyx_k_tend), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_time, __pyx_k_time, sizeof(__pyx_k_time), 0, 0, 1, 1},
+  {&__pyx_n_s_tr2, __pyx_k_tr2, sizeof(__pyx_k_tr2), 0, 0, 1, 1},
   {&__pyx_n_s_tstart, __pyx_k_tstart, sizeof(__pyx_k_tstart), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
@@ -24357,14 +25225,16 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_xlamp, __pyx_k_xlamp, sizeof(__pyx_k_xlamp), 0, 0, 1, 1},
   {&__pyx_n_s_xlfreq, __pyx_k_xlfreq, sizeof(__pyx_k_xlfreq), 0, 0, 1, 1},
   {&__pyx_n_s_xlphase, __pyx_k_xlphase, sizeof(__pyx_k_xlphase), 0, 0, 1, 1},
+  {&__pyx_n_s_yay, __pyx_k_yay, sizeof(__pyx_k_yay), 0, 0, 1, 1},
+  {&__pyx_n_s_you, __pyx_k_you, sizeof(__pyx_k_you), 0, 0, 1, 1},
   {&__pyx_n_s_zlamp, __pyx_k_zlamp, sizeof(__pyx_k_zlamp), 0, 0, 1, 1},
   {&__pyx_n_s_zlfreq, __pyx_k_zlfreq, sizeof(__pyx_k_zlfreq), 0, 0, 1, 1},
   {&__pyx_n_s_zlphase, __pyx_k_zlphase, sizeof(__pyx_k_zlphase), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 114, __pyx_L1_error)
-  __pyx_builtin_exit = __Pyx_GetBuiltinName(__pyx_n_s_exit); if (!__pyx_builtin_exit) __PYX_ERR(0, 922, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_builtin_exit = __Pyx_GetBuiltinName(__pyx_n_s_exit); if (!__pyx_builtin_exit) __PYX_ERR(0, 866, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 81, __pyx_L1_error)
   __pyx_builtin_OverflowError = __Pyx_GetBuiltinName(__pyx_n_s_OverflowError); if (!__pyx_builtin_OverflowError) __PYX_ERR(1, 81, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(1, 84, __pyx_L1_error)
@@ -24615,10 +25485,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "FromPyStructUtility":124
- *         value = obj['zlamp']
+ *         value = obj['tr2']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlamp'")             # <<<<<<<<<<<<<<
- *     result.zlamp = value
+ *         raise ValueError("No value specified for struct attribute 'tr2'")             # <<<<<<<<<<<<<<
+ *     result.tr2 = value
  *     try:
  */
   __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_22); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(1, 124, __pyx_L1_error)
@@ -24626,10 +25496,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__22);
 
   /* "FromPyStructUtility":129
- *         value = obj['zlfreq']
+ *         value = obj['zlamp']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlfreq'")             # <<<<<<<<<<<<<<
- *     result.zlfreq = value
+ *         raise ValueError("No value specified for struct attribute 'zlamp'")             # <<<<<<<<<<<<<<
+ *     result.zlamp = value
  *     try:
  */
   __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_23); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(1, 129, __pyx_L1_error)
@@ -24637,10 +25507,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__23);
 
   /* "FromPyStructUtility":134
- *         value = obj['zlphase']
+ *         value = obj['zlfreq']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'zlphase'")             # <<<<<<<<<<<<<<
- *     result.zlphase = value
+ *         raise ValueError("No value specified for struct attribute 'zlfreq'")             # <<<<<<<<<<<<<<
+ *     result.zlfreq = value
  *     try:
  */
   __pyx_tuple__24 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_24); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(1, 134, __pyx_L1_error)
@@ -24648,10 +25518,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__24);
 
   /* "FromPyStructUtility":139
- *         value = obj['proj']
+ *         value = obj['zlphase']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'proj'")             # <<<<<<<<<<<<<<
- *     result.proj = value
+ *         raise ValueError("No value specified for struct attribute 'zlphase'")             # <<<<<<<<<<<<<<
+ *     result.zlphase = value
  *     try:
  */
   __pyx_tuple__25 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_25); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(1, 139, __pyx_L1_error)
@@ -24659,10 +25529,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__25);
 
   /* "FromPyStructUtility":144
- *         value = obj['cdtrabi']
+ *         value = obj['proj']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'cdtrabi'")             # <<<<<<<<<<<<<<
- *     result.cdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'proj'")             # <<<<<<<<<<<<<<
+ *     result.proj = value
  *     try:
  */
   __pyx_tuple__26 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_26); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(1, 144, __pyx_L1_error)
@@ -24670,10 +25540,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__26);
 
   /* "FromPyStructUtility":149
- *         value = obj['sdtrabi']
+ *         value = obj['cdtrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'sdtrabi'")             # <<<<<<<<<<<<<<
- *     result.sdtrabi = value
+ *         raise ValueError("No value specified for struct attribute 'cdtrabi'")             # <<<<<<<<<<<<<<
+ *     result.cdtrabi = value
  *     try:
  */
   __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_27); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(1, 149, __pyx_L1_error)
@@ -24681,10 +25551,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__27);
 
   /* "FromPyStructUtility":154
- *         value = obj['ctcrabi']
+ *         value = obj['sdtrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'ctcrabi'")             # <<<<<<<<<<<<<<
- *     result.ctcrabi = value
+ *         raise ValueError("No value specified for struct attribute 'sdtrabi'")             # <<<<<<<<<<<<<<
+ *     result.sdtrabi = value
  *     try:
  */
   __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_28); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(1, 154, __pyx_L1_error)
@@ -24692,15 +25562,70 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__28);
 
   /* "FromPyStructUtility":159
- *         value = obj['stcrabi']
+ *         value = obj['ctcrabi']
  *     except KeyError:
- *         raise ValueError("No value specified for struct attribute 'stcrabi'")             # <<<<<<<<<<<<<<
- *     result.stcrabi = value
- *     return result
+ *         raise ValueError("No value specified for struct attribute 'ctcrabi'")             # <<<<<<<<<<<<<<
+ *     result.ctcrabi = value
+ *     try:
  */
   __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_29); if (unlikely(!__pyx_tuple__29)) __PYX_ERR(1, 159, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__29);
   __Pyx_GIVEREF(__pyx_tuple__29);
+
+  /* "FromPyStructUtility":164
+ *         value = obj['stcrabi']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcrabi'")             # <<<<<<<<<<<<<<
+ *     result.stcrabi = value
+ *     try:
+ */
+  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_30); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(1, 164, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
+
+  /* "FromPyStructUtility":169
+ *         value = obj['cdtxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'cdtxl'")             # <<<<<<<<<<<<<<
+ *     result.cdtxl = value
+ *     try:
+ */
+  __pyx_tuple__31 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_31); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(1, 169, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__31);
+  __Pyx_GIVEREF(__pyx_tuple__31);
+
+  /* "FromPyStructUtility":174
+ *         value = obj['sdtxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'sdtxl'")             # <<<<<<<<<<<<<<
+ *     result.sdtxl = value
+ *     try:
+ */
+  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_32); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(1, 174, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__32);
+  __Pyx_GIVEREF(__pyx_tuple__32);
+
+  /* "FromPyStructUtility":179
+ *         value = obj['ctcxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'ctcxl'")             # <<<<<<<<<<<<<<
+ *     result.ctcxl = value
+ *     try:
+ */
+  __pyx_tuple__33 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_33); if (unlikely(!__pyx_tuple__33)) __PYX_ERR(1, 179, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__33);
+  __Pyx_GIVEREF(__pyx_tuple__33);
+
+  /* "FromPyStructUtility":184
+ *         value = obj['stcxl']
+ *     except KeyError:
+ *         raise ValueError("No value specified for struct attribute 'stcxl'")             # <<<<<<<<<<<<<<
+ *     result.stcxl = value
+ *     return result
+ */
+  __pyx_tuple__34 = PyTuple_Pack(1, __pyx_kp_s_No_value_specified_for_struct_at_34); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(1, 184, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__34);
+  __Pyx_GIVEREF(__pyx_tuple__34);
 
   /* "View.MemoryView":132
  * 
@@ -24709,9 +25634,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         if itemsize <= 0:
  */
-  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(1, 132, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__30);
-  __Pyx_GIVEREF(__pyx_tuple__30);
+  __pyx_tuple__35 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__35)) __PYX_ERR(1, 132, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__35);
+  __Pyx_GIVEREF(__pyx_tuple__35);
 
   /* "View.MemoryView":135
  * 
@@ -24720,9 +25645,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         if not isinstance(format, bytes):
  */
-  __pyx_tuple__31 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(1, 135, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__31);
-  __Pyx_GIVEREF(__pyx_tuple__31);
+  __pyx_tuple__36 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(1, 135, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__36);
+  __Pyx_GIVEREF(__pyx_tuple__36);
 
   /* "View.MemoryView":147
  * 
@@ -24731,9 +25656,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(1, 147, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__32);
-  __Pyx_GIVEREF(__pyx_tuple__32);
+  __pyx_tuple__37 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__37)) __PYX_ERR(1, 147, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__37);
+  __Pyx_GIVEREF(__pyx_tuple__37);
 
   /* "View.MemoryView":175
  *             self.data = <char *>malloc(self.len)
@@ -24742,9 +25667,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *             if self.dtype_is_object:
  */
-  __pyx_tuple__33 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__33)) __PYX_ERR(1, 175, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__33);
-  __Pyx_GIVEREF(__pyx_tuple__33);
+  __pyx_tuple__38 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(1, 175, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__38);
+  __Pyx_GIVEREF(__pyx_tuple__38);
 
   /* "View.MemoryView":191
  *             bufmode = PyBUF_F_CONTIGUOUS | PyBUF_ANY_CONTIGUOUS
@@ -24753,9 +25678,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         info.buf = self.data
  *         info.len = self.len
  */
-  __pyx_tuple__34 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(1, 191, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__34);
-  __Pyx_GIVEREF(__pyx_tuple__34);
+  __pyx_tuple__39 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__39)) __PYX_ERR(1, 191, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__39);
+  __Pyx_GIVEREF(__pyx_tuple__39);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -24763,18 +25688,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__35 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__35)) __PYX_ERR(1, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__35);
-  __Pyx_GIVEREF(__pyx_tuple__35);
+  __pyx_tuple__40 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__40);
+  __Pyx_GIVEREF(__pyx_tuple__40);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__36 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__36);
-  __Pyx_GIVEREF(__pyx_tuple__36);
+  __pyx_tuple__41 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__41)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__41);
+  __Pyx_GIVEREF(__pyx_tuple__41);
 
   /* "View.MemoryView":413
  *     def __setitem__(memoryview self, object index, object value):
@@ -24783,9 +25708,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         have_slices, index = _unellipsify(index, self.view.ndim)
  */
-  __pyx_tuple__37 = PyTuple_Pack(1, __pyx_kp_s_Cannot_assign_to_read_only_memor); if (unlikely(!__pyx_tuple__37)) __PYX_ERR(1, 413, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__37);
-  __Pyx_GIVEREF(__pyx_tuple__37);
+  __pyx_tuple__42 = PyTuple_Pack(1, __pyx_kp_s_Cannot_assign_to_read_only_memor); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(1, 413, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__42);
+  __Pyx_GIVEREF(__pyx_tuple__42);
 
   /* "View.MemoryView":490
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -24794,9 +25719,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         else:
  *             if len(self.view.format) == 1:
  */
-  __pyx_tuple__38 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(1, 490, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__38);
-  __Pyx_GIVEREF(__pyx_tuple__38);
+  __pyx_tuple__43 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__43)) __PYX_ERR(1, 490, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__43);
+  __Pyx_GIVEREF(__pyx_tuple__43);
 
   /* "View.MemoryView":515
  *     def __getbuffer__(self, Py_buffer *info, int flags):
@@ -24805,9 +25730,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         if flags & PyBUF_STRIDES:
  */
-  __pyx_tuple__39 = PyTuple_Pack(1, __pyx_kp_s_Cannot_create_writable_memory_vi); if (unlikely(!__pyx_tuple__39)) __PYX_ERR(1, 515, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__39);
-  __Pyx_GIVEREF(__pyx_tuple__39);
+  __pyx_tuple__44 = PyTuple_Pack(1, __pyx_kp_s_Cannot_create_writable_memory_vi); if (unlikely(!__pyx_tuple__44)) __PYX_ERR(1, 515, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__44);
+  __Pyx_GIVEREF(__pyx_tuple__44);
 
   /* "View.MemoryView":565
  *         if self.view.strides == NULL:
@@ -24816,9 +25741,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-  __pyx_tuple__40 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(1, 565, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__40);
-  __Pyx_GIVEREF(__pyx_tuple__40);
+  __pyx_tuple__45 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__45)) __PYX_ERR(1, 565, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__45);
+  __Pyx_GIVEREF(__pyx_tuple__45);
 
   /* "View.MemoryView":572
  *     def suboffsets(self):
@@ -24827,12 +25752,12 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
  */
-  __pyx_tuple__41 = PyTuple_New(1); if (unlikely(!__pyx_tuple__41)) __PYX_ERR(1, 572, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__41);
+  __pyx_tuple__46 = PyTuple_New(1); if (unlikely(!__pyx_tuple__46)) __PYX_ERR(1, 572, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__46);
   __Pyx_INCREF(__pyx_int_neg_1);
   __Pyx_GIVEREF(__pyx_int_neg_1);
-  PyTuple_SET_ITEM(__pyx_tuple__41, 0, __pyx_int_neg_1);
-  __Pyx_GIVEREF(__pyx_tuple__41);
+  PyTuple_SET_ITEM(__pyx_tuple__46, 0, __pyx_int_neg_1);
+  __Pyx_GIVEREF(__pyx_tuple__46);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -24840,18 +25765,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__42 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(1, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__42);
-  __Pyx_GIVEREF(__pyx_tuple__42);
+  __pyx_tuple__47 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__47)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__47);
+  __Pyx_GIVEREF(__pyx_tuple__47);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__43 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__43)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__43);
-  __Pyx_GIVEREF(__pyx_tuple__43);
+  __pyx_tuple__48 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__48)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__48);
+  __Pyx_GIVEREF(__pyx_tuple__48);
 
   /* "View.MemoryView":677
  *         if item is Ellipsis:
@@ -24860,9 +25785,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *                 seen_ellipsis = True
  *             else:
  */
-  __pyx_slice__44 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__44)) __PYX_ERR(1, 677, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__44);
-  __Pyx_GIVEREF(__pyx_slice__44);
+  __pyx_slice__49 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__49)) __PYX_ERR(1, 677, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__49);
+  __Pyx_GIVEREF(__pyx_slice__49);
 
   /* "View.MemoryView":680
  *                 seen_ellipsis = True
@@ -24871,9 +25796,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *             have_slices = True
  *         else:
  */
-  __pyx_slice__44 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__44)) __PYX_ERR(1, 680, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__44);
-  __Pyx_GIVEREF(__pyx_slice__44);
+  __pyx_slice__49 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__49)) __PYX_ERR(1, 680, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__49);
+  __Pyx_GIVEREF(__pyx_slice__49);
 
   /* "View.MemoryView":691
  *     nslices = ndim - len(result)
@@ -24882,9 +25807,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  *     return have_slices or nslices, tuple(result)
  */
-  __pyx_slice__44 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__44)) __PYX_ERR(1, 691, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__44);
-  __Pyx_GIVEREF(__pyx_slice__44);
+  __pyx_slice__49 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__49)) __PYX_ERR(1, 691, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__49);
+  __Pyx_GIVEREF(__pyx_slice__49);
 
   /* "View.MemoryView":698
  *     for suboffset in suboffsets[:ndim]:
@@ -24893,9 +25818,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__45 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__45)) __PYX_ERR(1, 698, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__45);
-  __Pyx_GIVEREF(__pyx_tuple__45);
+  __pyx_tuple__50 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__50)) __PYX_ERR(1, 698, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__50);
+  __Pyx_GIVEREF(__pyx_tuple__50);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -24903,66 +25828,66 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__46 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__46)) __PYX_ERR(1, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__46);
-  __Pyx_GIVEREF(__pyx_tuple__46);
+  __pyx_tuple__51 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__51)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__51);
+  __Pyx_GIVEREF(__pyx_tuple__51);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__47 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__47)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__47);
-  __Pyx_GIVEREF(__pyx_tuple__47);
+  __pyx_tuple__52 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__52)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__52);
+  __Pyx_GIVEREF(__pyx_tuple__52);
 
-  /* "quantumc.pyx":94
- * @cython.wraparound(False)
+  /* "quantumc.pyx":101
  * @cython.nonecheck(False)
+ * @cython.cdivision(True)
  * def n_propagate_lite(paramdict, double complex [:] state_in, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_tuple__48 = PyTuple_Pack(12, __pyx_n_s_paramdict, __pyx_n_s_state_in, __pyx_n_s_spin, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_t, __pyx_n_s_B, __pyx_n_s_mytime); if (unlikely(!__pyx_tuple__48)) __PYX_ERR(0, 94, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__48);
-  __Pyx_GIVEREF(__pyx_tuple__48);
-  __pyx_codeobj__49 = (PyObject*)__Pyx_PyCode_New(3, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__48, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagate_lite, 94, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__49)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __pyx_tuple__53 = PyTuple_Pack(13, __pyx_n_s_paramdict, __pyx_n_s_state_in, __pyx_n_s_spin, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_t, __pyx_n_s_B, __pyx_n_s_U, __pyx_n_s_mytime); if (unlikely(!__pyx_tuple__53)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__53);
+  __Pyx_GIVEREF(__pyx_tuple__53);
+  __pyx_codeobj__54 = (PyObject*)__Pyx_PyCode_New(3, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__53, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagate_lite, 101, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__54)) __PYX_ERR(0, 101, __pyx_L1_error)
 
-  /* "quantumc.pyx":170
+  /* "quantumc.pyx":177
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def n_propagateN(paramdict, double complex [:,:] states, double [:] probs, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_tuple__50 = PyTuple_Pack(13, __pyx_n_s_paramdict, __pyx_n_s_states, __pyx_n_s_probs, __pyx_n_s_spin, __pyx_n_s_mytime, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_t, __pyx_n_s_B); if (unlikely(!__pyx_tuple__50)) __PYX_ERR(0, 170, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__50);
-  __Pyx_GIVEREF(__pyx_tuple__50);
-  __pyx_codeobj__51 = (PyObject*)__Pyx_PyCode_New(4, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__50, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagateN, 170, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__51)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_tuple__55 = PyTuple_Pack(14, __pyx_n_s_paramdict, __pyx_n_s_states, __pyx_n_s_probs, __pyx_n_s_spin, __pyx_n_s_mytime, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_t, __pyx_n_s_B, __pyx_n_s_U); if (unlikely(!__pyx_tuple__55)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__55);
+  __Pyx_GIVEREF(__pyx_tuple__55);
+  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(4, 0, 14, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__55, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagateN, 177, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) __PYX_ERR(0, 177, __pyx_L1_error)
 
-  /* "quantumc.pyx":265
+  /* "quantumc.pyx":269
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
- * def n_propagate_F(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
+ * def n_propagateF(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_tuple__52 = PyTuple_Pack(14, __pyx_n_s_paramdict, __pyx_n_s_states, __pyx_n_s_F_arr, __pyx_n_s_spin, __pyx_n_s_mytime, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_F, __pyx_n_s_B, __pyx_n_s_t); if (unlikely(!__pyx_tuple__52)) __PYX_ERR(0, 265, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__52);
-  __Pyx_GIVEREF(__pyx_tuple__52);
-  __pyx_codeobj__53 = (PyObject*)__Pyx_PyCode_New(4, 0, 14, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__52, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagate_F, 265, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__53)) __PYX_ERR(0, 265, __pyx_L1_error)
+  __pyx_tuple__57 = PyTuple_Pack(15, __pyx_n_s_paramdict, __pyx_n_s_states, __pyx_n_s_F_arr, __pyx_n_s_spin, __pyx_n_s_mytime, __pyx_n_s_params, __pyx_n_s_dim, __pyx_n_s_j, __pyx_n_s_i, __pyx_n_s_steps, __pyx_n_s_state, __pyx_n_s_t, __pyx_n_s_B, __pyx_n_s_F, __pyx_n_s_U); if (unlikely(!__pyx_tuple__57)) __PYX_ERR(0, 269, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__57);
+  __Pyx_GIVEREF(__pyx_tuple__57);
+  __pyx_codeobj__58 = (PyObject*)__Pyx_PyCode_New(4, 0, 15, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__57, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_n_propagateF, 269, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__58)) __PYX_ERR(0, 269, __pyx_L1_error)
 
-  /* "quantumc.pyx":620
+  /* "quantumc.pyx":677
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def Bfield(double [:] time, paramdict, double [:,:] Bfield):             # <<<<<<<<<<<<<<
  *     """
  *     Computes B over the specifed time range
  */
-  __pyx_tuple__54 = PyTuple_Pack(8, __pyx_n_s_time, __pyx_n_s_paramdict, __pyx_n_s_Bfield, __pyx_n_s_params, __pyx_n_s_B, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps); if (unlikely(!__pyx_tuple__54)) __PYX_ERR(0, 620, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__54);
-  __Pyx_GIVEREF(__pyx_tuple__54);
-  __pyx_codeobj__55 = (PyObject*)__Pyx_PyCode_New(3, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__54, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_Bfield, 620, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__55)) __PYX_ERR(0, 620, __pyx_L1_error)
+  __pyx_tuple__59 = PyTuple_Pack(9, __pyx_n_s_time, __pyx_n_s_paramdict, __pyx_n_s_Bfield, __pyx_n_s_params, __pyx_n_s_B, __pyx_n_s_t, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_steps); if (unlikely(!__pyx_tuple__59)) __PYX_ERR(0, 677, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__59);
+  __Pyx_GIVEREF(__pyx_tuple__59);
+  __pyx_codeobj__60 = (PyObject*)__Pyx_PyCode_New(3, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__59, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_quantumc_pyx, __pyx_n_s_Bfield, 677, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__60)) __PYX_ERR(0, 677, __pyx_L1_error)
 
   /* "View.MemoryView":285
  *         return self.name
@@ -24971,9 +25896,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__56 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__56)) __PYX_ERR(1, 285, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__56);
-  __Pyx_GIVEREF(__pyx_tuple__56);
+  __pyx_tuple__61 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__61)) __PYX_ERR(1, 285, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__61);
+  __Pyx_GIVEREF(__pyx_tuple__61);
 
   /* "View.MemoryView":286
  * 
@@ -24982,9 +25907,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__57 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__57)) __PYX_ERR(1, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__57);
-  __Pyx_GIVEREF(__pyx_tuple__57);
+  __pyx_tuple__62 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__62)) __PYX_ERR(1, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__62);
+  __Pyx_GIVEREF(__pyx_tuple__62);
 
   /* "View.MemoryView":287
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -24993,9 +25918,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__58 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__58)) __PYX_ERR(1, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__58);
-  __Pyx_GIVEREF(__pyx_tuple__58);
+  __pyx_tuple__63 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__63)) __PYX_ERR(1, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__63);
+  __Pyx_GIVEREF(__pyx_tuple__63);
 
   /* "View.MemoryView":290
  * 
@@ -25004,9 +25929,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__59 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__59)) __PYX_ERR(1, 290, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__59);
-  __Pyx_GIVEREF(__pyx_tuple__59);
+  __pyx_tuple__64 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__64)) __PYX_ERR(1, 290, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__64);
+  __Pyx_GIVEREF(__pyx_tuple__64);
 
   /* "View.MemoryView":291
  * 
@@ -25015,19 +25940,19 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__60 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__60)) __PYX_ERR(1, 291, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__60);
-  __Pyx_GIVEREF(__pyx_tuple__60);
+  __pyx_tuple__65 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__65)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__65);
+  __Pyx_GIVEREF(__pyx_tuple__65);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Enum(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     if __pyx_checksum != 0xb068931:
  *         from pickle import PickleError as __pyx_PickleError
  */
-  __pyx_tuple__61 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__61)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__61);
-  __Pyx_GIVEREF(__pyx_tuple__61);
-  __pyx_codeobj__62 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__61, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__62)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_tuple__66 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__66)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__66);
+  __Pyx_GIVEREF(__pyx_tuple__66);
+  __pyx_codeobj__67 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__66, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__67)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -25046,6 +25971,7 @@ if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_100 = PyInt_FromLong(100); if (unlikely(!__pyx_int_100)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_184977713 = PyInt_FromLong(184977713L); if (unlikely(!__pyx_int_184977713)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
@@ -25406,7 +26332,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef double sqrt2 = 1.41421356237309504880168872420969807856967187537694             # <<<<<<<<<<<<<<
  * cdef double invsqrt2 = 0.70710678118654752440084436210484903928483593768847
- * cdef double eps = np.finfo(np.float64).eps
+ * cdef double eps = np.finfo(np.float64).eps*100
  */
   __pyx_v_8quantumc_sqrt2 = 1.41421356237309504880168872420969807856967187537694;
 
@@ -25414,7 +26340,7 @@ if (!__Pyx_RefNanny) {
  * 
  * cdef double sqrt2 = 1.41421356237309504880168872420969807856967187537694
  * cdef double invsqrt2 = 0.70710678118654752440084436210484903928483593768847             # <<<<<<<<<<<<<<
- * cdef double eps = np.finfo(np.float64).eps
+ * cdef double eps = np.finfo(np.float64).eps*100
  * cdef double M_TAU = 2*M_PI
  */
   __pyx_v_8quantumc_invsqrt2 = 0.70710678118654752440084436210484903928483593768847;
@@ -25422,7 +26348,7 @@ if (!__Pyx_RefNanny) {
   /* "quantumc.pyx":11
  * cdef double sqrt2 = 1.41421356237309504880168872420969807856967187537694
  * cdef double invsqrt2 = 0.70710678118654752440084436210484903928483593768847
- * cdef double eps = np.finfo(np.float64).eps             # <<<<<<<<<<<<<<
+ * cdef double eps = np.finfo(np.float64).eps*100             # <<<<<<<<<<<<<<
  * cdef double M_TAU = 2*M_PI
  * cdef double M_SQRT3 = 1.73205080756887729352744634151 #sqrt(3)
  */
@@ -25443,13 +26369,16 @@ if (!__Pyx_RefNanny) {
   __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_eps); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 11, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_int_100); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_8quantumc_eps = __pyx_t_4;
 
   /* "quantumc.pyx":12
  * cdef double invsqrt2 = 0.70710678118654752440084436210484903928483593768847
- * cdef double eps = np.finfo(np.float64).eps
+ * cdef double eps = np.finfo(np.float64).eps*100
  * cdef double M_TAU = 2*M_PI             # <<<<<<<<<<<<<<
  * cdef double M_SQRT3 = 1.73205080756887729352744634151 #sqrt(3)
  * 
@@ -25457,7 +26386,7 @@ if (!__Pyx_RefNanny) {
   __pyx_v_8quantumc_M_TAU = (2.0 * M_PI);
 
   /* "quantumc.pyx":13
- * cdef double eps = np.finfo(np.float64).eps
+ * cdef double eps = np.finfo(np.float64).eps*100
  * cdef double M_TAU = 2*M_PI
  * cdef double M_SQRT3 = 1.73205080756887729352744634151 #sqrt(3)             # <<<<<<<<<<<<<<
  * 
@@ -25465,63 +26394,63 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_v_8quantumc_M_SQRT3 = 1.73205080756887729352744634151;
 
-  /* "quantumc.pyx":94
- * @cython.wraparound(False)
+  /* "quantumc.pyx":101
  * @cython.nonecheck(False)
+ * @cython.cdivision(True)
  * def n_propagate_lite(paramdict, double complex [:] state_in, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_1n_propagate_lite, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 94, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagate_lite, __pyx_t_3) < 0) __PYX_ERR(0, 94, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_1n_propagate_lite, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagate_lite, __pyx_t_2) < 0) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "quantumc.pyx":170
+  /* "quantumc.pyx":177
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def n_propagateN(paramdict, double complex [:,:] states, double [:] probs, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_3n_propagateN, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 170, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagateN, __pyx_t_3) < 0) __PYX_ERR(0, 170, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_3n_propagateN, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagateN, __pyx_t_2) < 0) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "quantumc.pyx":265
+  /* "quantumc.pyx":269
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
- * def n_propagate_F(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
+ * def n_propagateF(paramdict, double complex [:,:] states, double [:,:] F_arr, spin):             # <<<<<<<<<<<<<<
  *     """
  *     Fast unitary evolution over <time> given simulation parameters <paramdict>.
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_5n_propagate_F, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 265, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagate_F, __pyx_t_3) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_5n_propagateF, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 269, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_n_propagateF, __pyx_t_2) < 0) __PYX_ERR(0, 269, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "quantumc.pyx":620
+  /* "quantumc.pyx":677
  * @cython.wraparound(False)  # deactivate index wraparound check
  * @cython.nonecheck(False)   # deactivate none checks (these will segfault if you pass a None-type)
  * def Bfield(double [:] time, paramdict, double [:,:] Bfield):             # <<<<<<<<<<<<<<
  *     """
  *     Computes B over the specifed time range
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_7Bfield, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 620, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Bfield, __pyx_t_3) < 0) __PYX_ERR(0, 620, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8quantumc_7Bfield, NULL, __pyx_n_s_quantumc); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 677, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Bfield, __pyx_t_2) < 0) __PYX_ERR(0, 677, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "quantumc.pyx":1
  * # cython: profile=False             # <<<<<<<<<<<<<<
  * cimport cython
  * import numpy as np
  */
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_3) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "View.MemoryView":208
  *         info.obj = self
@@ -25530,10 +26459,10 @@ if (!__Pyx_RefNanny) {
  * 
  *     def __dealloc__(array self):
  */
-  __pyx_t_3 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 208, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem((PyObject *)__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_3) < 0) __PYX_ERR(1, 208, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 208, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(1, 208, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_array_type);
 
   /* "View.MemoryView":285
@@ -25543,12 +26472,12 @@ if (!__Pyx_RefNanny) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__56, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 285, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__61, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 285, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(generic);
-  __Pyx_DECREF_SET(generic, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
-  __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(generic, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":286
  * 
@@ -25557,12 +26486,12 @@ if (!__Pyx_RefNanny) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__57, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__62, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(strided);
-  __Pyx_DECREF_SET(strided, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
-  __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(strided, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":287
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -25571,12 +26500,12 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__58, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__63, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect);
-  __Pyx_DECREF_SET(indirect, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
-  __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(indirect, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":290
  * 
@@ -25585,12 +26514,12 @@ if (!__Pyx_RefNanny) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__59, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 290, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__64, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 290, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(contiguous);
-  __Pyx_DECREF_SET(contiguous, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
-  __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":291
  * 
@@ -25599,12 +26528,12 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__60, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 291, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__65, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect_contiguous);
-  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_3);
-  __pyx_t_3 = 0;
+  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":315
  * 
@@ -25639,10 +26568,10 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_3 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 544, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem((PyObject *)__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_3) < 0) __PYX_ERR(1, 544, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(1, 544, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryview_type);
 
   /* "View.MemoryView":990
@@ -25652,10 +26581,10 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_3 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 990, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem((PyObject *)__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_3) < 0) __PYX_ERR(1, 990, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 990, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(1, 990, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryviewslice_type);
 
   /* "(tree fragment)":1
@@ -25663,10 +26592,10 @@ if (!__Pyx_RefNanny) {
  *     if __pyx_checksum != 0xb068931:
  *         from pickle import PickleError as __pyx_PickleError
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_15View_dot_MemoryView_1__pyx_unpickle_Enum, NULL, __pyx_n_s_View_MemoryView); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_3) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_15View_dot_MemoryView_1__pyx_unpickle_Enum, NULL, __pyx_n_s_View_MemoryView); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_2) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":9
  *         __pyx_unpickle_Enum__set_state(<Enum> __pyx_result, __pyx_state)
@@ -26257,6 +27186,72 @@ static CYTHON_INLINE int __Pyx_div_int(int a, int b) {
     return q;
 }
 
+/* PyErrFetchRestore */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    tmp_type = tstate->curexc_type;
+    tmp_value = tstate->curexc_value;
+    tmp_tb = tstate->curexc_traceback;
+    tstate->curexc_type = type;
+    tstate->curexc_value = value;
+    tstate->curexc_traceback = tb;
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+}
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+}
+#endif
+
+/* WriteUnraisableException */
+static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
+                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
+                                  int full_traceback, CYTHON_UNUSED int nogil) {
+    PyObject *old_exc, *old_val, *old_tb;
+    PyObject *ctx;
+    __Pyx_PyThreadState_declare
+#ifdef WITH_THREAD
+    PyGILState_STATE state;
+    if (nogil)
+        state = PyGILState_Ensure();
+#ifdef _MSC_VER
+    else state = (PyGILState_STATE)-1;
+#endif
+#endif
+    __Pyx_PyThreadState_assign
+    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
+    if (full_traceback) {
+        Py_XINCREF(old_exc);
+        Py_XINCREF(old_val);
+        Py_XINCREF(old_tb);
+        __Pyx_ErrRestore(old_exc, old_val, old_tb);
+        PyErr_PrintEx(1);
+    }
+    #if PY_MAJOR_VERSION < 3
+    ctx = PyString_FromString(name);
+    #else
+    ctx = PyUnicode_FromString(name);
+    #endif
+    __Pyx_ErrRestore(old_exc, old_val, old_tb);
+    if (!ctx) {
+        PyErr_WriteUnraisable(Py_None);
+    } else {
+        PyErr_WriteUnraisable(ctx);
+        Py_DECREF(ctx);
+    }
+#ifdef WITH_THREAD
+    if (nogil)
+        PyGILState_Release(state);
+#endif
+}
+
 /* PyFunctionFastCall */
 #if CYTHON_FAST_PYCALL
 static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
@@ -26437,72 +27432,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
     return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
 }
 #endif
-
-/* PyErrFetchRestore */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    tmp_type = tstate->curexc_type;
-    tmp_value = tstate->curexc_value;
-    tmp_tb = tstate->curexc_traceback;
-    tstate->curexc_type = type;
-    tstate->curexc_value = value;
-    tstate->curexc_traceback = tb;
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-}
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    *type = tstate->curexc_type;
-    *value = tstate->curexc_value;
-    *tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-}
-#endif
-
-/* WriteUnraisableException */
-static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
-                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
-                                  int full_traceback, CYTHON_UNUSED int nogil) {
-    PyObject *old_exc, *old_val, *old_tb;
-    PyObject *ctx;
-    __Pyx_PyThreadState_declare
-#ifdef WITH_THREAD
-    PyGILState_STATE state;
-    if (nogil)
-        state = PyGILState_Ensure();
-#ifdef _MSC_VER
-    else state = (PyGILState_STATE)-1;
-#endif
-#endif
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
-    if (full_traceback) {
-        Py_XINCREF(old_exc);
-        Py_XINCREF(old_val);
-        Py_XINCREF(old_tb);
-        __Pyx_ErrRestore(old_exc, old_val, old_tb);
-        PyErr_PrintEx(1);
-    }
-    #if PY_MAJOR_VERSION < 3
-    ctx = PyString_FromString(name);
-    #else
-    ctx = PyUnicode_FromString(name);
-    #endif
-    __Pyx_ErrRestore(old_exc, old_val, old_tb);
-    if (!ctx) {
-        PyErr_WriteUnraisable(Py_None);
-    } else {
-        PyErr_WriteUnraisable(ctx);
-        Py_DECREF(ctx);
-    }
-#ifdef WITH_THREAD
-    if (nogil)
-        PyGILState_Release(state);
-#endif
-}
 
 /* GetTopmostException */
 #if CYTHON_USE_EXC_INFO_STACK
@@ -29033,17 +29962,111 @@ __pyx_fail:
     }
 }
 
-/* MemviewDtypeToObject */
-  static CYTHON_INLINE PyObject *__pyx_memview_get_double(const char *itemp) {
-    return (PyObject *) PyFloat_FromDouble(*(double *) itemp);
+/* Print */
+  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+static PyObject *__Pyx_GetStdout(void) {
+    PyObject *f = PySys_GetObject((char *)"stdout");
+    if (!f) {
+        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
+    }
+    return f;
 }
-static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *obj) {
-    double value = __pyx_PyFloat_AsDouble(obj);
-    if ((value == (double)-1) && PyErr_Occurred())
-        return 0;
-    *(double *) itemp = value;
-    return 1;
+static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
+    int i;
+    if (!f) {
+        if (!(f = __Pyx_GetStdout()))
+            return -1;
+    }
+    Py_INCREF(f);
+    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
+        PyObject* v;
+        if (PyFile_SoftSpace(f, 1)) {
+            if (PyFile_WriteString(" ", f) < 0)
+                goto error;
+        }
+        v = PyTuple_GET_ITEM(arg_tuple, i);
+        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
+            goto error;
+        if (PyString_Check(v)) {
+            char *s = PyString_AsString(v);
+            Py_ssize_t len = PyString_Size(v);
+            if (len > 0) {
+                switch (s[len-1]) {
+                    case ' ': break;
+                    case '\f': case '\r': case '\n': case '\t': case '\v':
+                        PyFile_SoftSpace(f, 0);
+                        break;
+                    default:  break;
+                }
+            }
+        }
+    }
+    if (newline) {
+        if (PyFile_WriteString("\n", f) < 0)
+            goto error;
+        PyFile_SoftSpace(f, 0);
+    }
+    Py_DECREF(f);
+    return 0;
+error:
+    Py_DECREF(f);
+    return -1;
 }
+#else
+static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
+    PyObject* kwargs = 0;
+    PyObject* result = 0;
+    PyObject* end_string;
+    if (unlikely(!__pyx_print)) {
+        __pyx_print = PyObject_GetAttr(__pyx_b, __pyx_n_s_print);
+        if (!__pyx_print)
+            return -1;
+    }
+    if (stream) {
+        kwargs = PyDict_New();
+        if (unlikely(!kwargs))
+            return -1;
+        if (unlikely(PyDict_SetItem(kwargs, __pyx_n_s_file, stream) < 0))
+            goto bad;
+        if (!newline) {
+            end_string = PyUnicode_FromStringAndSize(" ", 1);
+            if (unlikely(!end_string))
+                goto bad;
+            if (PyDict_SetItem(kwargs, __pyx_n_s_end, end_string) < 0) {
+                Py_DECREF(end_string);
+                goto bad;
+            }
+            Py_DECREF(end_string);
+        }
+    } else if (!newline) {
+        if (unlikely(!__pyx_print_kwargs)) {
+            __pyx_print_kwargs = PyDict_New();
+            if (unlikely(!__pyx_print_kwargs))
+                return -1;
+            end_string = PyUnicode_FromStringAndSize(" ", 1);
+            if (unlikely(!end_string))
+                return -1;
+            if (PyDict_SetItem(__pyx_print_kwargs, __pyx_n_s_end, end_string) < 0) {
+                Py_DECREF(end_string);
+                return -1;
+            }
+            Py_DECREF(end_string);
+        }
+        kwargs = __pyx_print_kwargs;
+    }
+    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
+    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
+        Py_DECREF(kwargs);
+    if (!result)
+        return -1;
+    Py_DECREF(result);
+    return 0;
+bad:
+    if (kwargs != __pyx_print_kwargs)
+        Py_XDECREF(kwargs);
+    return -1;
+}
+#endif
 
 /* CIntToPy */
   static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
@@ -29333,6 +30356,195 @@ raise_neg_overflow:
 }
 
 /* CIntFromPy */
+  static CYTHON_INLINE unsigned long __Pyx_PyInt_As_unsigned_long(PyObject *x) {
+    const unsigned long neg_one = (unsigned long) ((unsigned long) 0 - (unsigned long) 1), const_zero = (unsigned long) 0;
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(unsigned long) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(unsigned long, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (unsigned long) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (unsigned long) 0;
+                case  1: __PYX_VERIFY_RETURN_INT(unsigned long, digit, digits[0])
+                case 2:
+                    if (8 * sizeof(unsigned long) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) >= 2 * PyLong_SHIFT) {
+                            return (unsigned long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) >= 3 * PyLong_SHIFT) {
+                            return (unsigned long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) >= 4 * PyLong_SHIFT) {
+                            return (unsigned long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        }
+                    }
+                    break;
+            }
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+#else
+            {
+                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
+                if (unlikely(result < 0))
+                    return (unsigned long) -1;
+                if (unlikely(result == 1))
+                    goto raise_neg_overflow;
+            }
+#endif
+            if (sizeof(unsigned long) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(unsigned long, unsigned long, PyLong_AsUnsignedLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(unsigned long) <= sizeof(unsigned PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(unsigned long, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
+#endif
+            }
+        } else {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (unsigned long) 0;
+                case -1: __PYX_VERIFY_RETURN_INT(unsigned long, sdigit, (sdigit) (-(sdigit)digits[0]))
+                case  1: __PYX_VERIFY_RETURN_INT(unsigned long,  digit, +digits[0])
+                case -2:
+                    if (8 * sizeof(unsigned long) - 1 > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 2 * PyLong_SHIFT) {
+                            return (unsigned long) (((unsigned long)-1)*(((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+                case 2:
+                    if (8 * sizeof(unsigned long) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 2 * PyLong_SHIFT) {
+                            return (unsigned long) ((((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+                case -3:
+                    if (8 * sizeof(unsigned long) - 1 > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 3 * PyLong_SHIFT) {
+                            return (unsigned long) (((unsigned long)-1)*(((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 3 * PyLong_SHIFT) {
+                            return (unsigned long) ((((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+                case -4:
+                    if (8 * sizeof(unsigned long) - 1 > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 4 * PyLong_SHIFT) {
+                            return (unsigned long) (((unsigned long)-1)*(((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(unsigned long, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(unsigned long) - 1 > 4 * PyLong_SHIFT) {
+                            return (unsigned long) ((((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])));
+                        }
+                    }
+                    break;
+            }
+#endif
+            if (sizeof(unsigned long) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(unsigned long, long, PyLong_AsLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(unsigned long) <= sizeof(PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(unsigned long, PY_LONG_LONG, PyLong_AsLongLong(x))
+#endif
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            unsigned long val;
+            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (unsigned long) -1;
+        }
+    } else {
+        unsigned long val;
+        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
+        if (!tmp) return (unsigned long) -1;
+        val = __Pyx_PyInt_As_unsigned_long(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to unsigned long");
+    return (unsigned long) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to unsigned long");
+    return (unsigned long) -1;
+}
+
+/* CIntFromPy */
   static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     const long neg_one = (long) ((long) 0 - (long) 1), const_zero = (long) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -29520,6 +30732,43 @@ raise_neg_overflow:
         "can't convert negative value to long");
     return (long) -1;
 }
+
+/* PrintOne */
+  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
+    if (!f) {
+        if (!(f = __Pyx_GetStdout()))
+            return -1;
+    }
+    Py_INCREF(f);
+    if (PyFile_SoftSpace(f, 0)) {
+        if (PyFile_WriteString(" ", f) < 0)
+            goto error;
+    }
+    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
+        goto error;
+    if (PyFile_WriteString("\n", f) < 0)
+        goto error;
+    Py_DECREF(f);
+    return 0;
+error:
+    Py_DECREF(f);
+    return -1;
+    /* the line below is just to avoid C compiler
+     * warnings about unused functions */
+    return __Pyx_Print(f, NULL, 0);
+}
+#else
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
+    int res;
+    PyObject* arg_tuple = PyTuple_Pack(1, o);
+    if (unlikely(!arg_tuple))
+        return -1;
+    res = __Pyx_Print(stream, arg_tuple, 1);
+    Py_DECREF(arg_tuple);
+    return res;
+}
+#endif
 
 /* CIntFromPy */
   static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *x) {

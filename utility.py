@@ -108,6 +108,7 @@ def dict_sanitise(params):
                "xlamp": 0.0,
                "xlfreq": 50,
                "xlphase": 0.0,
+               "tr2": 0.0,
                "zlamp": 0.0,
                "zlfreq": 50,
                "zlphase": 0.0,
@@ -118,7 +119,12 @@ def dict_sanitise(params):
                "cdtrabi": 0.0,
                "sdtrabi": 0.0,
                "ctcrabi": 1.0,
-               "stcrabi": 0.0}
+               "stcrabi": 0.0,
+               "cdtxl": 0.0,
+               "sdtxl": 0.0,
+               "ctcxl": 1.0,
+               "stcxl": 0.0,
+               }
 
     # overwrite defaults
     for p in cparams.keys():
